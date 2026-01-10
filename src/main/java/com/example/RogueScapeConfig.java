@@ -8,12 +8,12 @@ import net.runelite.client.config.ConfigItem;
 public interface RogueScapeConfig extends Config
 {
 	@ConfigItem(
-		keyName = "greeting",
-		name = "Welcome Greeting",
-		description = "The message to show to the user when they login"
+		keyName = "recentTasks",
+		name = "Recent Task Number",
+		description = "The number of most recent tasks being progressed."
 	)
-	default String greeting()
+	default int recentTasks()
 	{
-		return "Hiii";
+		return 4;
 	}
 }

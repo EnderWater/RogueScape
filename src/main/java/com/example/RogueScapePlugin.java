@@ -2,17 +2,17 @@ package com.example;
 
 import com.google.inject.Provides;
 import javax.inject.Inject;
+
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Actor;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
-import net.runelite.api.events.ActorDeath;
-import net.runelite.api.events.GameStateChanged;
-import net.runelite.client.config.ConfigManager;
-import net.runelite.client.eventbus.Subscribe;
+import net.runelite.api.*;
+import net.runelite.client.events.NpcLootReceived;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.overlay.OverlayManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @PluginDescriptor(
@@ -24,13 +24,25 @@ public class RogueScapePlugin extends Plugin
 	private Client client;
 
 	@Inject
+	private OverlayManager overlayManager;
+
+	@Inject
+	private TaskProgressOverlay taskProgressOverlay;
+
+	@Inject
 	private RogueScapeConfig config;
+
+	@Getter
+	private final List<String> previousKills = new ArrayList<>();
+	private int MAX_KILL_QUEUE_SIZE;
+	private String previousKilledActorName;
 
 	@Override
 	protected void startUp() throws Exception
 	{
-
+		overlayManager.add(taskProgressOverlay);
 		log.debug("Example started!");
+		MAX_KILL_QUEUE_SIZE = config.recentTasks();
 	}
 
 	@Override
@@ -39,18 +51,25 @@ public class RogueScapePlugin extends Plugin
 		log.debug("Example stopped!");
 	}
 
-	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged)
-	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
-		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
-		}
+	public String getMostRecentKillName() {
+		return this.previousKills.get(0);
 	}
 
 	@Subscribe
-	protected void ActorDeath(Actor actor) {
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "God", "Dang " + actor.getName() + ",you suck...", null);
+	public void onNpcLootReceived(NpcLootReceived npcLootReceived) {
+		NPC npc = npcLootReceived.getNpc();
+		String npcName = npc.getName();
+		addKill(npcName);
+
+		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Loot received from " + npcName, "");
+	}
+
+	public void addKill(String npcName) {
+//		If there are more names in the list than the max allowed, remove the latest one (at the front)
+		if (previousKills.size() >= MAX_KILL_QUEUE_SIZE) {
+			previousKills.remove(0);
+		}
+		previousKills.add(npcName);
 	}
 
 	@Provides
