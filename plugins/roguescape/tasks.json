@@ -1,0 +1,120 @@
+[
+  {
+    "targetName": "Goblin",
+    "taskType": "Kill",
+    "name": "Slay Goblins",
+    "description": "Eliminate 20 goblins around the starting area.",
+    "isComplete": false,
+    "pinned": true,
+    "target": 20,
+    "current": 0
+  },
+  {
+    "targetName": "Hill Giant",
+    "taskType": "Kill",
+    "name": "Defeat Hill Giants",
+    "description": "Take down 15 Hill Giants in the Edgeville Dungeon.",
+    "isComplete": true,
+    "pinned": true,
+    "target": 15,
+    "current": 15
+  },
+  {
+    "targetName": "Menaphite Thug",
+    "taskType": "Kill",
+    "name": "Eliminate Menaphite Thugs",
+    "description": "Defeat 10 Menaphite Thugs around Sophanem.",
+    "isComplete": false,
+    "pinned": true,
+    "target": 10,
+    "current": 0
+  },
+  {
+    "targetName": "Rock Crab",
+    "taskType": "Kill",
+    "name": "Slay Rock Crabs",
+    "description": "Take down 25 Rock Crabs near Rellekka.",
+    "isComplete": false,
+    "pinned": false,
+    "target": 25,
+    "current": 0
+  },
+  {
+    "targetName": "Zombie",
+    "taskType": "Kill",
+    "name": "Defeat Zombies",
+    "description": "Defeat 30 zombies in the Stronghold of Security.",
+    "isComplete": false,
+    "pinned": false,
+    "target": 30,
+    "current": 30
+  },
+  {
+    "skillName": "Fishing",
+    "taskType": "Skill",
+    "name": "Train Fishing",
+    "description": "Catch fish until you reach level 50 Fishing.",
+    "isComplete": false,
+    "pinned": false,
+    "target": 101333,
+    "current": 0
+  },
+  {
+    "skillName": "Woodcutting",
+    "taskType": "Skill",
+    "name": "Train Woodcutting",
+    "description": "Cut trees to reach level 40 Woodcutting.",
+    "isComplete": false,
+    "pinned": false,
+    "target": 73789,
+    "current": 0
+  },
+  {
+    "skillName": "Cooking",
+    "taskType": "Skill",
+    "name": "Train Cooking",
+    "description": "Cook raw food until level 30 Cooking.",
+    "isComplete": false,
+    "pinned": false,
+    "target": 40600,
+    "current": 0
+  },
+  {
+    "skillName": "Mining",
+    "taskType": "Skill",
+    "name": "Train Mining",
+    "description": "Mine ores to reach level 45 Mining.",
+    "isComplete": false,
+    "pinned": false,
+    "target": 88222,
+    "current": 0
+  },
+  {
+    "skillName": "Smithing",
+    "taskType": "Skill",
+    "name": "Train Smithing",
+    "description": "Smith bars and items until level 35 Smithing.",
+    "isComplete": false,
+    "pinned": false,
+    "target": 53000,
+    "current": 0
+  },
+  {
+    "targetName": "",
+    "name": "asdf",
+    "description": "asdf",
+    "isComplete": true,
+    "pinned": false,
+    "target": 5,
+    "current": 5
+  },
+  {
+    "skillName": "",
+    "name": "Get 2 woodcutting",
+    "description": "Woodcut",
+    "isComplete": false,
+    "pinned": false,
+    "target": 2,
+    "current": 0
+  }
+]
