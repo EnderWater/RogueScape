@@ -14,6 +14,11 @@ public class KillTask extends Task {
         targetName = "";
     }
 
+    public KillTask(String taskType, String taskName, String description, int target) {
+        super(taskType, taskName, description, target);
+        targetName = "";
+    }
+
     // Implement the constructor and call the task's constructor
     KillTask(String taskName, String killTargetName, boolean pinned,
              boolean isComplete, String description) {

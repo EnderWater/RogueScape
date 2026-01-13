@@ -40,6 +40,14 @@ public abstract class Task {
         this.current = 0;
     }
 
+    Task(String taskType, String name, String description, int target) {
+        this.name = name;
+        this.description = description;
+        this.target = target;
+        this.taskType = taskType;
+        this.current = 0;
+    }
+
     Task(String name, boolean pinned, boolean isComplete, String description) {
         this.name = name;
         this.pinned = pinned;

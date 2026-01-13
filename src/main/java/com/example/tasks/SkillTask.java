@@ -13,6 +13,11 @@ public class SkillTask extends Task {
         this.skillName = "";
     }
 
+    public SkillTask(String taskType, String taskName, String description, int target) {
+        super(taskType, taskName, description, target);
+        this.skillName = "";
+    }
+
     public SkillTask(String taskName, String description, String skillName) {
         super(taskName, description);
         this.skillName = skillName;

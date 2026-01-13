@@ -115,12 +115,12 @@ public class TaskGeneratorPanel extends JPanel {
 
             switch (taskType) {
                 case "Kill":
-                    KillTask killTask = new KillTask(taskName, taskDesc, target);
+                    KillTask killTask = new KillTask(taskType, taskName, taskDesc, target);
                     taskManager.addTask(killTask);
                     break;
 
                 case "Skill":
-                    SkillTask skillTask = new SkillTask(taskName, taskDesc, target);
+                    SkillTask skillTask = new SkillTask(taskType, taskName, taskDesc, target);
                     taskManager.addTask(skillTask);
                     break;
             }

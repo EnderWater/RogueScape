@@ -57,6 +57,7 @@ public class TaskManager {
 
     public void addTask(Task task) {
         this.tasks.add(task);
+        TaskReaderWriter.writeTasks(tasks);
         this.notifyListeners();
     }
 
