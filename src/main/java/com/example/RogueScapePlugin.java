@@ -5,6 +5,7 @@ import com.example.cards.CardReaderWriter;
 import com.example.overlays.PackOverlay;
 import com.example.overlays.TaskProgressOverlay;
 import com.example.panels.RogueScapePanel;
+import com.example.relics.RelicManager;
 import com.example.tasks.TaskManager;
 import com.google.inject.Provides;
 
@@ -16,6 +17,7 @@ import net.runelite.api.*;
 import net.runelite.api.events.FakeXpDrop;
 import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.NpcLootReceived;
 import net.runelite.client.plugins.Plugin;
@@ -46,12 +48,18 @@ public class RogueScapePlugin extends Plugin {
     @Inject
     private ClientToolbar clientToolbar;
 
+    private EventBus eventBus = new EventBus();
+
     @Getter
     private TaskManager taskManager;
 
     // Initialize the card manager first so you can inject it elsewhere
     @Getter
     private final CardManager cardManager = CardReaderWriter.loadCardManager();
+
+    // Initialize the relic manager
+    @Getter
+    private final RelicManager relicManager = new RelicManager(this.cardManager, this.eventBus);
 
     private final String taskFilePath = "plugins/roguescape/tasks.json";
     private int gameTicksSinceLastSave = 0;

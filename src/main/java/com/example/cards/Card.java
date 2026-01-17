@@ -1,6 +1,6 @@
 package com.example.cards;
 
-public class Card {
+public abstract class Card {
     String name;
     String description;
     String icon;

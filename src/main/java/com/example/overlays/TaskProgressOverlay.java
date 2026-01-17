@@ -60,33 +60,11 @@ public class TaskProgressOverlay extends Overlay {
 
     private void buildTaskPanel(Task task)
     {
-//        PanelComponent taskPanel = new PanelComponent();
-//        taskPanel.setBackgroundColor(config.pinnedTaskBackgroundColor());
-//        taskPanel.setBorder(new Rectangle(8, 8, 8, 8)); // padding
-//        taskPanel.setBorder(new Rectangle(1, 1));
-//        taskPanel.setGap(new Point(0, 4));
-
         panel.getChildren().add(
                 LineComponent.builder()
                         .left(task.getName())
                         .leftColor(config.pinnedTaskTextColor())
                         .build()
         );
-//
-//        panel.getChildren().add(
-//                LineComponent.builder()
-//                        .left(task.getDescription())
-//                        .build()
-//        );
-//
-//        String progress = task.isComplete()
-//                ? "Status: Complete"
-//                : "Status: " + task.getCurrent() + "/" + task.getTarget();
-//
-//        panel.getChildren().add(
-//                LineComponent.builder()
-//                        .left(progress)
-//                        .build()
-//        );
     }
 }

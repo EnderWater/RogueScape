@@ -2,9 +2,11 @@ package com.example.cards;
 
 import lombok.Getter;
 
+import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 
+@Singleton
 public class CardManager {
     @Getter
     private int availablePacks;
@@ -34,4 +36,22 @@ public class CardManager {
         this.availablePacks++;
         CardReaderWriter.writeCardManager(this);
     }
+
+    public void removeAvailablePack() {
+        this.availablePacks--;
+        CardReaderWriter.writeCardManager(this);
+    }
+
+    // This method is used when the total pack needs to increase
+    public void awardNewPack() {
+        this.totalPacks++;
+        this.addAvailablePack();
+    }
+
+    public void openPack() {
+        this.openedPacks++;
+        this.removeAvailablePack();
+    }
+
+//    public List<Card>
 }
