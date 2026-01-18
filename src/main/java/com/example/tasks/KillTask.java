@@ -1,7 +1,6 @@
 package com.example.tasks;
 
 public class KillTask extends Task {
-
     private final String targetName;
 
     public KillTask(String taskName, String description) {

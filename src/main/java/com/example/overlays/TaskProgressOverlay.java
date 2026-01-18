@@ -3,6 +3,7 @@ package com.example.overlays;
 import com.example.RogueScapeConfig;
 import com.example.RogueScapePlugin;
 import com.example.tasks.Task;
+import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;

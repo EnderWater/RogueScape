@@ -39,10 +39,18 @@ public interface RogueScapeConfig extends Config
 	default int overlayWidth() { return 120; }
 
 	@ConfigItem(
+			keyName = "overlayFontSize",
+			name = "Overlay font size",
+			description = "Controls the size of the font in the overlay.",
+			position = 4
+	)
+	default int overlayFontSize() { return 12; }
+
+	@ConfigItem(
 			keyName = "overlayNameVisible",
 			name = "Enable Name",
 			description = "Enables or disables the visibility of the task name in the overlay.",
-			position = 4
+			position = 5
 	)
 	default boolean isNameVisible() { return true; }
 
@@ -50,7 +58,7 @@ public interface RogueScapeConfig extends Config
 			keyName = "overlayDescriptionVisible",
 			name = "Enable Description",
 			description = "Enables or disables the visibility of the task description in the overlay.",
-			position = 5
+			position = 6
 	)
 	default boolean isDescriptionVisible() { return true; }
 
@@ -58,7 +66,7 @@ public interface RogueScapeConfig extends Config
 			keyName = "overlayStatusVisible",
 			name = "Enable Status",
 			description = "Enables or disables the visibility of the task status in the overlay.",
-			position = 6
+			position = 7
 	)
 	default boolean isStatusVisible() { return true; }
 }

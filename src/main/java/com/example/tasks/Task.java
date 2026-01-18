@@ -58,7 +58,7 @@ public abstract class Task {
     }
 
     private boolean isTaskComplete() {
-        return this.current >= this.target;
+        return this.current >= this.target && this.target != 0;
     }
 
     public void setCompleted() {
