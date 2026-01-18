@@ -18,12 +18,11 @@ public class TaskManager {
 
     private final CardManager cardManager;
     private final int MAX_PINNED_TASKS = 3;
+    private final List<TaskChangeListener> listeners = new ArrayList<>();
 
     public interface TaskChangeListener {
         void onTasksChanged();
     }
-
-    private final List<TaskChangeListener> listeners = new ArrayList<>();
 
     public void addListener(TaskChangeListener listener) {
         listeners.add(listener);

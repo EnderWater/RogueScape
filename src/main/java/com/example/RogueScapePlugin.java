@@ -7,6 +7,7 @@ import com.example.overlays.TaskProgressOverlay;
 import com.example.panels.RogueScapePanel;
 import com.example.relics.RelicManager;
 import com.example.tasks.TaskManager;
+import com.example.widgets.WidgetManager;
 import com.google.inject.Provides;
 
 import javax.inject.Inject;
@@ -48,18 +49,19 @@ public class RogueScapePlugin extends Plugin {
     @Inject
     private ClientToolbar clientToolbar;
 
-    private EventBus eventBus = new EventBus();
+    private EventBus eventBus;
 
     @Getter
     private TaskManager taskManager;
 
-    // Initialize the card manager first so you can inject it elsewhere
     @Getter
-    private final CardManager cardManager = CardReaderWriter.loadCardManager();
+    // Initialize the card manager first so you can inject it elsewhere
+    private CardManager cardManager;
 
     // Initialize the relic manager
-    @Getter
-    private final RelicManager relicManager = new RelicManager(this.cardManager, this.eventBus);
+    private RelicManager relicManager;
+
+    private WidgetManager widgetManager;
 
     private final String taskFilePath = "plugins/roguescape/tasks.json";
     private int gameTicksSinceLastSave = 0;
@@ -67,14 +69,26 @@ public class RogueScapePlugin extends Plugin {
 
     @Override
     protected void startUp() throws Exception {
-        overlayManager.add(taskProgressOverlay);
-        overlayManager.add(packOverlay);
+        this.overlayManager.add(this.taskProgressOverlay);
+        this.overlayManager.add(this.packOverlay);
+
+        // Initialize the card manager
+        this.cardManager = CardReaderWriter.loadCardManager();
 
         // Initialize the task manager
         this.taskManager = new TaskManager(this.cardManager);
 
+        // Create the event bus
+        this.eventBus = new EventBus();
+
+        // Initialize the relic manager
+        this.relicManager = new RelicManager(this.cardManager, this.eventBus);
+
+        // Initialize the widget manager
+        this.widgetManager = new WidgetManager(this.client);
+
         // Create the side panel
-        RogueScapePanel panel = new RogueScapePanel(taskManager);
+        RogueScapePanel panel = new RogueScapePanel(this.taskManager, this.cardManager);
 
         // Create the button on the toolbar to open the panel
         this.navButton = NavigationButton.builder()
@@ -86,15 +100,15 @@ public class RogueScapePlugin extends Plugin {
                 .panel(panel)
                 .build();
 
-        clientToolbar.addNavigation(navButton);
+        this.clientToolbar.addNavigation(this.navButton);
     }
 
     @Override
     protected void shutDown() throws Exception {
         if (navButton != null)
         {
-            clientToolbar.removeNavigation(navButton);
-            navButton = null;
+            this.clientToolbar.removeNavigation(navButton);
+            this.navButton = null;
         }
     }
 

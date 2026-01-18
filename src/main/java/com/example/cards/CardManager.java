@@ -1,10 +1,12 @@
 package com.example.cards;
 
+import com.example.widgets.WidgetManager;
 import lombok.Getter;
 
 import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Singleton
 public class CardManager {
@@ -20,38 +22,44 @@ public class CardManager {
 
     private int totalPacks;
     private int openedPacks;
+    private final WidgetManager widgetManager;
 
-    public CardManager() {
+    public CardManager(WidgetManager widgetManager) {
         this.totalPacks = 0;
         this.openedPacks = 0;
+        this.widgetManager = widgetManager;
     }
 
-    public CardManager(int totalPacks, int openedPacks, List<Card> cards) {
+    public CardManager(int totalPacks, int openedPacks, List<Card> cards, WidgetManager widgetManager) {
         this.totalPacks = totalPacks;
         this.openedPacks = openedPacks;
         this.cards = cards;
+        this.widgetManager = widgetManager;
     }
 
-    public void addAvailablePack() {
+    private void addAndSavePack() {
         this.availablePacks++;
         CardReaderWriter.writeCardManager(this);
     }
 
-    public void removeAvailablePack() {
+    private void removeAndSavePack() {
         this.availablePacks--;
         CardReaderWriter.writeCardManager(this);
     }
 
     // This method is used when the total pack needs to increase
-    public void awardNewPack() {
+    public void addAvailablePack() {
         this.totalPacks++;
-        this.addAvailablePack();
+        this.addAndSavePack();
     }
 
     public void openPack() {
-        this.openedPacks++;
-        this.removeAvailablePack();
-    }
+//        Random random = new Random();
+//        random.nextInt(this.cards.size()-1);
 
-//    public List<Card>
+        this.widgetManager.openWidget();
+
+        this.openedPacks++;
+        this.removeAndSavePack();
+    }
 }

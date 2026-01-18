@@ -22,7 +22,7 @@ public class RelicManager {
     }
 
     private void loadRelics() {
-
+        this.relics = RelicReaderWriter.loadRelics();
     }
 
     private void activateRelics() {

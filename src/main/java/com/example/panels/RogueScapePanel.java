@@ -1,5 +1,6 @@
  package com.example.panels;
 
+import com.example.cards.CardManager;
 import com.example.tasks.KillTask;
 import com.example.tasks.SkillTask;
 import com.example.tasks.Task;
@@ -17,14 +18,17 @@ public class RogueScapePanel extends PluginPanel implements TaskManager.TaskChan
 
     private NavigationButton navButton;
     private final TaskManager taskManager;
+    private final CardManager cardManager;
     private final CollapsiblePanel pinnedSection;
     private final CollapsiblePanel killSection;
     private final CollapsiblePanel skillSection;
     private final CollapsiblePanel addTaskSection;
+    private final CollapsiblePanel packManagerSection;
 
-    public RogueScapePanel(TaskManager taskManager) {
+    public RogueScapePanel(TaskManager taskManager, CardManager cardManager) {
         this.taskManager = taskManager;
         this.taskManager.addListener(this);
+        this.cardManager = cardManager;
 
         // Layout setup
         setLayout(new BorderLayout());
@@ -33,26 +37,22 @@ public class RogueScapePanel extends PluginPanel implements TaskManager.TaskChan
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
         // Pinned task section
-        this.pinnedSection = createSection("Pinned Tasks");
-        mainPanel.add(this.pinnedSection);
-        mainPanel.add(Box.createVerticalStrut(20));
+        this.pinnedSection = createSection("Pinned Tasks", mainPanel);
 
         // Kill tasks section
-        this.killSection = createSection("Kill Tasks");
-        mainPanel.add(this.killSection);
-        mainPanel.add(Box.createVerticalStrut(20));
+        this.killSection = createSection("Kill Tasks", mainPanel);
 
         // Skill tasks section
-        this.skillSection = createSection("Skill Tasks");
-        mainPanel.add(this.skillSection);
-        mainPanel.add(Box.createVerticalStrut(20));
+        this.skillSection = createSection("Skill Tasks", mainPanel);
 
         // Add tasks section
-        this.addTaskSection = createSection("Add Tasks");
-        mainPanel.add(this.addTaskSection);
-        mainPanel.add(Box.createVerticalStrut(20));
+        this.addTaskSection = createSection("Add Tasks", mainPanel);
         // Create new task UI
         this.addTaskSection.getContent().add(new TaskGeneratorPanel(this.taskManager));
+
+        // Add pack manager section
+        this.packManagerSection = createSection("Manage Packs", mainPanel);
+        this.packManagerSection.getContent().add(new PackManager(this.cardManager));
 
         add(mainPanel, BorderLayout.CENTER);
 
@@ -90,11 +90,14 @@ public class RogueScapePanel extends PluginPanel implements TaskManager.TaskChan
         }
     }
 
-    private CollapsiblePanel createSection(String title) {
+    private CollapsiblePanel createSection(String title, JPanel mainPanel) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         add(Box.createVerticalStrut(20));
-        return new CollapsiblePanel(panel, title);
+        CollapsiblePanel section = new CollapsiblePanel(panel, title);
+        mainPanel.add(section);
+        mainPanel.add(Box.createVerticalStrut(20));
+        return section;
     }
 
     private JPanel createTaskRow(Task task) {

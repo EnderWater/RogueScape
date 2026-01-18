@@ -126,9 +126,7 @@ public class TaskGeneratorPanel extends JPanel {
             }
             this.clearFormData();
         });
-
-        add(submit);
-
+        add(submit, BorderLayout.CENTER);
         return submit;
     }
 

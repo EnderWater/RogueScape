@@ -4,8 +4,8 @@ import net.runelite.api.Quest;
 
 public class QuestCard extends Card {
     Quest quest;
-    QuestCard(String name, String description, String icon, Quest quest) {
-        super(name, description, icon);
+    QuestCard(String name, String description, String icon, CardRarity rarity, Quest quest) {
+        super(name, description, icon, rarity);
         this.quest = quest;
     }
 }
