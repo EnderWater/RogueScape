@@ -4,7 +4,6 @@ import net.runelite.api.Client;
 import net.runelite.api.FontID;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.api.widgets.WidgetType;
 
 import java.awt.*;
@@ -19,7 +18,8 @@ public class WidgetManager {
     }
 
     public void openWidget() {
-        if (root == null) getRootWidget();
+        if (this.root == null) getRootWidget();
+        if (this.root != null && this.cardWidget == null) createCardWidget();
         this.cardWidget.setHidden(false);
     }
 
@@ -36,7 +36,9 @@ public class WidgetManager {
             this.cardWidget = null;
             return;
         }
+    }
 
+    private void createCardWidget() {
         this.cardWidget = root.createChild(WidgetType.RECTANGLE);
         this.cardWidget.setOriginalX(200);
         this.cardWidget.setOriginalY(100);

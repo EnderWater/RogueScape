@@ -39,12 +39,12 @@ public class CardManager {
 
     private void addAndSavePack() {
         this.availablePacks++;
-        CardReaderWriter.writeCardManager(this);
+        JsonManager.save("cardmanager.json", this);
     }
 
     private void removeAndSavePack() {
         this.availablePacks--;
-        CardReaderWriter.writeCardManager(this);
+        JsonManager.save("cardmanager.json", this);
     }
 
     // This method is used when the total pack needs to increase

@@ -1,6 +1,8 @@
 package com.example.relics;
 
 import com.example.cards.CardManager;
+import com.example.cards.JsonManager;
+import com.google.common.reflect.TypeToken;
 import net.runelite.client.eventbus.EventBus;
 
 import javax.inject.Singleton;
@@ -22,7 +24,7 @@ public class RelicManager {
     }
 
     private void loadRelics() {
-        this.relics = RelicReaderWriter.loadRelics();
+        this.relics = JsonManager.load("relics.json", new TypeToken<List<Relic>>(){}.getType());
     }
 
     private void activateRelics() {

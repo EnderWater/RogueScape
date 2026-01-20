@@ -1,7 +1,6 @@
 package com.example;
 
 import com.example.cards.CardManager;
-import com.example.cards.CardReaderWriter;
 import com.example.overlays.PackOverlay;
 import com.example.overlays.TaskProgressOverlay;
 import com.example.panels.RogueScapePanel;
@@ -72,8 +71,11 @@ public class RogueScapePlugin extends Plugin {
         this.overlayManager.add(this.taskProgressOverlay);
         this.overlayManager.add(this.packOverlay);
 
+        // Initialize the widget manager
+        this.widgetManager = new WidgetManager(this.client);
+
         // Initialize the card manager
-        this.cardManager = CardReaderWriter.loadCardManager();
+        this.cardManager = new CardManager(this.widgetManager);
 
         // Initialize the task manager
         this.taskManager = new TaskManager(this.cardManager);
@@ -83,9 +85,6 @@ public class RogueScapePlugin extends Plugin {
 
         // Initialize the relic manager
         this.relicManager = new RelicManager(this.cardManager, this.eventBus);
-
-        // Initialize the widget manager
-        this.widgetManager = new WidgetManager(this.client);
 
         // Create the side panel
         RogueScapePanel panel = new RogueScapePanel(this.taskManager, this.cardManager);

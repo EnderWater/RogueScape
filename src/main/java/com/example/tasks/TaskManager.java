@@ -1,6 +1,9 @@
 package com.example.tasks;
 
 import com.example.cards.CardManager;
+import com.example.cards.JsonManager;
+import com.example.relics.Relic;
+import com.google.common.reflect.TypeToken;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -41,7 +44,7 @@ public class TaskManager {
     @Inject
     public TaskManager(CardManager cardManager) {
         // Load the user's tasks
-        this.tasks = TaskReaderWriter.loadTasks();
+        this.tasks = JsonManager.load("tasks.json", new TypeToken<List<Task>>(){}.getType());
 
         // Load any saved pinned tasks
         loadPinnedTasks();
@@ -51,12 +54,12 @@ public class TaskManager {
     }
 
     public void saveTasks() {
-        TaskReaderWriter.writeTasks(tasks);
+        JsonManager.save("tasks.json", tasks);
     }
 
     public void addTask(Task task) {
         this.tasks.add(task);
-        TaskReaderWriter.writeTasks(tasks);
+        JsonManager.save("tasks.json", tasks);
         this.notifyListeners();
     }
 

@@ -1,5 +1,6 @@
-//package com.example.tasks;
+//package com.example.packs;
 //
+//import com.example.cards.CardManager;
 //import com.google.gson.Gson;
 //import com.google.gson.GsonBuilder;
 //import com.google.gson.reflect.TypeToken;
@@ -13,22 +14,20 @@
 //import java.nio.file.Paths;
 //import java.util.List;
 //
-//public class TaskReaderWriter {
+//public class CardManagerReaderWriter {
 //
 //    private static final Gson GSON = new GsonBuilder()
-//            .registerTypeAdapter(Task.class, new TaskDeserializer())
 //            .setPrettyPrinting()
 //            .create();
 //
-//    public static List<Task> loadTasks() {
+//    public static List<CardManager> loadCardManagers() {
 //        // Ensure that the JSON file exists
-//        ensureTaskFileExists();
+//        ensureCardManagerFileExists();
 //
-//        // Just hard-code it since it's not going to change
-//        String pathToJson = "plugins/roguescape/tasks.json";
+//        String pathToJson = "plugins/roguescape/cardManager.json";
 //        try (Reader reader = new FileReader(pathToJson)) {
 //
-//            return GSON.fromJson(reader, new TypeToken<List<Task>>() {
+//            return GSON.fromJson(reader, new TypeToken<CardManager>() {
 //            }.getType());
 //        } catch (Exception e) {
 //            e.printStackTrace();
@@ -36,13 +35,13 @@
 //        }
 //    }
 //
-//    public static void writeTasks(List<Task> tasks)
+//    public static void writeCardManager(List<CardManager> packs)
 //    {
-//        String filePath = "plugins/roguescape/tasks.json";
+//        String filePath = "plugins/roguescape/cardManager.json";
 //        Path path = Paths.get(filePath);
 //        try
 //        {
-//            String json = GSON.toJson(tasks);
+//            String json = GSON.toJson(packs);
 //            Files.write(path, json.getBytes(StandardCharsets.UTF_8));
 //        }
 //        catch (IOException e)
@@ -51,7 +50,7 @@
 //        }
 //    }
 //
-//    private static void ensureTaskFileExists() {
+//    private static void ensureCardManagerFileExists() {
 //        try {
 //            // 1. Directory path for this user
 //            Path dir = Paths.get("plugins/roguescape/");
@@ -60,10 +59,10 @@
 //            }
 //
 //            // 2. JSON file path
-//            Path file = dir.resolve("tasks.json");
+//            Path file = dir.resolve("cardManager.json");
 //            if (!Files.exists(file)) {
 //                // 3. Create default JSON content
-//                String defaultJson = "[]"; // empty task list
+//                String defaultJson = "[]"; // empty packManager object
 //
 //                // 4. Write the file
 //                Files.write(file, defaultJson.getBytes(StandardCharsets.UTF_8));
