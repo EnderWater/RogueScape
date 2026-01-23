@@ -8,9 +8,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
-
+@Singleton
 public class TaskManager {
     @Getter
     private List<Task> tasks;
@@ -18,8 +19,8 @@ public class TaskManager {
     @Getter
     @Setter
     private List<Task> pinnedTasks = new ArrayList<>();
-
-    private final CardManager cardManager;
+    @Inject
+    private CardManager cardManager;
     private final int MAX_PINNED_TASKS = 3;
     private final List<TaskChangeListener> listeners = new ArrayList<>();
 
@@ -42,15 +43,12 @@ public class TaskManager {
     }
 
     @Inject
-    public TaskManager(CardManager cardManager) {
+    public TaskManager() {
         // Load the user's tasks
         this.tasks = JsonManager.load("tasks.json", new TypeToken<List<Task>>(){}.getType());
 
         // Load any saved pinned tasks
         loadPinnedTasks();
-
-        // Set the cardManager instance to update available packs when a task is completed.
-        this.cardManager = cardManager;
     }
 
     public void saveTasks() {

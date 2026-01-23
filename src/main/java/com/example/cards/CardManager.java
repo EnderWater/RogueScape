@@ -3,6 +3,7 @@ package com.example.cards;
 import com.example.widgets.WidgetManager;
 import lombok.Getter;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,14 +23,15 @@ public class CardManager {
 
     private int totalPacks;
     private int openedPacks;
-    private final WidgetManager widgetManager;
+    @Inject
+    private WidgetManager widgetManager;
 
-    public CardManager(WidgetManager widgetManager) {
+    public CardManager() {
         this.totalPacks = 0;
         this.openedPacks = 0;
-        this.widgetManager = widgetManager;
     }
 
+    @Inject
     public CardManager(int totalPacks, int openedPacks, List<Card> cards, WidgetManager widgetManager) {
         this.totalPacks = totalPacks;
         this.openedPacks = openedPacks;

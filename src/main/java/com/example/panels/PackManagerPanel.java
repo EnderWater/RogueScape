@@ -2,13 +2,17 @@ package com.example.panels;
 
 import com.example.cards.CardManager;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.swing.*;
 import java.awt.*;
 
-public class PackManager extends JPanel {
-    private final CardManager cardManager;
+@Singleton
+public class PackManagerPanel extends JPanel {
+    private CardManager cardManager;
 
-    PackManager(CardManager cardManager) {
+    @Inject
+    PackManagerPanel(CardManager cardManager) {
         this.cardManager = cardManager;
 
         // Set the view to be a BorderLayout

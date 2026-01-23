@@ -5,22 +5,22 @@ import com.example.cards.JsonManager;
 import com.google.common.reflect.TypeToken;
 import net.runelite.client.eventbus.EventBus;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.Console;
 import java.util.List;
 @Singleton
 public class RelicManager {
 
-    private final CardManager cardManager;
-    private final EventBus eventBus;
+    @Inject
+    private CardManager cardManager;
+    @Inject
+    private EventBus eventBus;
     private List<Relic> relics;
 
-    public RelicManager(CardManager cardManager, EventBus eventBus) {
-        this.cardManager = cardManager;
-        this.eventBus = eventBus;
+    public RelicManager() {
         loadRelics();
-        activateRelics();
-        //
+//        activateRelics();
     }
 
     private void loadRelics() {

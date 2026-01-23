@@ -9,50 +9,50 @@ import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.PluginPanel;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Singleton
 public class RogueScapePanel extends PluginPanel implements TaskManager.TaskChangeListener {
 
     private NavigationButton navButton;
-    private final TaskManager taskManager;
-    private final CardManager cardManager;
+    @Inject
+    private TaskManager taskManager;
+    @Inject
+    private CardManager cardManager;
+    @Inject
+    private PackManagerPanel packManagerPanel;
     private final CollapsiblePanel pinnedSection;
     private final CollapsiblePanel killSection;
     private final CollapsiblePanel skillSection;
     private final CollapsiblePanel addTaskSection;
     private final CollapsiblePanel packManagerSection;
 
-    public RogueScapePanel(TaskManager taskManager, CardManager cardManager) {
+    @Inject
+    public RogueScapePanel(TaskManager taskManager, CardManager cardManager)
+    {
         this.taskManager = taskManager;
-        this.taskManager.addListener(this);
         this.cardManager = cardManager;
 
-        // Layout setup
+        this.taskManager.addListener(this);
+
         setLayout(new BorderLayout());
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-        // Pinned task section
         this.pinnedSection = createSection("Pinned Tasks", mainPanel);
-
-        // Kill tasks section
         this.killSection = createSection("Kill Tasks", mainPanel);
-
-        // Skill tasks section
         this.skillSection = createSection("Skill Tasks", mainPanel);
-
-        // Add tasks section
         this.addTaskSection = createSection("Add Tasks", mainPanel);
-        // Create new task UI
         this.addTaskSection.getContent().add(new TaskGeneratorPanel(this.taskManager));
 
-        // Add pack manager section
         this.packManagerSection = createSection("Manage Packs", mainPanel);
-        this.packManagerSection.getContent().add(new PackManager(this.cardManager));
+        this.packManagerSection.getContent().add(this.packManagerPanel);
 
         add(mainPanel, BorderLayout.CENTER);
 
