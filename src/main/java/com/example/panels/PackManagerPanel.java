@@ -7,9 +7,8 @@ import javax.inject.Singleton;
 import javax.swing.*;
 import java.awt.*;
 
-@Singleton
 public class PackManagerPanel extends JPanel {
-    private CardManager cardManager;
+    private final CardManager cardManager;
 
     @Inject
     PackManagerPanel(CardManager cardManager) {

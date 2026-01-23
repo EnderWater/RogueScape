@@ -6,6 +6,7 @@ import com.example.relics.Relic;
 import com.google.common.reflect.TypeToken;
 import lombok.Getter;
 import lombok.Setter;
+import com.example.listeners.TaskChangeListener;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -13,20 +14,18 @@ import java.util.ArrayList;
 import java.util.List;
 @Singleton
 public class TaskManager {
+    private final CardManager cardManager;
+
     @Getter
-    private List<Task> tasks;
+    private List<Task> tasks = new ArrayList<>();
 
     @Getter
     @Setter
     private List<Task> pinnedTasks = new ArrayList<>();
-    @Inject
-    private CardManager cardManager;
-    private final int MAX_PINNED_TASKS = 3;
-    private final List<TaskChangeListener> listeners = new ArrayList<>();
 
-    public interface TaskChangeListener {
-        void onTasksChanged();
-    }
+    private final int MAX_PINNED_TASKS = 3;
+
+    private final List<TaskChangeListener> listeners = new ArrayList<>();
 
     public void addListener(TaskChangeListener listener) {
         listeners.add(listener);
@@ -43,9 +42,15 @@ public class TaskManager {
     }
 
     @Inject
-    public TaskManager() {
+    public TaskManager(CardManager cardManager) {
+        this.cardManager = cardManager;
+
         // Load the user's tasks
-        this.tasks = JsonManager.load("tasks.json", new TypeToken<List<Task>>(){}.getType());
+        List<Task> tasks = JsonManager.load("tasks.json", new TypeToken<List<Task>>(){}.getType());
+
+        // Make sure the tasks loaded are not null. If not, it is safe to set them.
+        if (tasks != null)
+            this.tasks = tasks;
 
         // Load any saved pinned tasks
         loadPinnedTasks();
@@ -98,5 +103,26 @@ public class TaskManager {
                 this.pinnedTasks.add(task);
             }
         }
+    }
+
+    public void resetTask(Task task) {
+        task.resetTask();
+        this.notifyListeners();
+    }
+
+    public void addToTask(Task task, int amount) {
+        if (!task.isComplete()) {
+            task.addToTask(amount);
+
+            if (task.isComplete())
+                completeTask(task);
+        }
+        this.notifyListeners();
+    }
+
+    public void removeFromTask(Task task, int amount) {
+        if (!task.isComplete() && task.getCurrent() > 0)
+            task.removeFromTask(amount);
+        this.notifyListeners();
     }
 }

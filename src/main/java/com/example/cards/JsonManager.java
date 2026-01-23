@@ -22,7 +22,7 @@ public class JsonManager {
     private static Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Task.class, new TaskDeserializer())
             .registerTypeAdapter(Relic.class, new RelicDeserializer())
-            .registerTypeAdapter(CardManager.class, new CardManagerDeserializer())
+            .registerTypeAdapter(CardManager.class, new CardManagerAdapter())
             .setPrettyPrinting()
             .create();
 

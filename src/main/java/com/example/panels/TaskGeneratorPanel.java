@@ -17,7 +17,6 @@ import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 
-@Singleton
 public class TaskGeneratorPanel extends JPanel {
 
     private final TaskManager taskManager;

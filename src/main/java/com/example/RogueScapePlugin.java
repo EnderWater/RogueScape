@@ -81,6 +81,8 @@ public class RogueScapePlugin extends Plugin {
         this.overlayManager.add(this.taskProgressOverlay);
         this.overlayManager.add(this.packOverlay);
 
+        this.panel = new RogueScapePanel(this.taskManager, this.cardManager);
+
         // Create the button on the toolbar to open the panel
         this.navButton = NavigationButton.builder()
                 .tooltip("RogueScape")

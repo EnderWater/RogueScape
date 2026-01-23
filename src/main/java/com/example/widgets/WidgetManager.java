@@ -4,6 +4,8 @@ import net.runelite.api.Client;
 import net.runelite.api.FontID;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.api.widgets.WidgetSizeMode;
 import net.runelite.api.widgets.WidgetType;
 import net.runelite.client.callback.ClientThread;
 
@@ -15,51 +17,99 @@ import java.awt.*;
 public class WidgetManager {
     @Inject
     private ClientThread clientThread;
+
     @Inject
     private Client client;
-    private Widget root;
+
+    private Widget rootWidget;
     private Widget cardWidget;
 
-    public void openWidget() {
-        if (this.root == null) getRootWidget();
-        clientThread.invokeLater(this::createCardWidget);
-        this.cardWidget.setHidden(false);
+    public void openWidget()
+    {
+        clientThread.invokeLater(() ->
+        {
+            if (rootWidget == null)
+            {
+                initRoot();
+            }
+
+            if (cardWidget == null)
+            {
+                createCardWidget();
+            }
+
+            cardWidget.setHidden(false);
+        });
     }
+
 
     public void closeWidget() {
         this.cardWidget.setHidden(true);
     }
 
-    private void getRootWidget() {
-        // In widget inspector, the widgets are shown like the following: R 161.0 ToplevelOsrsStretch.CONTROL
-        // the groupId is the 161 and the child is 0. Additionally, the groupName is ToplevelOsrsStretch and the child is CONTROL
-        this.root = this.client.getWidget(InterfaceID.TOPLEVEL_OSRS_STRETCH, 34);
+    private void initRoot() {
+        // Try the top level first
+        Widget parent = client.getWidget(InterfaceID.TOPLEVEL, 0);
 
-        if (this.root == null) {
-            this.cardWidget = null;
+        // Fallback: toplevel osrs stretch
+        if (parent == null) {
+            parent = client.getWidget(InterfaceID.TOPLEVEL_OSRS_STRETCH, 0);
+        }
+
+        if (parent == null) {
+            parent = client.getWidget(InterfaceID.TOPLEVEL_OSRS_STRETCH, 34);
+        }
+
+        if (parent == null) {
             return;
         }
+
+        // Create a layer attached to this parent
+        rootWidget = parent.createChild(WidgetType.LAYER);
+        rootWidget.setOriginalX(0);
+        rootWidget.setOriginalY(0);
+        rootWidget.setWidthMode(WidgetSizeMode.ABSOLUTE);
+        rootWidget.setHeightMode(WidgetSizeMode.ABSOLUTE);
+        rootWidget.setWidth(parent.getWidth());
+        rootWidget.setHeight(parent.getHeight());
+        rootWidget.revalidate();
     }
 
+
     private void createCardWidget() {
-        if (root == null) return;
+        if (rootWidget == null) return;
 
-        this.cardWidget = root.createChild(WidgetType.RECTANGLE);
-        this.cardWidget.setOriginalX(200);
-        this.cardWidget.setOriginalY(100);
-        this.cardWidget.setSize(300, 200);
-//        this.cardWidget.setWidth(300);
-//        this.cardWidget.setHeight(200);
-        this.cardWidget.setFilled(true);
-        this.cardWidget.setOpacity(180);
-        this.cardWidget.setTextColor(Color.BLACK.getRGB());
-        this.cardWidget.setHidden(true);
+        // Create a layer for the card container
+        cardWidget = rootWidget.createChild(WidgetType.LAYER);
+        cardWidget.setOriginalX(200);
+        cardWidget.setOriginalY(100);
+        cardWidget.setWidthMode(WidgetSizeMode.ABSOLUTE);
+        cardWidget.setHeightMode(WidgetSizeMode.ABSOLUTE);
+        cardWidget.setWidth(300);
+        cardWidget.setHeight(200);
+        cardWidget.setHidden(false); // show immediately
+        cardWidget.revalidate();
 
-        Widget text = this.cardWidget.createChild(WidgetType.TEXT);
+        // Background rectangle
+        Widget background = cardWidget.createChild(WidgetType.RECTANGLE);
+        background.setOriginalX(0);
+        background.setOriginalY(0);
+        background.setWidthMode(WidgetSizeMode.ABSOLUTE);
+        background.setHeightMode(WidgetSizeMode.ABSOLUTE);
+        background.setWidth(300);
+        background.setHeight(200);
+        background.setFilled(true);
+        background.setOpacity(180);
+        background.setTextColor(Color.BLACK.getRGB());
+        background.revalidate();
+
+        // Text
+        Widget text = cardWidget.createChild(WidgetType.TEXT);
         text.setOriginalX(20);
         text.setOriginalY(20);
         text.setText("You've opened the card widget!");
         text.setFontId(FontID.PLAIN_12);
         text.setTextColor(Color.WHITE.getRGB());
+        text.revalidate();
     }
 }

@@ -1,31 +1,28 @@
  package com.example.panels;
 
 import com.example.cards.CardManager;
+import com.example.listeners.TaskChangeListener;
 import com.example.tasks.KillTask;
 import com.example.tasks.SkillTask;
 import com.example.tasks.Task;
 import com.example.tasks.TaskManager;
-import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.PluginPanel;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Singleton
-public class RogueScapePanel extends PluginPanel implements TaskManager.TaskChangeListener {
+public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
 
-    private NavigationButton navButton;
-    @Inject
-    private TaskManager taskManager;
-    @Inject
-    private CardManager cardManager;
-    @Inject
+    private final TaskManager taskManager;
+
+    private final CardManager cardManager;
+
     private PackManagerPanel packManagerPanel;
+
     private final CollapsiblePanel pinnedSection;
     private final CollapsiblePanel killSection;
     private final CollapsiblePanel skillSection;
@@ -37,6 +34,7 @@ public class RogueScapePanel extends PluginPanel implements TaskManager.TaskChan
     {
         this.taskManager = taskManager;
         this.cardManager = cardManager;
+        this.packManagerPanel = new PackManagerPanel(this.cardManager);
 
         this.taskManager.addListener(this);
 
@@ -148,22 +146,14 @@ public class RogueScapePanel extends PluginPanel implements TaskManager.TaskChan
         JButton addButton = new JButton("Add 1");
         addButton.setPreferredSize(new Dimension(90, 22));
         addButton.addActionListener(e -> {
-            if (!task.isComplete()) {
-                task.addToTask(1);
-
-                if (task.isComplete())
-                    taskManager.completeTask(task);
-            }
-            refreshUI();
+            this.taskManager.addToTask(task, 1);
         });
 
         // Create the button to remove 1 from the current task
         JButton removeButton = new JButton("Remove 1");
         removeButton.setPreferredSize(new Dimension(90, 22));
         removeButton.addActionListener(e -> {
-            if (!task.isComplete() && task.getCurrent() > 0)
-                task.removeFromTask(1);
-            refreshUI();
+            this.taskManager.removeFromTask(task, 1);
         });
 
         // Add all the UI components to their corresponding row
@@ -199,8 +189,7 @@ public class RogueScapePanel extends PluginPanel implements TaskManager.TaskChan
                     JOptionPane.YES_NO_OPTION
             );
             if (result == JOptionPane.YES_OPTION) {
-                task.resetTask();
-                refreshUI();
+                taskManager.resetTask(task);
             }
         });
         return resetButton;
@@ -215,7 +204,6 @@ public class RogueScapePanel extends PluginPanel implements TaskManager.TaskChan
 
     public void pinTask(Task task) {
         this.taskManager.pinTask(task);
-        refreshUI();
     }
 
     @Override

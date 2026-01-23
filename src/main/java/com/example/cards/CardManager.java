@@ -11,32 +11,46 @@ import java.util.Random;
 
 @Singleton
 public class CardManager {
+    @Inject
+    private WidgetManager widgetManager;
+
+    @Getter
+    private List<Card> allCards = new ArrayList<>();
+
+    // This list contains all the card ids that the user currently has.
+    @Getter
+    private List<Integer> heldCardIds;
+
     @Getter
     private int availablePacks;
 
     @Getter
-    private List<Pack> packs; // I probably don't need to load packs... I need to load cards
-    // and then place them into packs randomly based on their rarity
+    private int totalPacks;
 
     @Getter
-    private List<Card> cards = new ArrayList<>();
-
-    private int totalPacks;
     private int openedPacks;
-    @Inject
-    private WidgetManager widgetManager;
 
-    public CardManager() {
-        this.totalPacks = 0;
-        this.openedPacks = 0;
+    @Inject
+    public CardManager(WidgetManager widgetManager) {
+        CardManager cardManager = JsonManager.load("cardmanager.json", CardManager.class);
+        if (cardManager != null) {
+            this.totalPacks = cardManager.totalPacks;
+            this.openedPacks = cardManager.openedPacks;
+            this.availablePacks = cardManager.availablePacks;
+        }
+        else {
+            this.totalPacks = 0;
+            this.openedPacks = 0;
+            this.availablePacks = 0;
+        }
+
+        this.widgetManager = widgetManager;
     }
 
-    @Inject
-    public CardManager(int totalPacks, int openedPacks, List<Card> cards, WidgetManager widgetManager) {
+    public CardManager(int totalPacks, int openedPacks, int availablePacks) {
         this.totalPacks = totalPacks;
         this.openedPacks = openedPacks;
-        this.cards = cards;
-        this.widgetManager = widgetManager;
+        this.availablePacks = availablePacks;
     }
 
     private void addAndSavePack() {
