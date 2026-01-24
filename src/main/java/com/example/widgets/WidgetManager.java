@@ -49,15 +49,15 @@ public class WidgetManager {
 
     private void initRoot() {
         // Try the top level first
-        Widget parent = client.getWidget(InterfaceID.TOPLEVEL, 0);
+        Widget parent = client.getWidget(InterfaceID.Orbs.WIKI);
 
         // Fallback: toplevel osrs stretch
         if (parent == null) {
-            parent = client.getWidget(InterfaceID.TOPLEVEL_OSRS_STRETCH, 0);
+            parent = client.getWidget(InterfaceID.Orbs.WIKI);
         }
 
         if (parent == null) {
-            parent = client.getWidget(InterfaceID.TOPLEVEL_OSRS_STRETCH, 34);
+            parent = client.getWidget(InterfaceID.Orbs.WIKI);
         }
 
         if (parent == null) {

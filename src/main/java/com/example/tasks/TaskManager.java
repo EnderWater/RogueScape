@@ -2,7 +2,6 @@ package com.example.tasks;
 
 import com.example.cards.CardManager;
 import com.example.cards.JsonManager;
-import com.example.relics.Relic;
 import com.google.common.reflect.TypeToken;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +9,7 @@ import com.example.listeners.TaskChangeListener;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 @Singleton
@@ -62,7 +62,14 @@ public class TaskManager {
 
     public void addTask(Task task) {
         this.tasks.add(task);
-        JsonManager.save("tasks.json", tasks);
+        this.saveTasks();
+        this.notifyListeners();
+    }
+
+    public void deleteTask(Task task) {
+        this.tasks.remove(task);
+        this.pinnedTasks.remove(task);
+        this.saveTasks();
         this.notifyListeners();
     }
 
@@ -85,6 +92,7 @@ public class TaskManager {
             this.pinnedTasks.remove(0);
         }
 
+        this.saveTasks();
         this.notifyListeners();
     }
 
@@ -124,5 +132,14 @@ public class TaskManager {
         if (!task.isComplete() && task.getCurrent() > 0)
             task.removeFromTask(amount);
         this.notifyListeners();
+    }
+
+    public void loadTasksFromCsv(Path taskFile) {
+        List<Task> newTasks = TaskCsvReader.read(taskFile);
+        if (!newTasks.isEmpty()) {
+            this.tasks = newTasks;
+            this.saveTasks();
+            this.notifyListeners();
+        }
     }
 }

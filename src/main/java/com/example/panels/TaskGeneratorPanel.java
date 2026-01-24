@@ -12,8 +12,11 @@ import net.runelite.client.ui.components.FlatTextField;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,8 +27,7 @@ public class TaskGeneratorPanel extends JPanel {
     private final JTextField taskName;
     private final JTextField taskDescription;
     private final JSpinner taskTarget;
-    private final JComboBox<Skill> skill;
-    private final JButton submit;
+//    private final JComboBox<Skill> skill;
 
     @Inject
     TaskGeneratorPanel(TaskManager taskManager) {
@@ -40,22 +42,36 @@ public class TaskGeneratorPanel extends JPanel {
         taskName = addTextField("Task name");
         taskDescription = addTextField("Task description");
         taskTarget = addSpinner("# to complete goal");
-        skill = createComboBox("Skill", Skill.values());
-        submit = createSubmit();
+//        skill = createComboBox("Skill", Skill.values());
+        createButtons();
     }
 
     String getTaskType() {
         return Objects.requireNonNull(taskType.getSelectedItem()).toString();
     }
+
     String getTaskName() {
-        return taskName.getText();
+        if (taskName.getText().isBlank()) {
+            JOptionPane.showMessageDialog(taskName, "Task name cannot be empty");
+            return null;
+        }
+        else
+            return taskName.getText();
     }
+
     String getTaskDescription() {
-        return taskDescription.getText();
+        if (taskDescription.getText().isBlank()) {
+            JOptionPane.showMessageDialog(taskName, "Task name cannot be empty");
+            return null;
+        }
+        else
+            return taskDescription.getText();
     }
-    Skill getSkill() {
-        return ((Skill) Objects.requireNonNull(skill.getSelectedItem()));
-    }
+
+//    Skill getSkill() {
+//        return ((Skill) Objects.requireNonNull(skill.getSelectedItem()));
+//    }
+
     int getTaskTarget() {
         return (int)this.taskTarget.getValue();
     }
@@ -103,30 +119,64 @@ public class TaskGeneratorPanel extends JPanel {
         return box;
     }
 
-    private JButton createSubmit() {
+    private void createButtons() {
         JButton submit = new JButton("Create task");
         submit.addActionListener(e -> {
             String taskName = this.getTaskName();
-            String taskType = this.getTaskType();
+            if (taskName == null) return;
+
             String taskDesc = this.getTaskDescription();
-            Skill skill = this.getSkill();
+            if (taskDesc == null) return;
+
+            String taskType = this.getTaskType();
+//            Skill skill = this.getSkill();
             int target = this.getTaskTarget();
 
             switch (taskType) {
                 case "Kill":
-                    KillTask killTask = new KillTask(taskType, taskName, taskDesc, target);
+                    KillTask killTask = new KillTask(taskType, taskName, taskDesc, 0, target, false, "");
                     taskManager.addTask(killTask);
                     break;
 
                 case "Skill":
-                    SkillTask skillTask = new SkillTask(taskType, taskName, taskDesc, target);
+                    SkillTask skillTask = new SkillTask(taskType, taskName, taskDesc, 0, target, false, "");
                     taskManager.addTask(skillTask);
                     break;
             }
             this.clearFormData();
         });
-        add(submit, BorderLayout.CENTER);
-        return submit;
+
+        JButton loadFromCsv = new JButton("Load tasks");
+        loadFromCsv.setPreferredSize(new Dimension(120, 22));
+        loadFromCsv.addActionListener(e -> {
+            Path taskFile = Paths.get(
+                    System.getProperty("user.home"),
+                    ".runelite",
+                    "plugins",
+                    "roguescape",
+                    "tasks.csv"
+            );
+            // Create the dialog string to show the path of the csv
+            StringBuilder dialog = new StringBuilder("Would you like to load tasks from ");
+            dialog.append(taskFile.toString());
+            dialog.append("?");
+
+            int response = JOptionPane.showConfirmDialog(loadFromCsv, dialog.toString());
+            if (response != JOptionPane.YES_OPTION) return;
+
+            response = JOptionPane.showConfirmDialog(loadFromCsv, "This action will delete your current tasks and load the new ones. Continue?");
+            if (response == JOptionPane.YES_OPTION)
+                this.taskManager.loadTasksFromCsv(taskFile);
+
+        });
+
+
+        JPanel submitContainer = new JPanel();
+        submitContainer.setLayout(new BorderLayout());
+
+        submitContainer.add(submit, BorderLayout.WEST);
+        submitContainer.add(loadFromCsv, BorderLayout.EAST);
+        add(submitContainer);
     }
 
     private JSpinner addSpinner(String label) {
@@ -134,7 +184,8 @@ public class TaskGeneratorPanel extends JPanel {
         container.setLayout(new BorderLayout());
 
         JLabel boxLabel = new JLabel(label);
-        JSpinner spinner = new JSpinner();
+        SpinnerModel spinnerModel = new SpinnerNumberModel(1, 1, 5096, 1);
+        JSpinner spinner = new JSpinner(spinnerModel);
 
         boxLabel.setFont(FontManager.getRunescapeSmallFont());
         boxLabel.setBorder(new EmptyBorder(0, 0, 4, 0));
@@ -143,6 +194,7 @@ public class TaskGeneratorPanel extends JPanel {
         container.add(spinner);
 
         add(container);
+        add(Box.createVerticalStrut(20));
 
         return spinner;
     }
@@ -150,7 +202,7 @@ public class TaskGeneratorPanel extends JPanel {
     private void clearFormData() {
         this.taskDescription.setText("");
         this.taskName.setText("");
-        this.skill.setSelectedIndex(0);
+//        this.skill.setSelectedIndex(0);
         this.taskType.setSelectedIndex(0);
     }
 }

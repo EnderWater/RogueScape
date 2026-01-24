@@ -93,6 +93,7 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         add(Box.createVerticalStrut(20));
         CollapsiblePanel section = new CollapsiblePanel(panel, title);
+
         mainPanel.add(section);
         mainPanel.add(Box.createVerticalStrut(20));
         return section;
@@ -109,12 +110,14 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
         JPanel progressBarRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel taskButtonsRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel taskButtonsRow2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel taskButtonsRow3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         // Set the rows' alignment
         taskInfoRow.setAlignmentX(Component.LEFT_ALIGNMENT);
         progressBarRow.setAlignmentX(Component.LEFT_ALIGNMENT);
         taskButtonsRow.setAlignmentX(Component.LEFT_ALIGNMENT);
         taskButtonsRow2.setAlignmentX(Component.LEFT_ALIGNMENT);
+        taskButtonsRow3.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // Create the name and taskCount labels
         JLabel nameLabel = new JLabel(task.getName());
@@ -156,6 +159,12 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
             this.taskManager.removeFromTask(task, 1);
         });
 
+        JButton deleteButton = new JButton("Delete Task");
+        deleteButton.setPreferredSize(new Dimension(90, 22));
+        deleteButton.addActionListener(e -> {
+            this.taskManager.deleteTask(task);
+        });
+
         // Add all the UI components to their corresponding row
         taskInfoRow.add(nameLabel);
         taskInfoRow.add(taskCountLabel);
@@ -165,12 +174,14 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
         taskButtonsRow.add(addButton);
         taskButtonsRow2.add(resetButton);
         taskButtonsRow2.add(removeButton);
+        taskButtonsRow3.add(deleteButton);
 
         // Add the rows to the wrapping Task row container
         taskRow.add(taskInfoRow);
         taskRow.add(progressBarRow);
         taskRow.add(taskButtonsRow);
         taskRow.add(taskButtonsRow2);
+        taskRow.add(taskButtonsRow3);
         taskRow.add(Box.createVerticalStrut(20));
 
         // Return the full task row

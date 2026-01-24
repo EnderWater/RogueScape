@@ -68,5 +68,11 @@ public class TaskProgressOverlay extends Overlay {
                         .leftColor(config.pinnedTaskTextColor())
                         .build()
         );
+        panel.getChildren().add(
+                LineComponent.builder()
+                        .left(task.getCurrent() + "/" + task.getTarget())
+                        .leftColor(config.pinnedTaskTextColor())
+                        .build()
+        );
     }
 }

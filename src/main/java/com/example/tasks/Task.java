@@ -17,7 +17,7 @@ public abstract class Task {
 
     @Getter
     @Setter
-    private boolean pinned;
+    private boolean isPinned;
 
     @Getter
     @Setter
@@ -29,7 +29,7 @@ public abstract class Task {
     Task(String name, String description) {
         this.name = name;
         this.description = description;
-        this.pinned = false;
+        this.isPinned = false;
         this.isComplete = false;
     }
 
@@ -48,13 +48,13 @@ public abstract class Task {
         this.current = 0;
     }
 
-    Task(String name, boolean pinned, boolean isComplete, String description) {
-        this.name = name;
-        this.pinned = pinned;
-        this.isComplete = isComplete;
+    Task(String taskType, String taskName, String description, int current, int target, boolean isPinned) {
+        this.name = taskName;
+        this.isPinned = isPinned;
         this.description = description;
-        this.current = 0;
-        this.target = 0;
+        this.current = current;
+        this.target = target;
+        this.isComplete = isTaskComplete();
     }
 
     private boolean isTaskComplete() {
