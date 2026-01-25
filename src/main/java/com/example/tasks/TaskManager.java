@@ -138,6 +138,7 @@ public class TaskManager {
         List<Task> newTasks = TaskCsvReader.read(taskFile);
         if (!newTasks.isEmpty()) {
             this.tasks = newTasks;
+            this.pinnedTasks.clear();
             this.saveTasks();
             this.notifyListeners();
         }
