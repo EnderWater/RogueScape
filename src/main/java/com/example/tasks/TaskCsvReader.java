@@ -128,7 +128,7 @@ public class TaskCsvReader {
                 // Write CSV header
                 Files.writeString(
                         csvPath,
-                        "taskType,name,description,current,target,pinned,isComplete,monsterType,skillName\n"
+                        "taskType,name,description,current,target,pinned,monsterType,skillName\n"
                 );
             }
         }
