@@ -42,9 +42,8 @@ public class TaskCsvReader {
                     int current = parseIntSafe(parts, 3);
                     int target = parseIntSafe(parts, 4);
                     boolean pinned = parseBooleanSafe(parts, 5);
-                    boolean isComplete = parseBooleanSafe(parts, 6);
-                    String monsterType = safe(parts, 7);
-                    String skillName = safe(parts, 8);
+                    String monsterType = safe(parts, 6);
+                    String skillName = safe(parts, 7);
 
                     Task task = createTask(
                             taskType,
@@ -53,21 +52,12 @@ public class TaskCsvReader {
                             current,
                             target,
                             pinned,
-                            isComplete,
                             monsterType,
                             skillName
                     );
 
                     if (task == null) {
                         continue;
-                    }
-
-                    if (current > 0) {
-                        task.addToTask(current);
-                    }
-
-                    if (isComplete) {
-                        task.setCompleted();
                     }
 
                     tasks.add(task);
@@ -93,7 +83,6 @@ public class TaskCsvReader {
             int current,
             int target,
             boolean pinned,
-            boolean isComplete,
             String npcName,
             String skillName
     ) {
