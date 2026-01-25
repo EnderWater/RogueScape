@@ -135,12 +135,19 @@ public class TaskCsvReader {
 
             if (!Files.exists(csvPath)) {
                 Files.createFile(csvPath);
+
+                // Write CSV header
+                Files.writeString(
+                        csvPath,
+                        "taskType,name,description,current,target,pinned,isComplete,monsterType,skillName\n"
+                );
             }
         }
         catch (IOException e) {
             System.err.println("Failed to create task CSV file: " + e.getMessage());
         }
     }
+
 
     private static String safe(String[] parts, int index) {
         if (index >= parts.length) {
