@@ -1,7 +1,7 @@
 package com.example.tasks;
 
 import com.example.cards.CardManager;
-import com.example.cards.JsonManager;
+import com.example.JsonManager;
 import com.google.common.reflect.TypeToken;
 import lombok.Getter;
 import lombok.Setter;

@@ -1,12 +1,13 @@
 package com.example;
 
 import com.example.cards.CardManager;
+import com.example.overlays.PackOpeningOverlay;
 import com.example.overlays.PackOverlay;
 import com.example.overlays.TaskProgressOverlay;
 import com.example.panels.RogueScapePanel;
 import com.example.relics.RelicManager;
 import com.example.tasks.TaskManager;
-import com.example.widgets.WidgetManager;
+//import com.example.widgets.WidgetManager;
 
 import javax.inject.Inject;
 
@@ -43,6 +44,9 @@ public class RogueScapePlugin extends Plugin {
     private PackOverlay packOverlay;
 
     @Inject
+    private PackOpeningOverlay packOpeningOverlay;
+
+    @Inject
     private RogueScapeConfig config;
 
     @Inject
@@ -64,8 +68,8 @@ public class RogueScapePlugin extends Plugin {
     // Initialize the relic manager
     private RelicManager relicManager;
 
-    @Inject
-    private WidgetManager widgetManager;
+//    @Inject
+//    private WidgetManager widgetManager;
 
     // This panel needs to be injected because it is dependent on other singletons.
     // If a class depends on other singletons, it should be a singleton itself that injects those singletons
@@ -80,6 +84,7 @@ public class RogueScapePlugin extends Plugin {
     protected void startUp() throws Exception {
         this.overlayManager.add(this.taskProgressOverlay);
         this.overlayManager.add(this.packOverlay);
+        this.overlayManager.add(this.packOpeningOverlay);
 
         this.panel = new RogueScapePanel(this.taskManager, this.cardManager);
 

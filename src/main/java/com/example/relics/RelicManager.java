@@ -1,13 +1,12 @@
 package com.example.relics;
 
 import com.example.cards.CardManager;
-import com.example.cards.JsonManager;
+import com.example.JsonManager;
 import com.google.common.reflect.TypeToken;
 import net.runelite.client.eventbus.EventBus;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.Console;
 import java.util.List;
 @Singleton
 public class RelicManager {

@@ -3,7 +3,6 @@ package com.example.overlays;
 import com.example.RogueScapeConfig;
 import com.example.RogueScapePlugin;
 import com.example.cards.CardManager;
-import com.example.tasks.Task;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.PanelComponent;

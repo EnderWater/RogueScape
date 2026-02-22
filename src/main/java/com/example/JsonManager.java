@@ -1,12 +1,12 @@
-package com.example.cards;
+package com.example;
 
+import com.example.cards.*;
 import com.example.relics.Relic;
 import com.example.relics.RelicDeserializer;
 import com.example.tasks.Task;
 import com.example.tasks.TaskDeserializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -16,13 +16,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 public class JsonManager {
     private static Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Task.class, new TaskDeserializer())
             .registerTypeAdapter(Relic.class, new RelicDeserializer())
             .registerTypeAdapter(CardManager.class, new CardManagerAdapter())
+            .registerTypeAdapter(Card.class, new CardDeserializer())
             .setPrettyPrinting()
             .create();
 

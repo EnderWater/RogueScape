@@ -9,6 +9,7 @@ import java.awt.*;
 
 public class PackManagerPanel extends JPanel {
     private final CardManager cardManager;
+    private boolean isPackOpen = false;
 
     @Inject
     PackManagerPanel(CardManager cardManager) {
@@ -20,7 +21,16 @@ public class PackManagerPanel extends JPanel {
         JButton openPackButton = new JButton("Open pack");
         openPackButton.setPreferredSize(new Dimension(100, 20));
         openPackButton.addActionListener(e -> {
-            this.cardManager.openPack();
+            if (!isPackOpen) {
+                this.cardManager.openPack();
+                this.isPackOpen = true;
+                openPackButton.setText("Close Pack");
+            }
+            else {
+                this.cardManager.closePack();
+                this.isPackOpen = false;
+                openPackButton.setText("Open Pack");
+            }
         });
 
         JButton viewCardsButton = new JButton("View current cards");
