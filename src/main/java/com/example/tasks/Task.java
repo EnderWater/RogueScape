@@ -55,6 +55,7 @@ public abstract class Task {
         this.current = current;
         this.target = target;
         this.isComplete = isTaskComplete();
+        this.taskType = taskType;
     }
 
     private boolean isTaskComplete() {

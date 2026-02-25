@@ -1,5 +1,5 @@
 package com.example.relics;
 
-public enum RelicsEnum {
+public enum Relics {
     AnthologyOfProficiency,
 }

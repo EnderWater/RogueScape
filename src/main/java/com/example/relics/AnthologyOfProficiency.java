@@ -4,7 +4,7 @@ import net.runelite.client.eventbus.EventBus;
 
 public class AnthologyOfProficiency extends Relic {
     public AnthologyOfProficiency(EventBus eventBus) {
-        super(eventBus, "AnthologyOfProficiency");
+        super(eventBus, Relics.AnthologyOfProficiency);
     }
 
     @Override

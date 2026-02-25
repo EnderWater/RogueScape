@@ -4,10 +4,13 @@ import com.example.cards.*;
 import com.example.relics.Relic;
 import com.example.relics.RelicDeserializer;
 import com.example.tasks.Task;
-import com.example.tasks.TaskDeserializer;
+import com.example.tasks.TaskAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.runelite.client.eventbus.EventBus;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -17,16 +20,25 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+@Singleton
 public class JsonManager {
-    private static Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(Task.class, new TaskDeserializer())
-            .registerTypeAdapter(Relic.class, new RelicDeserializer())
-            .registerTypeAdapter(CardManager.class, new CardManagerAdapter())
-            .registerTypeAdapter(Card.class, new CardDeserializer())
-            .setPrettyPrinting()
-            .create();
+    private final EventBus eventBus;
+    private final Gson GSON;
 
-    public static <T> T load(String filename, Type type) {
+    @Inject
+    JsonManager(EventBus eventBus) {
+        this.eventBus = eventBus;
+
+        GSON = new GsonBuilder()
+                .registerTypeAdapter(Task.class, new TaskAdapter(this))
+                .registerTypeAdapter(Relic.class, new RelicDeserializer())
+                .registerTypeAdapter(CardManager.class, new CardManagerAdapter(this))
+                .registerTypeAdapter(Card.class, new CardDeserializer(this.eventBus))
+                .setPrettyPrinting()
+                .create();
+    }
+
+    public <T> T load(String filename, Type type) {
         // Ensure that the JSON file exists
         ensureJsonExists(filename);
 
@@ -40,7 +52,7 @@ public class JsonManager {
         }
     }
 
-    public static <T> void save(String filename, T object)
+    public <T> void save(String filename, T object)
     {
         String filePath = "plugins/roguescape/" + filename;
         Path path = Paths.get(filePath);
@@ -55,7 +67,7 @@ public class JsonManager {
         }
     }
 
-    private static void ensureJsonExists(String filename) {
+    private void ensureJsonExists(String filename) {
         try {
             // 1. Directory path for this user
             Path dir = Paths.get("plugins/roguescape/");

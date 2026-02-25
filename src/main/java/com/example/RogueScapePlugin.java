@@ -21,12 +21,16 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.NpcLootReceived;
+import net.runelite.client.input.MouseListener;
+import net.runelite.client.input.MouseManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
+
+import java.awt.event.MouseEvent;
 
 @Slf4j
 @PluginDescriptor(name = "RogueScape")
@@ -68,13 +72,60 @@ public class RogueScapePlugin extends Plugin {
     // Initialize the relic manager
     private RelicManager relicManager;
 
-//    @Inject
-//    private WidgetManager widgetManager;
-
     // This panel needs to be injected because it is dependent on other singletons.
     // If a class depends on other singletons, it should be a singleton itself that injects those singletons
     @Inject
     private RogueScapePanel panel;
+
+    @Inject
+    private MouseManager mouseManager;
+
+    private final MouseListener mouseListener = new MouseListener()
+    {
+        @Override
+        public MouseEvent mouseClicked(MouseEvent mouseEvent) {
+            return mouseEvent;
+        }
+
+        @Override
+        public MouseEvent mousePressed(MouseEvent event)
+        {
+            int overlayIndex = packOpeningOverlay.isClickOnButton(event);
+            if (overlayIndex >= 0 && cardManager.isPackOpen())
+            {
+                cardManager.selectCard(cardManager.getOverlayCards().get(overlayIndex));
+                cardManager.completePackOpening();
+                event.consume();
+            }
+
+            return event;
+        }
+
+        @Override
+        public MouseEvent mouseReleased(MouseEvent mouseEvent) {
+            return mouseEvent;
+        }
+
+        @Override
+        public MouseEvent mouseEntered(MouseEvent mouseEvent) {
+            return mouseEvent;
+        }
+
+        @Override
+        public MouseEvent mouseExited(MouseEvent mouseEvent) {
+            return mouseEvent;
+        }
+
+        @Override
+        public MouseEvent mouseDragged(MouseEvent mouseEvent) {
+            return mouseEvent;
+        }
+
+        @Override
+        public MouseEvent mouseMoved(MouseEvent mouseEvent) {
+            return mouseEvent;
+        }
+    };
 
     private final String taskFilePath = "plugins/roguescape/tasks.json";
     private int gameTicksSinceLastSave = 0;
@@ -85,6 +136,8 @@ public class RogueScapePlugin extends Plugin {
         this.overlayManager.add(this.taskProgressOverlay);
         this.overlayManager.add(this.packOverlay);
         this.overlayManager.add(this.packOpeningOverlay);
+
+        this.mouseManager.registerMouseListener(this.mouseListener);
 
         this.panel = new RogueScapePanel(this.taskManager, this.cardManager);
 

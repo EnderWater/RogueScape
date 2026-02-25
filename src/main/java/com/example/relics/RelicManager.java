@@ -11,19 +11,25 @@ import java.util.List;
 @Singleton
 public class RelicManager {
 
-    @Inject
-    private CardManager cardManager;
+    private final CardManager cardManager;
+    private final JsonManager jsonManager;
+
     @Inject
     private EventBus eventBus;
+
     private List<Relic> relics;
 
-    public RelicManager() {
+    @Inject
+    public RelicManager(CardManager cardManager, JsonManager jsonManager) {
+        this.cardManager = cardManager;
+        this.jsonManager = jsonManager;
+
         loadRelics();
 //        activateRelics();
     }
 
     private void loadRelics() {
-        this.relics = JsonManager.load("relics.json", new TypeToken<List<Relic>>(){}.getType());
+        this.relics = jsonManager.load("relics.json", new TypeToken<List<Relic>>(){}.getType());
     }
 
     private void activateRelics() {
@@ -34,16 +40,16 @@ public class RelicManager {
         this.relics.forEach(Relic::deactivate);
     }
 
-    public void addRelic(RelicsEnum relicsEnum) {
-        Relic relic = this.getRelicById(relicsEnum);
+    public void addRelic(Relics relics) {
+        Relic relic = this.getRelicById(relics);
         if (relic != null)
             this.relics.add(relic);
     }
 
-    public Relic getRelicById(RelicsEnum relicsEnum) {
+    public Relic getRelicById(Relics relics) {
         Relic relic = null;
 
-        switch (relicsEnum) {
+        switch (relics) {
             case AnthologyOfProficiency:
                 relic = new AnthologyOfProficiency(this.eventBus);
                 break;

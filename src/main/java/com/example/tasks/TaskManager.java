@@ -15,6 +15,7 @@ import java.util.List;
 @Singleton
 public class TaskManager {
     private final CardManager cardManager;
+    private final JsonManager jsonManager;
 
     @Getter
     private List<Task> tasks = new ArrayList<>();
@@ -42,11 +43,12 @@ public class TaskManager {
     }
 
     @Inject
-    public TaskManager(CardManager cardManager) {
+    public TaskManager(CardManager cardManager, JsonManager jsonManager) {
         this.cardManager = cardManager;
+        this.jsonManager = jsonManager;
 
         // Load the user's tasks
-        List<Task> tasks = JsonManager.load("tasks.json", new TypeToken<List<Task>>(){}.getType());
+        List<Task> tasks = jsonManager.load("tasks.json", new TypeToken<List<Task>>(){}.getType());
 
         // Make sure the tasks loaded are not null. If not, it is safe to set them.
         if (tasks != null)
@@ -57,7 +59,7 @@ public class TaskManager {
     }
 
     public void saveTasks() {
-        JsonManager.save("tasks.json", tasks);
+        jsonManager.save("tasks.json", tasks);
     }
 
     public void addTask(Task task) {

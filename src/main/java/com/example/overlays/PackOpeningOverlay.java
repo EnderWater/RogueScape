@@ -1,19 +1,21 @@
 package com.example.overlays;
 
-import com.example.RogueScapeConfig;
-import com.example.RogueScapePlugin;
 import com.example.cards.*;
 import net.runelite.api.Client;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.components.PanelComponent;
 
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This overlay is meant to show the packs opening for a user. 3-5 random cards will appear based on rarity.
@@ -21,182 +23,93 @@ import java.util.List;
  *
  */
 public class PackOpeningOverlay extends Overlay {
-    private final PanelComponent panel = new PanelComponent();
-    private final RogueScapePlugin plugin;
-    private final RogueScapeConfig config;
+    private final int OVERLAY_CARD_WIDTH = 150;
+    private final int OVERLAY_CARD_HEIGHT = 250;
+    private final int MAX_OVERLAY_CARDS = 3;
+    private final int PADDING = 12;
+    private final int SPACING = 30;
+
     private final Client client;
     private final ItemManager itemManager;
     private final CardManager cardManager;
+    private final Map<String, BufferedImage> iconMap = new HashMap<>();
+    private final List<Rectangle> cardBounds = new ArrayList<>();
 
     @Inject
-    PackOpeningOverlay(RogueScapePlugin plugin, RogueScapeConfig config, ItemManager itemManager, CardManager cardManager, Client client) {
-        this.plugin = plugin;
-        this.config = config;
+    PackOpeningOverlay(ItemManager itemManager, CardManager cardManager, Client client) {
         this.itemManager = itemManager;
         this.cardManager = cardManager;
         this.client = client;
+        loadIcons();
 
         setPosition(OverlayPosition.DYNAMIC);
         setLayer(OverlayLayer.ALWAYS_ON_TOP);
 
         setResizable(false);
         setMovable(false);
+
+        int totalWidth = MAX_OVERLAY_CARDS * OVERLAY_CARD_WIDTH + (MAX_OVERLAY_CARDS - 1) * PADDING;
+        int startX = (client.getCanvasWidth() - totalWidth) / 2;
+        int startY = (client.getCanvasHeight() - OVERLAY_CARD_HEIGHT) / 2;
+
+        for (int i = 0; i < MAX_OVERLAY_CARDS; i++) {
+            int x = startX + i * (OVERLAY_CARD_WIDTH + PADDING);
+            int y = startY;
+            cardBounds.add(new Rectangle(x, y, OVERLAY_CARD_WIDTH, OVERLAY_CARD_HEIGHT));
+        }
     }
 
-//    @Override
-//    public Dimension render(Graphics2D graphics) {
+    private void loadIcons()
+    {
+        // Card type icons
+        loadIcon("Boon", "/com/example/icons/Boon.png");
+        loadIcon("Goal", "/com/example/icons/Goal.png");
+        loadIcon("Item", "/com/example/icons/Item.png");
+        loadIcon("Land", "/com/example/icons/Land.png");
+        loadIcon("Main_hand", "/com/example/icons/Main_Hand.png");
+        loadIcon("Minigame", "/com/example/icons/Minigame.png");
+        loadIcon("Off_hand", "/com/example/icons/Off_Hand.png");
+        loadIcon("Quest", "/com/example/icons/Quest.png");
+        loadIcon("Relic", "/com/example/icons/Relic.png");
+        loadIcon("Skill", "/com/example/icons/Skill.png");
 
-//        int canvasWidth = client.getCanvasWidth();
-//        int canvasHeight = client.getCanvasHeight();
-//
-//        List<OverlayCard> cards = cardManager.getOverlayCards();
-//        if (cards.isEmpty())
-//        {
-//            return null;
-//        }
-//
-//        int cardWidth = cards.get(0).getWidth();
-//        int cardHeight = cards.get(0).getHeight();
-//        int spacing = 20;
-//
-//        int totalWidth = cards.size() * cardWidth + (cards.size() - 1) * spacing;
-//
-//        // Center horizontally
-//        int startX = (canvasWidth - totalWidth) / 2;
-//
-//        // Center vertically
-//        int startY = (canvasHeight - cardHeight) / 2;
-//        // Enable smooth text & shapes
-//        graphics.setRenderingHint(
-//                RenderingHints.KEY_ANTIALIASING,
-//                RenderingHints.VALUE_ANTIALIAS_ON
-//        );
-//
-//        // ---------------------------------------------------------------
-//
-//        for (OverlayCard overlayCard : this.cardManager.getOverlayCards()) {
-//
-//            // Background
-//            graphics.setColor(new Color(30, 30, 30, 220));
-//            graphics.fillRoundRect(overlayCard.x, overlayCard.y,
-//                    overlayCard.getWidth(), overlayCard.getHeight(), 12, 12);
-//
-//            // Border
-//            graphics.setColor(Color.WHITE);
-//            graphics.drawRoundRect(overlayCard.x, overlayCard.y,
-//                    overlayCard.getWidth(), overlayCard.getHeight(), 12, 12);
-//
-//            // Icon
-//            BufferedImage image = itemManager.getImage(overlayCard.getCard().getImageId()); // Abyssal whip item ID
-//
-//            if (image != null) {
-//                graphics.drawImage(image, overlayCard.getX() + overlayCard.getWidth()/2, overlayCard.y + overlayCard.getHeight()/2, null);
-//            }
-//
-//            // Text
-//            graphics.setColor(Color.WHITE);
-//            graphics.drawString(overlayCard.getCard().getName(),
-//                    overlayCard.getBottomLeft().x + overlayCard.getWidth() / 2,
-//                    overlayCard.getHeight() + 20);
-//        }
-//
-//        return null;
-//    }
-//    @Override
-//    public Dimension render(Graphics2D graphics)
-//    {
-//        if (cardManager.getOverlayCards().isEmpty())
-//        {
-//            return null;
-//        }
-//
-//        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-//
-//        int canvasWidth = client.getCanvasWidth();
-//        int canvasHeight = client.getCanvasHeight();
-//
-//        var cards = cardManager.getOverlayCards();
-//
-//        int cardWidth = cards.get(0).getWidth();
-//        int cardHeight = cards.get(0).getHeight();
-//        int spacing = 20;
-//
-//        int totalWidth = cards.size() * cardWidth + (cards.size() - 1) * spacing;
-//
-//        int startX = (canvasWidth - totalWidth) / 2;
-//        int startY = (canvasHeight - cardHeight) / 2;
-//
-//        for (int i = 0; i < cards.size(); i++)
-//        {
-//            OverlayCard overlayCard = cards.get(i);
-//
-//            int x = startX + i * (cardWidth + spacing);
-//            int y = startY;
-//
-//            // Background
-//            graphics.setColor(new Color(30, 30, 30, 220));
-//            graphics.fillRoundRect(x, y, cardWidth, cardHeight, 16, 16);
-//
-//            // Border
-//            graphics.setStroke(new BasicStroke(2f));
-//            graphics.setColor(Color.WHITE);
-//            graphics.drawRoundRect(x, y, cardWidth, cardHeight, 16, 16);
-//
-//            // Draw Image
-//            BufferedImage image = itemManager.getImage(overlayCard.getCard().getImageId());
-//            if (image != null)
-//            {
-//                int imageWidth = image.getWidth();
-//
-//                int imageX = x + (cardWidth - imageWidth) / 2;
-//                int imageY = y + 20;
-//
-//                graphics.drawImage(image, imageX, imageY, null);
-//            }
-//
-//            // Draw Centered + Wrapped Name
-//            graphics.setColor(Color.WHITE);
-////            graphics.setFont(new Font("Arial", Font.BOLD, 14));
-//
-//            FontMetrics metrics = graphics.getFontMetrics();
-//            int maxTextWidth = cardWidth - 20;
-//            int lineHeight = metrics.getHeight();
-//
-//            String text = overlayCard.getCard().getName();
-//            String[] words = text.split(" ");
-//            StringBuilder line = new StringBuilder();
-//
-//            int textStartY = y + cardHeight - 40;
-//            int currentY = textStartY;
-//
-//            for (String word : words)
-//            {
-//                String testLine = line + word + " ";
-//                int testWidth = metrics.stringWidth(testLine);
-//
-//                if (testWidth > maxTextWidth)
-//                {
-//                    int centeredX = x + (cardWidth - metrics.stringWidth(line.toString())) / 2;
-//                    graphics.drawString(line.toString(), centeredX, currentY);
-//                    line = new StringBuilder(word + " ");
-//                    currentY += lineHeight;
-//                }
-//                else
-//                {
-//                    line.append(word).append(" ");
-//                }
-//            }
-//
-//            if (!(line.length() == 0))
-//            {
-//                int centeredX = x + (cardWidth - metrics.stringWidth(line.toString())) / 2;
-//                graphics.drawString(line.toString(), centeredX, currentY);
-//            }
-//        }
-//
-//        return null;
-//    }
+        // Rarity icons
+        loadIcon("Common", "/com/example/icons/Common.png");
+        loadIcon("Uncommon", "/com/example/icons/Uncommon.png");
+        loadIcon("Rare", "/com/example/icons/Rare.png");
+        loadIcon("Mythic", "/com/example/icons/Mythic.png");
+        loadIcon("Legendary", "/com/example/icons/Legendary.png");
+    }
+
+    private void loadIcon(String key, String path)
+    {
+        try
+        {
+            BufferedImage image = ImageIO.read(getClass().getResourceAsStream(path));
+            iconMap.put(key, image);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Returns the index of the card that was clicked on screen
+     * @param event
+     * @return
+     */
+    public int isClickOnButton(MouseEvent event) {
+        if (!this.cardManager.getOverlayCards().isEmpty()) {
+            for (Rectangle card : this.cardBounds) {
+                if (card.contains(event.getPoint())) {
+                    return this.cardBounds.indexOf(card);
+                }
+            }
+        }
+        return -1;
+    }
+
     @Override
     public Dimension render(Graphics2D graphics)
     {
@@ -211,26 +124,23 @@ public class PackOpeningOverlay extends Overlay {
         int canvasWidth = client.getCanvasWidth();
         int canvasHeight = client.getCanvasHeight();
 
-        List<OverlayCard> cards = cardManager.getOverlayCards();
+        List<Card> cards = cardManager.getOverlayCards();
 
-        int cardWidth = cards.get(0).getWidth();
-        int cardHeight = cards.get(0).getHeight();
-        int spacing = 30;
+        int cardWidth = OVERLAY_CARD_WIDTH;
+        int cardHeight = OVERLAY_CARD_HEIGHT;
 
-        int totalWidth = cards.size() * cardWidth + (cards.size() - 1) * spacing;
+        int totalWidth = cards.size() * cardWidth + (cards.size() - 1) * SPACING;
         int startX = (canvasWidth - totalWidth) / 2;
         int startY = (canvasHeight - cardHeight) / 2;
 
         for (int i = 0; i < cards.size(); i++)
         {
-            OverlayCard overlayCard = cards.get(i);
-            Card card = overlayCard.getCard();
+            Card card = cards.get(i);
 
-            int x = startX + i * (cardWidth + spacing);
+            int x = startX + i * (cardWidth + SPACING);
             int y = startY;
 
-            int padding = 12;
-            int cursorY = y + padding;
+            int cursorY = y + PADDING;
 
             // -----------------------------
             // CARD BACKGROUND
@@ -238,7 +148,28 @@ public class PackOpeningOverlay extends Overlay {
             graphics.setColor(new Color(20, 20, 20, 240));
             graphics.fillRoundRect(x, y, cardWidth, cardHeight, 20, 20);
 
-            graphics.setColor(Color.WHITE);
+            // Set the border color based on the rarity
+            Color borderColor;
+            switch (card.getRarity()) {
+                case Common:
+                    borderColor = new Color(150, 75, 0);
+                    break;
+                case Uncommon:
+                    borderColor = new Color	(64, 145, 18);
+                    break;
+                case Rare:
+                    borderColor = new Color(135, 206, 235);
+                    break;
+                case Mythic:
+                    borderColor = new Color(175, 149, 230);
+                    break;
+                case Legendary:
+                    borderColor = new Color(250, 224, 51);
+                    break;
+                default:
+                    borderColor = Color.WHITE;
+            }
+            graphics.setColor(borderColor);
             graphics.setStroke(new BasicStroke(2f));
             graphics.drawRoundRect(x, y, cardWidth, cardHeight, 20, 20);
 
@@ -333,18 +264,38 @@ public class PackOpeningOverlay extends Overlay {
             }
 
             // -----------------------------
-            // BOTTOM ICONS (Placeholders)
+            // BOTTOM ICONS
             // -----------------------------
             int iconSize = 22;
-            int iconY = y + cardHeight - iconSize - padding;
+            int iconY = y + cardHeight - iconSize - PADDING;
 
             // Rarity icon (BOTTOM LEFT)
-            graphics.setColor(Color.YELLOW);
-            graphics.fillOval(x + padding, iconY, iconSize, iconSize);
+            BufferedImage rarityImage = this.iconMap.get(card.getRarity().toString());
+            if (rarityImage != null)
+            {
+                int rarityX = x + PADDING;
+                graphics.drawImage(rarityImage, rarityX, iconY, iconSize, iconSize, null);
+            }
+            else
+            {
+                // fallback placeholder
+                graphics.setColor(Color.YELLOW);
+                graphics.fillOval(x + PADDING, iconY, iconSize, iconSize);
+            }
 
             // Type icon (BOTTOM RIGHT)
-            graphics.setColor(Color.CYAN);
-            graphics.fillOval(x + cardWidth - padding - iconSize, iconY, iconSize, iconSize);
+            BufferedImage typeImage = this.iconMap.get(card.getType());
+            if (typeImage != null)
+            {
+                typeX = x + cardWidth - PADDING - iconSize;
+                graphics.drawImage(typeImage, typeX, iconY, iconSize, iconSize, null);
+            }
+            else
+            {
+                // fallback placeholder
+                graphics.setColor(Color.CYAN);
+                graphics.fillOval(x + cardWidth - PADDING - iconSize, iconY, iconSize, iconSize);
+            }
         }
 
         return null;
