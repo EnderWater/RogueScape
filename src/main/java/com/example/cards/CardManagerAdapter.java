@@ -38,6 +38,7 @@ public class CardManagerAdapter implements JsonSerializer<CardManager>
         obj.addProperty("totalPacks", cardManager.getTotalPacks());
         obj.addProperty("openedPacks", cardManager.getOpenedPacks());
         obj.add("heldCards", context.serialize(cardManager.getHeldCards()));
+        obj.add("openedPackCards", context.serialize(cardManager.getOpenedPackCards()));
 
         return obj;
     }

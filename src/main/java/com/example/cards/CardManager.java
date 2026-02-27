@@ -10,13 +10,14 @@ import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Singleton
 public class CardManager {
     private final JsonManager jsonManager;
-
-    @Getter
     private List<Card> allCards = new ArrayList<>();
+    private List<Card> availableCards = new ArrayList<>();
 
     // This list contains all the cards that the user currently has.
     @Getter
@@ -25,6 +26,11 @@ public class CardManager {
     // This list contains the current 3-5 cards that are visible on the screen while the user is choosing
     @Getter
     private List<Card> overlayCards = new ArrayList<>();
+
+    // This list contains the cards from a previously opened pack. If a user closes the pack before selecting a card,
+    // the same cards will appear again when they open a pack again
+    @Getter
+    private List<Card> openedPackCards = new ArrayList<>();
 
     @Getter
     private int availablePacks;
@@ -48,6 +54,7 @@ public class CardManager {
             this.openedPacks = cardManager.openedPacks;
             this.availablePacks = cardManager.availablePacks;
             this.heldCards = cardManager.heldCards;
+            this.openedPackCards = cardManager.openedPackCards;
         }
         else {
             this.totalPacks = 0;
@@ -55,6 +62,13 @@ public class CardManager {
             this.availablePacks = 0;
         }
         this.allCards = jsonManager.load("allCards.json", new TypeToken<List<Card>>(){}.getType());
+        Set<Integer> heldIds = this.heldCards.stream()
+                .map(Card::getCardId)
+                .collect(Collectors.toSet());
+
+        this.availableCards = this.allCards.stream()
+                .filter(card -> !heldIds.contains(card.getCardId()))
+                .collect(Collectors.toList());
     }
 
     public CardManager(JsonManager jsonManager, int totalPacks, int openedPacks, int availablePacks) {
@@ -83,14 +97,31 @@ public class CardManager {
         // Use this to clear any overlayCards that may be left over
         this.overlayCards.clear();
 
+        if (!this.openedPackCards.isEmpty()) {
+            this.overlayCards.addAll(this.openedPackCards);
+            return;
+        }
+
         Random random = new Random();
 
-        // Push 3 new overlay cards to the array
-        for (int i = 0; i < 3; i++) {
-            int randInt = random.nextInt(this.allCards.size()-1);
-            Card randCard = this.allCards.get(randInt);
-            this.overlayCards.add(randCard);
+        int i = 0;
+        while (i < 3) {
+            int randInt = random.nextInt(this.availableCards.size()-1);
+            Card randCard = this.availableCards.get(randInt);
+
+            // If the selected card is already in the user's hand somehow
+            if (this.heldCards.contains(randCard))
+                continue;
+
+            // This will help the app "remember" which cards were used during the last opening
+            this.openedPackCards.add(randCard);
+            i++;
         }
+        // Save the openedPackCards after they've been set
+        this.save();
+
+        // Add them to the overlay
+        this.overlayCards.addAll(this.openedPackCards);
     }
 
     // This method is used when the total pack needs to increase
@@ -122,6 +153,8 @@ public class CardManager {
     public void selectCard(Card card) {
         if (card != null) {
             this.heldCards.add(card);
+            this.availableCards.remove(card);
+            this.openedPackCards.clear();
             this.save();
         }
     }

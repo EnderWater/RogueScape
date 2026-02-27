@@ -1,6 +1,7 @@
 package com.example;
 
 import com.example.cards.CardManager;
+import com.example.overlays.ChunkIndicatorOverlay;
 import com.example.overlays.PackOpeningOverlay;
 import com.example.overlays.PackOverlay;
 import com.example.overlays.TaskProgressOverlay;
@@ -49,6 +50,9 @@ public class RogueScapePlugin extends Plugin {
 
     @Inject
     private PackOpeningOverlay packOpeningOverlay;
+
+    @Inject
+    private ChunkIndicatorOverlay chunkIndicatorOverlay;
 
     @Inject
     private RogueScapeConfig config;
@@ -136,6 +140,7 @@ public class RogueScapePlugin extends Plugin {
         this.overlayManager.add(this.taskProgressOverlay);
         this.overlayManager.add(this.packOverlay);
         this.overlayManager.add(this.packOpeningOverlay);
+        this.overlayManager.add(this.chunkIndicatorOverlay);
 
         this.mouseManager.registerMouseListener(this.mouseListener);
 
