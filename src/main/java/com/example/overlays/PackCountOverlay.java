@@ -11,14 +11,14 @@ import net.runelite.client.ui.overlay.components.TitleComponent;
 import javax.inject.Inject;
 import java.awt.*;
 
-public class PackOverlay extends Overlay {
+public class PackCountOverlay extends Overlay {
 
     private final RogueScapePlugin plugin;
     private final RogueScapeConfig config;
     private final PanelComponent panel = new PanelComponent();
 
     @Inject
-    PackOverlay(RogueScapePlugin plugin, RogueScapeConfig config) {
+    PackCountOverlay(RogueScapePlugin plugin, RogueScapeConfig config) {
         this.plugin = plugin;
         this.config = config;
         panel.setPreferredSize(new Dimension(100, 0)); // width only

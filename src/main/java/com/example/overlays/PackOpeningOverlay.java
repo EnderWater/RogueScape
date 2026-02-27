@@ -25,7 +25,6 @@ import java.util.Map;
 public class PackOpeningOverlay extends Overlay {
     private final int OVERLAY_CARD_WIDTH = 150;
     private final int OVERLAY_CARD_HEIGHT = 250;
-    private final int MAX_OVERLAY_CARDS = 3;
     private final int PADDING = 12;
     private final int SPACING = 30;
 
@@ -47,16 +46,6 @@ public class PackOpeningOverlay extends Overlay {
 
         setResizable(false);
         setMovable(false);
-
-        int totalWidth = MAX_OVERLAY_CARDS * OVERLAY_CARD_WIDTH + (MAX_OVERLAY_CARDS - 1) * PADDING;
-        int startX = (client.getCanvasWidth() - totalWidth) / 2;
-        int startY = (client.getCanvasHeight() - OVERLAY_CARD_HEIGHT) / 2;
-
-        for (int i = 0; i < MAX_OVERLAY_CARDS; i++) {
-            int x = startX + i * (OVERLAY_CARD_WIDTH + PADDING);
-            int y = startY;
-            cardBounds.add(new Rectangle(x, y, OVERLAY_CARD_WIDTH, OVERLAY_CARD_HEIGHT));
-        }
     }
 
     private void loadIcons()
@@ -96,8 +85,8 @@ public class PackOpeningOverlay extends Overlay {
 
     /**
      * Returns the index of the card that was clicked on screen
-     * @param event
-     * @return
+     * @param event - Mouse event
+     * @return - Returns the index of the card that was clicked
      */
     public int isClickOnButton(MouseEvent event) {
         if (!this.cardManager.getOverlayCards().isEmpty()) {
@@ -139,6 +128,8 @@ public class PackOpeningOverlay extends Overlay {
 
             int x = startX + i * (cardWidth + SPACING);
             int y = startY;
+
+            cardBounds.add(new Rectangle(x, y, cardWidth, cardHeight));
 
             int cursorY = y + PADDING;
 

@@ -3,7 +3,7 @@ package com.example;
 import com.example.cards.CardManager;
 import com.example.overlays.ChunkIndicatorOverlay;
 import com.example.overlays.PackOpeningOverlay;
-import com.example.overlays.PackOverlay;
+import com.example.overlays.PackCountOverlay;
 import com.example.overlays.TaskProgressOverlay;
 import com.example.panels.RogueScapePanel;
 import com.example.relics.RelicManager;
@@ -46,7 +46,7 @@ public class RogueScapePlugin extends Plugin {
     private TaskProgressOverlay taskProgressOverlay;
 
     @Inject
-    private PackOverlay packOverlay;
+    private PackCountOverlay packCountOverlay;
 
     @Inject
     private PackOpeningOverlay packOpeningOverlay;
@@ -138,7 +138,7 @@ public class RogueScapePlugin extends Plugin {
     @Override
     protected void startUp() throws Exception {
         this.overlayManager.add(this.taskProgressOverlay);
-        this.overlayManager.add(this.packOverlay);
+        this.overlayManager.add(this.packCountOverlay);
         this.overlayManager.add(this.packOpeningOverlay);
         this.overlayManager.add(this.chunkIndicatorOverlay);
 
