@@ -26,6 +26,7 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
     private final CollapsiblePanel pinnedSection;
     private final CollapsiblePanel killSection;
     private final CollapsiblePanel skillSection;
+    private final CollapsiblePanel completedSection;
     private final CollapsiblePanel addTaskSection;
     private final CollapsiblePanel packManagerSection;
 
@@ -46,6 +47,7 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
         this.pinnedSection = createSection("Pinned Tasks", mainPanel);
         this.killSection = createSection("Kill Tasks", mainPanel);
         this.skillSection = createSection("Skill Tasks", mainPanel);
+        this.completedSection = createSection("Completed Tasks", mainPanel);
         this.addTaskSection = createSection("Add Tasks", mainPanel);
         this.addTaskSection.getContent().add(new TaskGeneratorPanel(this.taskManager));
 
@@ -63,19 +65,24 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
         // Get the pinned task
         List<Task> pinnedTasks = this.taskManager.getPinnedTasks();
         // Create the pinned tasks section
-        this.createTaskSection(this.pinnedSection.getContent(), pinnedTasks);
+        this.createTaskSection(this.pinnedSection, pinnedTasks);
 
         // Get the list of all tasks
         List<Task> tasks = this.taskManager.getTasks();
 
         // Kill tasks
-        this.createTaskSection(this.killSection.getContent(), tasks.stream()
-                .filter(t -> t instanceof KillTask && !t.isPinned())
+        this.createTaskSection(this.killSection, tasks.stream()
+                .filter(t -> t instanceof KillTask && !t.isPinned() && !t.isTaskComplete())
                 .collect(Collectors.toList()));
 
         // Skill tasks
-        this.createTaskSection(this.skillSection.getContent(), tasks.stream()
-                .filter(t -> t instanceof SkillTask && !t.isPinned())
+        this.createTaskSection(this.skillSection, tasks.stream()
+                .filter(t -> t instanceof SkillTask && !t.isPinned() && !t.isTaskComplete())
+                .collect(Collectors.toList()));
+
+        // Skill tasks
+        this.createTaskSection(this.completedSection, tasks.stream()
+                .filter(t -> t.isTaskComplete() && !t.isPinned())
                 .collect(Collectors.toList()));
 
         revalidate();
@@ -106,21 +113,15 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
         taskRow.setLayout(new BoxLayout(taskRow, BoxLayout.Y_AXIS));
 
         // Create all the rows for the task
-        JPanel taskInfoRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel progressBarRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel taskButtonsRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel taskButtonsRow2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel taskButtonsRow3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel taskInfoRow = new JPanel(new BorderLayout());
+        JPanel progressBarRow = new JPanel(new BorderLayout());
+        JPanel taskButtons = new JPanel(new GridLayout(0,2,8,8));
 
-        // Set the rows' alignment
-        taskInfoRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-        progressBarRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-        taskButtonsRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-        taskButtonsRow2.setAlignmentX(Component.LEFT_ALIGNMENT);
-        taskButtonsRow3.setAlignmentX(Component.LEFT_ALIGNMENT);
+        taskInfoRow.setToolTipText(task.getDescription());
 
         // Create the name and taskCount labels
         JLabel nameLabel = new JLabel(task.getName());
+        nameLabel.setFont(new Font(this.getFont().getName(), this.getFont().getStyle(), 20));
         JLabel taskCountLabel = new JLabel(task.getCurrent() + "/" + task.getTarget());
         nameLabel.setPreferredSize(new Dimension(120, 20));
 
@@ -165,23 +166,30 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
             this.taskManager.deleteTask(task);
         });
 
+        JButton completeTaskButton = new JButton("Complete Task");
+        completeTaskButton.setPreferredSize(new Dimension(90, 22));
+        completeTaskButton.addActionListener(e -> {
+            this.taskManager.completeTask(task);
+        });
+
         // Add all the UI components to their corresponding row
-        taskInfoRow.add(nameLabel);
-        taskInfoRow.add(taskCountLabel);
-        taskInfoRow.setToolTipText(task.getDescription());
-        progressBarRow.add(progressBar);
-        taskButtonsRow.add(pinButton);
-        taskButtonsRow.add(addButton);
-        taskButtonsRow2.add(resetButton);
-        taskButtonsRow2.add(removeButton);
-        taskButtonsRow3.add(deleteButton);
+        taskInfoRow.add(nameLabel, BorderLayout.WEST);
+        taskInfoRow.add(taskCountLabel, BorderLayout.EAST);
+        progressBarRow.add(progressBar, BorderLayout.CENTER);
+        progressBarRow.add(Box.createVerticalStrut(8), BorderLayout.SOUTH);
+        taskButtons.add(pinButton);
+        taskButtons.add(addButton);
+        taskButtons.add(resetButton);
+        taskButtons.add(removeButton);
+        taskButtons.add(deleteButton);
+        taskButtons.add(completeTaskButton);
 
         // Add the rows to the wrapping Task row container
         taskRow.add(taskInfoRow);
         taskRow.add(progressBarRow);
-        taskRow.add(taskButtonsRow);
-        taskRow.add(taskButtonsRow2);
-        taskRow.add(taskButtonsRow3);
+        taskRow.add(taskButtons);
+//        taskRow.add(taskButtonsRow2);
+//        taskRow.add(taskButtonsRow3);
         taskRow.add(Box.createVerticalStrut(20));
 
         // Return the full task row
@@ -206,9 +214,12 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
         return resetButton;
     }
 
-    private void createTaskSection(JPanel container, List<Task> tasks) {
-        container.removeAll();
-        this.updateTaskList(container, tasks);
+    private void createTaskSection(CollapsiblePanel container, List<Task> tasks) {
+        JPanel content = container.getContent();
+        content.removeAll();
+
+//        if (container.isExpanded())
+        this.updateTaskList(content, tasks);
     }
 
     // ------------------- Task operations -------------------

@@ -1,5 +1,7 @@
 package com.example.panels;
 
+import lombok.Getter;
+
 import javax.annotation.Nonnull;
 import javax.swing.*;
 import java.awt.*;
@@ -8,7 +10,8 @@ public class CollapsiblePanel extends JPanel
 {
     private final JPanel contentPanel;
     private final JLabel arrowPanel;
-    private boolean isExpanded = true;
+    @Getter
+    private boolean isExpanded = false;
 
     public CollapsiblePanel(@Nonnull JPanel child, String title)
     {
@@ -46,6 +49,7 @@ public class CollapsiblePanel extends JPanel
         add(child);
 
         this.contentPanel = child;
+        this.contentPanel.setVisible(this.isExpanded);
     }
 
     public JPanel getContent()

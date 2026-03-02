@@ -100,7 +100,8 @@ public class TaskManager {
 
     public void completeTask(Task task) {
         task.setCompleted();
-        this.cardManager.addAvailablePack();
+        this.cardManager.addAvailablePack(task);
+        this.notifyListeners();
     }
 
     public void loadPinnedTasks() {
@@ -121,23 +122,23 @@ public class TaskManager {
     }
 
     public void addToTask(Task task, int amount) {
-        if (!task.isComplete()) {
+        if (!task.isTaskComplete()) {
             task.addToTask(amount);
 
-            if (task.isComplete())
+            if (task.isTaskComplete())
                 completeTask(task);
         }
         this.notifyListeners();
     }
 
     public void removeFromTask(Task task, int amount) {
-        if (!task.isComplete() && task.getCurrent() > 0)
+        if (!task.isTaskComplete() && task.getCurrent() > 0)
             task.removeFromTask(amount);
         this.notifyListeners();
     }
 
     public void loadTasksFromCsv(Path taskFile) {
-        List<Task> newTasks = TaskCsvReader.read(taskFile);
+        List<Task> newTasks = TaskCsvLoader.read(taskFile);
         if (!newTasks.isEmpty()) {
             this.tasks = newTasks;
             this.pinnedTasks.clear();

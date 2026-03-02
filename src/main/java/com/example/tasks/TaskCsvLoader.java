@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskCsvReader {
+public class TaskCsvLoader {
 
     public static List<Task> read(Path csvPath) {
         ensureFileExists(csvPath);
@@ -44,6 +44,7 @@ public class TaskCsvReader {
                     boolean pinned = parseBooleanSafe(parts, 5);
                     String monsterType = safe(parts, 6);
                     String skillName = safe(parts, 7);
+                    int packsAwarded = parseIntSafe(parts, 8);
 
                     Task task = createTask(
                             taskType,
@@ -53,7 +54,8 @@ public class TaskCsvReader {
                             target,
                             pinned,
                             monsterType,
-                            skillName
+                            skillName,
+                            packsAwarded
                     );
 
                     if (task == null) {
@@ -84,7 +86,8 @@ public class TaskCsvReader {
             int target,
             boolean pinned,
             String npcName,
-            String skillName
+            String skillName,
+            int packsAwarded
     ) {
         if (taskType.isBlank()) {
             return null;
@@ -99,6 +102,7 @@ public class TaskCsvReader {
                         current,
                         target,
                         pinned,
+                        packsAwarded,
                         npcName
                 );
 
@@ -110,6 +114,7 @@ public class TaskCsvReader {
                         current,
                         target,
                         pinned,
+                        packsAwarded,
                         skillName
                 );
 
@@ -128,7 +133,7 @@ public class TaskCsvReader {
                 // Write CSV header
                 Files.writeString(
                         csvPath,
-                        "taskType,name,description,current,target,pinned,monsterType,skillName\n"
+                        "taskType,name,description,current,target,pinned,monsterType,skillName,packsAwarded\n"
                 );
             }
         }

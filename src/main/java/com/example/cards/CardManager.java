@@ -82,11 +82,6 @@ public class CardManager {
         jsonManager.save("cardmanager.json", this);
     }
 
-    private void addAndSavePack() {
-        this.availablePacks++;
-        this.save();
-    }
-
     private void removeAndSavePack() {
         this.availablePacks--;
         this.save();
@@ -125,9 +120,16 @@ public class CardManager {
     }
 
     // This method is used when the total pack needs to increase
-    public void addAvailablePack() {
-        this.totalPacks++;
-        this.addAndSavePack();
+    public void addAvailablePack(Task task) {
+        if (task != null) {
+            this.totalPacks += task.getPacksAwarded();
+            this.availablePacks += task.getPacksAwarded();
+        }
+        else {
+            this.totalPacks++;
+            this.availablePacks++;
+        }
+        this.save();
     }
 
     // The method that is used by the "frontend" to "open" a pack of cards

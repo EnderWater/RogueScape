@@ -12,7 +12,6 @@ public abstract class Task {
     @Getter
     private final String description;
 
-    @Getter
     private boolean isComplete;
 
     @Getter
@@ -26,6 +25,9 @@ public abstract class Task {
     @Getter
     private int current;
 
+    @Getter
+    private int packsAwarded = 0;
+
     Task(String name, String description) {
         this.name = name;
         this.description = description;
@@ -33,22 +35,7 @@ public abstract class Task {
         this.isComplete = false;
     }
 
-    Task(String name, String description, int target) {
-        this.name = name;
-        this.description = description;
-        this.target = target;
-        this.current = 0;
-    }
-
-    Task(String taskType, String name, String description, int target) {
-        this.name = name;
-        this.description = description;
-        this.target = target;
-        this.taskType = taskType;
-        this.current = 0;
-    }
-
-    Task(String taskType, String taskName, String description, int current, int target, boolean isPinned) {
+    Task(String taskType, String taskName, String description, int current, int target, boolean isPinned, int packsAwarded) {
         this.name = taskName;
         this.isPinned = isPinned;
         this.description = description;
@@ -56,9 +43,10 @@ public abstract class Task {
         this.target = target;
         this.isComplete = isTaskComplete();
         this.taskType = taskType;
+        this.packsAwarded = packsAwarded;
     }
 
-    private boolean isTaskComplete() {
+    public boolean isTaskComplete() {
         return this.current >= this.target && this.target != 0;
     }
 

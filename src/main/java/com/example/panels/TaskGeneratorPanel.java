@@ -27,6 +27,7 @@ public class TaskGeneratorPanel extends JPanel {
     private final JTextField taskName;
     private final JTextField taskDescription;
     private final JSpinner taskTarget;
+    private final JSpinner packsAwarded;
 //    private final JComboBox<Skill> skill;
 
     @Inject
@@ -42,7 +43,7 @@ public class TaskGeneratorPanel extends JPanel {
         taskName = addTextField("Task name");
         taskDescription = addTextField("Task description");
         taskTarget = addSpinner("# to complete goal");
-//        skill = createComboBox("Skill", Skill.values());
+        packsAwarded = addSpinner("# packs awarded");
         createButtons();
     }
 
@@ -68,12 +69,12 @@ public class TaskGeneratorPanel extends JPanel {
             return taskDescription.getText();
     }
 
-//    Skill getSkill() {
-//        return ((Skill) Objects.requireNonNull(skill.getSelectedItem()));
-//    }
-
     int getTaskTarget() {
         return (int)this.taskTarget.getValue();
+    }
+
+    int getPacksAwarded() {
+        return (int)this.packsAwarded.getValue();
     }
 
     private JTextField addTextField(String labelString) {
@@ -129,17 +130,17 @@ public class TaskGeneratorPanel extends JPanel {
             if (taskDesc == null) return;
 
             String taskType = this.getTaskType();
-//            Skill skill = this.getSkill();
             int target = this.getTaskTarget();
+            int packsAwarded = this.getPacksAwarded();
 
             switch (taskType) {
                 case "Kill":
-                    KillTask killTask = new KillTask(taskType, taskName, taskDesc, 0, target, false, "");
+                    KillTask killTask = new KillTask(taskType, taskName, taskDesc, 0, target, false, packsAwarded, "");
                     taskManager.addTask(killTask);
                     break;
 
                 case "Skill":
-                    SkillTask skillTask = new SkillTask(taskType, taskName, taskDesc, 0, target, false, "");
+                    SkillTask skillTask = new SkillTask(taskType, taskName, taskDesc, 0, target, false, packsAwarded, "");
                     taskManager.addTask(skillTask);
                     break;
             }
