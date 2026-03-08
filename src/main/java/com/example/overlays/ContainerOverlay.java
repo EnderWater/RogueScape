@@ -44,8 +44,8 @@ public class ContainerOverlay extends Overlay {
         int windowWidth = (int) (canvasWidth * WINDOW_WIDTH_PERCENTAGE);
         int windowHeight = (int) (canvasHeight * WINDOW_HEIGHT_PERCENTAGE);
 
-        int x = (int) (canvasWidth - windowWidth) / 2;
-        int y = (int) (canvasHeight - windowHeight) / 2;
+        int x = (canvasWidth - windowWidth) / 2;
+        int y = (canvasHeight - windowHeight) / 2;
 
         window.setBounds(x, y, windowWidth, windowHeight);
 

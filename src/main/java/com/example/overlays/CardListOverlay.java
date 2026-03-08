@@ -102,7 +102,7 @@ public class CardListOverlay {
             BufferedImage image = ImageIO.read(getClass().getResourceAsStream(path));
             iconMap.put(key, image);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error loading image" + e);
         }
     }
 

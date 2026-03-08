@@ -2,7 +2,6 @@ package com.example.cards;
 
 import com.example.JsonManager;
 import com.example.listeners.CardChangeListener;
-import com.example.listeners.TaskChangeListener;
 import com.example.tasks.Task;
 import com.google.common.reflect.TypeToken;
 import lombok.Getter;
@@ -78,14 +77,6 @@ public class CardManager {
         this.availableCards = this.allCards.stream()
                 .filter(card -> !heldIds.contains(card.getCardId()))
                 .collect(Collectors.toList());
-    }
-
-    public CardManager(JsonManager jsonManager, int totalPacks, int openedPacks, int availablePacks) {
-        this.jsonManager = jsonManager;
-//        this.overlayStateManager = overlayStateManager;
-        this.totalPacks = totalPacks;
-        this.openedPacks = openedPacks;
-        this.availablePacks = availablePacks;
     }
 
     private void save() {

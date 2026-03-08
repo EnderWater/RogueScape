@@ -43,9 +43,7 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
         JPanel buttonSection = new JPanel();
         buttonSection.setLayout(new GridLayout(0, 2, 8, 8));
 
-        this.viewCardsButton = createButton("Held cards", e -> {
-            this.buildHeldCardsSection();
-        });
+        this.viewCardsButton = createButton("Held cards", e -> this.buildHeldCardsSection());
 
         // Create the open pack and add pack buttons for the button section
         JButton openPackButton = createButton("Open pack", e -> {
