@@ -212,8 +212,6 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
         taskRow.add(taskInfoRow);
         taskRow.add(progressBarRow);
         taskRow.add(taskButtons);
-//        taskRow.add(taskButtonsRow2);
-//        taskRow.add(taskButtonsRow3);
         taskRow.add(Box.createVerticalStrut(20));
 
         // Return the full task row
@@ -242,7 +240,6 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
         JPanel content = container.getContent();
         content.removeAll();
 
-//        if (container.isExpanded())
         this.updateTaskList(content, tasks);
     }
 

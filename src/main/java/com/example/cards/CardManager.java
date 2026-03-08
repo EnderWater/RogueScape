@@ -1,7 +1,6 @@
 package com.example.cards;
 
 import com.example.JsonManager;
-import com.example.overlays.OverlayStateManager;
 import com.example.tasks.Task;
 import com.google.common.reflect.TypeToken;
 import lombok.Getter;
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -20,6 +18,9 @@ public class CardManager {
     private final JsonManager jsonManager;
 
     private List<Card> allCards = new ArrayList<>();
+
+    // This list contains all the cards that the user does not have
+    @Getter
     private List<Card> availableCards = new ArrayList<>();
 
     // This list contains all the cards that the user currently has.
@@ -124,8 +125,8 @@ public class CardManager {
     // Add a card to the user's held cards
     public void selectCard(Card card) {
         if (card != null) {
-            this.heldCards.add(card);
-            this.availableCards.remove(card);
+            this.addCard(card);
+
             this.openedPackCards.clear();
 
             // Since a card was chosen, increment the opened packs and reduce the available packs
@@ -135,5 +136,19 @@ public class CardManager {
             // Save your work! :)
             this.save();
         }
+    }
+
+    public void addCard(Card card) {
+        if (card != null) {
+            this.heldCards.add(card);
+            this.availableCards.remove(card);
+            this.save();
+        }
+    }
+
+    public void deleteHeldCard(Card card) {
+        this.heldCards.remove(card);
+        this.availableCards.add(card);
+        this.save();
     }
 }
