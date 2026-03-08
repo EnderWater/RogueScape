@@ -41,25 +41,10 @@ public class PackManagerPanel extends JPanel {
         JPanel buttonSection = new JPanel();
         buttonSection.setLayout(new GridLayout(0,2, 8,8));
 
-        this.viewCardsButton = new JButton("Held cards");
-        viewCardsButton.setPreferredSize(new Dimension(100, 20));
-        viewCardsButton.addActionListener(e -> {
-            this.buildHeldCardsSection();
-        });
+        this.viewCardsButton = createButton("Held cards", e -> this.buildHeldCardsSection());
 
-        // Create the buttons for the button section
-        JButton openPackButton = createButton("Open pack", e -> {
-            // Check if there are available packs and if the pack opening is not open. If so, open the pack opening overlay
-            if (this.cardManager.getAvailablePacks() > 0 && !this.overlayStateManager.isPackOpeningOpen()) {
-                List<Card> packCards = this.cardManager.getCardsInPack();
-                this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.PackOpening, packCards);
-            }
-            // If the pack opening overlay is already open, close it.
-            else if (this.overlayStateManager.isPackOpeningOpen()) {
-                this.overlayStateManager.closeOverlay();
-            }
-        });
-
+        // Create the open pack and add pack buttons for the button section
+        JButton openPackButton = createButton("Open pack", e -> openPack());
         JButton addPackButton = createButton("Add 1 Pack", e -> this.cardManager.addAvailablePack(null));
 
         // Create the section where the held cards will be displayed
@@ -173,5 +158,17 @@ public class PackManagerPanel extends JPanel {
         button.setPreferredSize(new Dimension(100, 20));
         button.addActionListener(actionListener);
         return button;
+    }
+
+    void openPack() {
+        // Check if there are available packs and if the pack opening is not open. If so, open the pack opening overlay
+        if (this.cardManager.getAvailablePacks() > 0 && !this.overlayStateManager.isPackOpeningOpen()) {
+            List<Card> packCards = this.cardManager.getCardsInPack();
+            this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.PackOpening, packCards);
+        }
+        // If the pack opening overlay is already open, close it.
+        else if (this.overlayStateManager.isPackOpeningOpen()) {
+            this.overlayStateManager.closeOverlay();
+        }
     }
 }
