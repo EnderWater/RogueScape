@@ -14,6 +14,7 @@ public class ContainerOverlay extends Overlay {
     private final OverlayStateManager overlayStateManager;
     private final CardListOverlay cardListOverlay;
 
+    private final Rectangle window = new Rectangle();
     private final Rectangle closeButton = new Rectangle();
     private final Rectangle leftArrow = new Rectangle();
     private final Rectangle rightArrow = new Rectangle();
@@ -45,6 +46,8 @@ public class ContainerOverlay extends Overlay {
 
         int x = (int) (canvasWidth - windowWidth) / 2;
         int y = (int) (canvasHeight - windowHeight) / 2;
+
+        window.setBounds(x, y, windowWidth, windowHeight);
 
         // Background
         graphics2D.setColor(new Color(25, 25, 25, 240));
@@ -181,6 +184,9 @@ public class ContainerOverlay extends Overlay {
 
             return true;
         }
+
+        if (window.contains(p) && overlayStateManager.isWindowOpen())
+            return true;
 
         return false;
     }

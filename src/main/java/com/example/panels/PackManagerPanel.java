@@ -2,11 +2,13 @@ package com.example.panels;
 
 import com.example.cards.Card;
 import com.example.cards.CardManager;
+import com.example.listeners.CardChangeListener;
 import com.example.overlays.OverlayStateManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.IconTextField;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -17,9 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class PackManagerPanel extends JPanel {
+public class PackManagerPanel extends JPanel implements CardChangeListener {
     private final CardManager cardManager;
     private final OverlayStateManager overlayStateManager;
+
     private final JPanel selectionSection;
     private final JPanel heldCardsSection;
     private final JButton viewCardsButton;
@@ -28,11 +31,14 @@ public class PackManagerPanel extends JPanel {
     private static final int FILTER_DELAY = 250; // in milliseconds
     private final List<Card> filterCards = new ArrayList<>();
     private boolean isAddCardSection = false;
+    private boolean closeHeldCards = true; // These should start out as true so when clicked, they turn to false for the first run
 
-    @Inject
     PackManagerPanel(CardManager cardManager, OverlayStateManager overlayStateManager) {
         this.cardManager = cardManager;
         this.overlayStateManager = overlayStateManager;
+
+        // Add this as a listener so it can update after the cards have been updated
+        this.cardManager.addListener(this);
 
         // Set the view to be a BoxLayout to add things in vertically
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -41,12 +47,22 @@ public class PackManagerPanel extends JPanel {
         JPanel buttonSection = new JPanel();
         buttonSection.setLayout(new GridLayout(0,2, 8,8));
 
-        this.viewCardsButton = createButton("Held cards", e -> this.buildHeldCardsSection());
+        this.viewCardsButton = createButton("Held cards", e -> {
+            this.buildHeldCardsSection();
+        });
 
         // Create the open pack and add pack buttons for the button section
-        JButton openPackButton = createButton("Open pack", e -> openPack());
+        JButton openPackButton = createButton("Open pack", e -> {
+            // Reset this so the held cards can be opened again immediately
+            this.closeHeldCards = false;
+            openPack();
+        });
         JButton addPackButton = createButton("Add 1 Pack", e -> this.cardManager.addAvailablePack(null));
-        JButton addCardButton = createButton("Add card", e-> this.renderAddCardSection());
+        JButton addCardButton = createButton("Add card", e-> {
+            // Reset this so the held cards can be opened again immediately
+            this.closeHeldCards = false;
+            this.renderAddCardSection();
+        });
 
         // Create the section where the held cards will be displayed
         this.heldCardsSection = new JPanel();
@@ -99,19 +115,25 @@ public class PackManagerPanel extends JPanel {
     }
 
     private void buildHeldCardsSection() {
-        this.heldCardsSection.removeAll();
-        this.selectionSection.removeAll();
         this.isAddCardSection = false;
+        heldCardsSection.removeAll();
+        selectionSection.removeAll();
 
-        if (!overlayStateManager.isHeldCardsOpen() || overlayStateManager.isSingleCardOpen()) {
+        if (overlayStateManager.isWindowOpen())
+            this.overlayStateManager.closeOverlay();
+        else
+            // If the window was closed, let the held cards button open it again
+            this.closeHeldCards = false;
+
+//        if (!overlayStateManager.isHeldCardsOpen() || overlayStateManager.isSingleCardOpen() || (overlayStateManager.isPackOpeningOpen() && this.heldCardsSection.isVisible())) {
+        if (!closeHeldCards) {
             addCardsToSection(cardManager.getHeldCards());
+
             this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.HeldCards);
             this.overlayStateManager.addOverlayCards(this.cardManager.getHeldCards());
         }
-        else {
-            this.overlayStateManager.closeOverlay();
-        }
 
+        closeHeldCards = !closeHeldCards;
         this.selectionSection.revalidate();
         this.selectionSection.repaint();
     }
@@ -120,14 +142,16 @@ public class PackManagerPanel extends JPanel {
         this.heldCardsSection.removeAll();
         this.selectionSection.removeAll();
 
+        // Reset the state of the overlay since none of them are technically open
+        this.overlayStateManager.closeOverlay();
+
         if (!this.isAddCardSection) {
             this.isAddCardSection = true;
             addCardsToSection(cardManager.getAvailableCards());
-            // Reset the state of the overlay since none of them are technically open
-            this.overlayStateManager.closeOverlay();
         }
-        else
+        else {
             this.isAddCardSection = false;
+        }
 
         this.selectionSection.revalidate();
         this.selectionSection.repaint();
@@ -187,6 +211,7 @@ public class PackManagerPanel extends JPanel {
         List<Card> searchedCards = cards.stream().filter(card -> card.getName().toLowerCase().contains(query)).collect(Collectors.toList());
 
         this.renderCardList(searchedCards);
+        this.overlayStateManager.addOverlayCards(searchedCards);
 
         this.heldCardsSection.revalidate();
         this.heldCardsSection.repaint();
@@ -220,9 +245,6 @@ public class PackManagerPanel extends JPanel {
         );
         if (result == JOptionPane.YES_OPTION) {
             cardManager.deleteHeldCard(card);
-            this.selectionSection.removeAll();
-            this.heldCardsSection.removeAll();
-            this.addCardsToSection(cardManager.getHeldCards());
         }
     }
 
@@ -232,5 +254,13 @@ public class PackManagerPanel extends JPanel {
         this.isAddCardSection = false;
         this.renderAddCardSection();
         this.filter(this.filterCards);
+    }
+
+    @Override
+    public void onCardsChanged() {
+        if (isAddCardSection)
+            renderAddCardSection();
+        else
+            buildHeldCardsSection();
     }
 }

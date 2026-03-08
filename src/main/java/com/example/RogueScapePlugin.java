@@ -79,11 +79,6 @@ public class RogueScapePlugin extends Plugin {
     // Initialize the relic manager
     private RelicManager relicManager;
 
-    // This panel needs to be injected because it is dependent on other singletons.
-    // If a class depends on other singletons, it should be a singleton itself that injects those singletons
-    @Inject
-    private RogueScapePanel panel;
-
     @Inject
     private MouseManager mouseManager;
 
@@ -151,7 +146,8 @@ public class RogueScapePlugin extends Plugin {
 
         this.mouseManager.registerMouseListener(this.mouseListener);
 
-        this.panel = new RogueScapePanel(this.taskManager, this.cardManager, this.overlayStateManager);
+        // Create the side panel and then add it to RuneLite
+        RogueScapePanel panel = new RogueScapePanel(taskManager, cardManager, overlayStateManager);
 
         // Create the button on the toolbar to open the panel
         this.navButton = NavigationButton.builder()
@@ -160,7 +156,7 @@ public class RogueScapePlugin extends Plugin {
                         RogueScapePlugin.class,
                         "icons/roguescape_icon.png"
                 ))
-                .panel(this.panel)
+                .panel(panel)
                 .build();
 
         this.clientToolbar.addNavigation(this.navButton);

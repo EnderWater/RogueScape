@@ -1,6 +1,8 @@
 package com.example.cards;
 
 import com.example.JsonManager;
+import com.example.listeners.CardChangeListener;
+import com.example.listeners.TaskChangeListener;
 import com.example.tasks.Task;
 import com.google.common.reflect.TypeToken;
 import lombok.Getter;
@@ -43,6 +45,16 @@ public class CardManager {
 
     @Getter
     private boolean isPackOpen = false;
+
+    private final List<CardChangeListener> listeners = new ArrayList<>();
+
+    public void addListener(CardChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(CardChangeListener listener) {
+        listeners.remove(listener);
+    }
 
     @Inject
     public CardManager(JsonManager jsonManager) {
@@ -143,6 +155,7 @@ public class CardManager {
             this.heldCards.add(card);
             this.availableCards.remove(card);
             this.save();
+            this.notifyListeners();
         }
     }
 
@@ -150,5 +163,12 @@ public class CardManager {
         this.heldCards.remove(card);
         this.availableCards.add(card);
         this.save();
+        this.notifyListeners();
+    }
+
+    private void notifyListeners() {
+        for (CardChangeListener listener : listeners) {
+            listener.onCardsChanged();
+        }
     }
 }

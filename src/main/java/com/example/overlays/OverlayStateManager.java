@@ -88,6 +88,9 @@ public class OverlayStateManager {
         // Use this to clear any overlayCards that may be left over
         clearOverlayCards();
 
+        // Reset the page back to 1
+        resetPage();
+
         // Add them to the overlay
         this.overlayCards.add(card);
 
@@ -98,6 +101,9 @@ public class OverlayStateManager {
     public void addOverlayCards(List<Card> cards) {
         // Use this to clear any overlayCards that may be left over
         clearOverlayCards();
+
+        // Reset the page back to 1
+        resetPage();
 
         // Add them to the overlay
         this.overlayCards.addAll(cards);
@@ -128,6 +134,10 @@ public class OverlayStateManager {
     public void setCurrentPage(int page) {
         currentPage = page;
         this.paginateCards();
+    }
+
+    private void resetPage() {
+        currentPage = 1;
     }
 
     public List<Card> getOverlayCards() {

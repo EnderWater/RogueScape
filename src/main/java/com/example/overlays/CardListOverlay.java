@@ -122,9 +122,8 @@ public class CardListOverlay {
             Rectangle cardBound = isClickOnCard(event);
             if (cardBound != null) {
                 Card card = getCardFromBounds(cardBound);
-                overlayStateManager.addOverlayCards(card);
                 overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.SingleCard);
-
+                overlayStateManager.addOverlayCards(card);
                 return true;
             }
         }

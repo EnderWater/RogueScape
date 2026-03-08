@@ -4,6 +4,7 @@ import com.example.cards.CardManager;
 import com.example.listeners.TaskChangeListener;
 import com.example.overlays.OverlayStateManager;
 import com.example.tasks.*;
+import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 
 import javax.annotation.Nonnull;
@@ -16,10 +17,7 @@ import java.util.stream.Collectors;
 public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
 
     private final TaskManager taskManager;
-    private final CardManager cardManager;
-    private final OverlayStateManager overlayStateManager;
 
-    private PackManagerPanel packManagerPanel;
     private final CollapsiblePanel pinnedSection;
     private final CollapsiblePanel killSection;
     private final CollapsiblePanel skillSection;
@@ -29,13 +27,10 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
     private final CollapsiblePanel addTaskSection;
     private final CollapsiblePanel packManagerSection;
 
-    @Inject
     public RogueScapePanel(TaskManager taskManager, CardManager cardManager, OverlayStateManager overlayStateManager)
     {
         this.taskManager = taskManager;
-        this.cardManager = cardManager;
-        this.overlayStateManager = overlayStateManager;
-        this.packManagerPanel = new PackManagerPanel(this.cardManager, this.overlayStateManager);
+        PackManagerPanel packManagerPanel = new PackManagerPanel(cardManager, overlayStateManager);
 
         this.taskManager.addListener(this);
 
@@ -43,6 +38,8 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setOpaque(false);
+        setBackground(ColorScheme.DARK_GRAY_COLOR);
 
         this.pinnedSection = createSection("Pinned Tasks", mainPanel);
         this.killSection = createSection("Kill Tasks", mainPanel);
@@ -54,7 +51,7 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
         this.addTaskSection.getContent().add(new TaskGeneratorPanel(this.taskManager));
 
         this.packManagerSection = createSection("Manage Packs", mainPanel);
-        this.packManagerSection.getContent().add(this.packManagerPanel);
+        this.packManagerSection.getContent().add(packManagerPanel);
 
         add(mainPanel, BorderLayout.CENTER);
 
@@ -110,6 +107,7 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
     private CollapsiblePanel createSection(String title, JPanel mainPanel) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
         add(Box.createVerticalStrut(20));
         CollapsiblePanel section = new CollapsiblePanel(panel, title);
 
