@@ -3,10 +3,7 @@
 import com.example.cards.CardManager;
 import com.example.listeners.TaskChangeListener;
 import com.example.overlays.OverlayStateManager;
-import com.example.tasks.KillTask;
-import com.example.tasks.SkillTask;
-import com.example.tasks.Task;
-import com.example.tasks.TaskManager;
+import com.example.tasks.*;
 import net.runelite.client.ui.PluginPanel;
 
 import javax.annotation.Nonnull;
@@ -26,6 +23,8 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
     private final CollapsiblePanel pinnedSection;
     private final CollapsiblePanel killSection;
     private final CollapsiblePanel skillSection;
+    private final CollapsiblePanel questSection;
+    private final CollapsiblePanel miscellaneousSection;
     private final CollapsiblePanel completedSection;
     private final CollapsiblePanel addTaskSection;
     private final CollapsiblePanel packManagerSection;
@@ -48,6 +47,8 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
         this.pinnedSection = createSection("Pinned Tasks", mainPanel);
         this.killSection = createSection("Kill Tasks", mainPanel);
         this.skillSection = createSection("Skill Tasks", mainPanel);
+        this.questSection = createSection("Quest tasks", mainPanel);
+        this.miscellaneousSection = createSection("Miscellaneous tasks", mainPanel);
         this.completedSection = createSection("Completed Tasks", mainPanel);
         this.addTaskSection = createSection("Add Tasks", mainPanel);
         this.addTaskSection.getContent().add(new TaskGeneratorPanel(this.taskManager));
@@ -82,6 +83,16 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
                 .collect(Collectors.toList()));
 
         // Skill tasks
+        this.createTaskSection(this.questSection, tasks.stream()
+                .filter(t -> t instanceof QuestTask && !t.isPinned() && !t.isTaskComplete())
+                .collect(Collectors.toList()));
+
+        // Skill tasks
+        this.createTaskSection(this.miscellaneousSection, tasks.stream()
+                .filter(t -> t instanceof MiscellaneousTask && !t.isPinned() && !t.isTaskComplete())
+                .collect(Collectors.toList()));
+
+        // Completed tasks
         this.createTaskSection(this.completedSection, tasks.stream()
                 .filter(t -> t.isTaskComplete() && !t.isPinned())
                 .collect(Collectors.toList()));

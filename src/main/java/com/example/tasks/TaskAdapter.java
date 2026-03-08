@@ -26,6 +26,10 @@ public class TaskAdapter implements JsonSerializer<Task>, JsonDeserializer<Task>
                 return context.deserialize(json, KillTask.class);
             case "Skill":
                 return context.deserialize(json, SkillTask.class);
+            case "Quest":
+                return context.deserialize(json, QuestTask.class);
+            case "Misc":
+                return context.deserialize(json, MiscellaneousTask.class);
             default:
                 throw new JsonParseException("Unknown taskType: " + taskType);
         }

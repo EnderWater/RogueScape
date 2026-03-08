@@ -1,9 +1,6 @@
 package com.example.panels;
 
-import com.example.tasks.KillTask;
-import com.example.tasks.SkillTask;
-import com.example.tasks.Task;
-import com.example.tasks.TaskManager;
+import com.example.tasks.*;
 import net.runelite.api.Skill;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
@@ -37,7 +34,7 @@ public class TaskGeneratorPanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         add(Box.createVerticalStrut(10));
 
-        String[] taskTypes = new String[] {"Kill", "Skill"};
+        String[] taskTypes = new String[] {"Kill", "Skill", "Quest", "Miscellaneous"};
 
         taskType = createComboBox("Task Type", taskTypes);
         taskName = addTextField("Task name");
@@ -122,61 +119,17 @@ public class TaskGeneratorPanel extends JPanel {
 
     private void createButtons() {
         JButton submit = new JButton("Create task");
-        submit.addActionListener(e -> {
-            String taskName = this.getTaskName();
-            if (taskName == null) return;
+        submit.addActionListener(e -> this.submit());
 
-            String taskDesc = this.getTaskDescription();
-            if (taskDesc == null) return;
-
-            String taskType = this.getTaskType();
-            int target = this.getTaskTarget();
-            int packsAwarded = this.getPacksAwarded();
-
-            switch (taskType) {
-                case "Kill":
-                    KillTask killTask = new KillTask(taskType, taskName, taskDesc, 0, target, false, packsAwarded, "");
-                    taskManager.addTask(killTask);
-                    break;
-
-                case "Skill":
-                    SkillTask skillTask = new SkillTask(taskType, taskName, taskDesc, 0, target, false, packsAwarded, "");
-                    taskManager.addTask(skillTask);
-                    break;
-            }
-            this.clearFormData();
-        });
-
-        JButton loadFromCsv = new JButton("Load tasks");
-        loadFromCsv.setPreferredSize(new Dimension(120, 22));
-        loadFromCsv.addActionListener(e -> {
-            Path taskFile = Paths.get(
-                    System.getProperty("user.home"),
-                    ".runelite",
-                    "plugins",
-                    "roguescape",
-                    "tasks.csv"
-            );
-            // Create the dialog string to show the path of the csv
-            StringBuilder dialog = new StringBuilder("Would you like to load tasks from ");
-            dialog.append(taskFile.toString());
-            dialog.append("?");
-
-            int response = JOptionPane.showConfirmDialog(loadFromCsv, dialog.toString());
-            if (response != JOptionPane.YES_OPTION) return;
-
-            response = JOptionPane.showConfirmDialog(loadFromCsv, "This action will delete your current tasks and load the new ones. Continue?");
-            if (response == JOptionPane.YES_OPTION)
-                this.taskManager.loadTasksFromCsv(taskFile);
-
-        });
-
+        JButton loadFromCsvButton = new JButton("Load tasks");
+        loadFromCsvButton.setPreferredSize(new Dimension(120, 22));
+        loadFromCsvButton.addActionListener(e -> this.loadFromCsv(loadFromCsvButton));
 
         JPanel submitContainer = new JPanel();
         submitContainer.setLayout(new BorderLayout());
 
         submitContainer.add(submit, BorderLayout.WEST);
-        submitContainer.add(loadFromCsv, BorderLayout.EAST);
+        submitContainer.add(loadFromCsvButton, BorderLayout.EAST);
         add(submitContainer);
     }
 
@@ -205,5 +158,61 @@ public class TaskGeneratorPanel extends JPanel {
         this.taskName.setText("");
 //        this.skill.setSelectedIndex(0);
         this.taskType.setSelectedIndex(0);
+    }
+
+    private void submit() {
+        String taskName = this.getTaskName();
+        if (taskName == null) return;
+
+        String taskDesc = this.getTaskDescription();
+        if (taskDesc == null) return;
+
+        String taskType = this.getTaskType();
+        int target = this.getTaskTarget();
+        int packsAwarded = this.getPacksAwarded();
+
+        switch (taskType) {
+            case "Kill":
+                KillTask killTask = new KillTask(taskType, taskName, taskDesc, 0, target, false, packsAwarded, "");
+                taskManager.addTask(killTask);
+                break;
+
+            case "Skill":
+                SkillTask skillTask = new SkillTask(taskType, taskName, taskDesc, 0, target, false, packsAwarded, "");
+                taskManager.addTask(skillTask);
+                break;
+
+            case "Quest":
+                QuestTask questTask = new QuestTask(taskType, taskName, taskDesc, 0, target, false, packsAwarded, "");
+                taskManager.addTask(questTask);
+                break;
+
+            case "Miscellaneous":
+                MiscellaneousTask miscellaneousTask = new MiscellaneousTask(taskType, taskName, taskDesc, 0, target, false, packsAwarded);
+                taskManager.addTask(miscellaneousTask);
+                break;
+        }
+        this.clearFormData();
+    }
+
+    private void loadFromCsv(JButton loadFromCsvButton) {
+        Path taskFile = Paths.get(
+                System.getProperty("user.home"),
+                ".runelite",
+                "plugins",
+                "roguescape",
+                "tasks.csv"
+        );
+        // Create the dialog string to show the path of the csv
+        StringBuilder dialog = new StringBuilder("Would you like to load tasks from ");
+        dialog.append(taskFile.toString());
+        dialog.append("?");
+
+        int response = JOptionPane.showConfirmDialog(loadFromCsvButton, dialog.toString());
+        if (response != JOptionPane.YES_OPTION) return;
+
+        response = JOptionPane.showConfirmDialog(loadFromCsvButton, "This action will delete your current tasks and load the new ones. Continue?");
+        if (response == JOptionPane.YES_OPTION)
+            this.taskManager.loadTasksFromCsv(taskFile);
     }
 }
