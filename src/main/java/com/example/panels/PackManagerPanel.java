@@ -7,8 +7,6 @@ import com.example.overlays.OverlayStateManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.IconTextField;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -30,8 +28,6 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
     private final IconTextField searchBar;
     private static final int FILTER_DELAY = 250; // in milliseconds
     private final List<Card> filterCards = new ArrayList<>();
-    private boolean isAddCardSection = false;
-    private boolean closeHeldCards = true; // These should start out as true so when clicked, they turn to false for the first run
 
     PackManagerPanel(CardManager cardManager, OverlayStateManager overlayStateManager) {
         this.cardManager = cardManager;
@@ -45,7 +41,7 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
 
         // Create the section where the buttons will be shown
         JPanel buttonSection = new JPanel();
-        buttonSection.setLayout(new GridLayout(0,2, 8,8));
+        buttonSection.setLayout(new GridLayout(0, 2, 8, 8));
 
         this.viewCardsButton = createButton("Held cards", e -> {
             this.buildHeldCardsSection();
@@ -54,13 +50,11 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
         // Create the open pack and add pack buttons for the button section
         JButton openPackButton = createButton("Open pack", e -> {
             // Reset this so the held cards can be opened again immediately
-            this.closeHeldCards = false;
             openPack();
         });
         JButton addPackButton = createButton("Add 1 Pack", e -> this.cardManager.addAvailablePack(null));
-        JButton addCardButton = createButton("Add card", e-> {
+        JButton addCardButton = createButton("Add card", e -> {
             // Reset this so the held cards can be opened again immediately
-            this.closeHeldCards = false;
             this.renderAddCardSection();
         });
 
@@ -115,61 +109,101 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
     }
 
     private void buildHeldCardsSection() {
-        this.isAddCardSection = false;
-        heldCardsSection.removeAll();
-        selectionSection.removeAll();
-
-        if (overlayStateManager.isWindowOpen())
+        if (!overlayStateManager.isHeldCardsOpen()) {
+            renderHeldCards();
+        } else {
             this.overlayStateManager.closeOverlay();
-        else
-            // If the window was closed, let the held cards button open it again
-            this.closeHeldCards = false;
-
-//        if (!overlayStateManager.isHeldCardsOpen() || overlayStateManager.isSingleCardOpen() || (overlayStateManager.isPackOpeningOpen() && this.heldCardsSection.isVisible())) {
-        if (!closeHeldCards) {
-            addCardsToSection(cardManager.getHeldCards());
-
-            this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.HeldCards);
-            this.overlayStateManager.addOverlayCards(this.cardManager.getHeldCards());
+            heldCardsSection.removeAll();
+            selectionSection.removeAll();
+            this.selectionSection.revalidate();
+            this.selectionSection.repaint();
         }
-
-        closeHeldCards = !closeHeldCards;
-        this.selectionSection.revalidate();
-        this.selectionSection.repaint();
     }
 
     private void renderAddCardSection() {
-        this.heldCardsSection.removeAll();
-        this.selectionSection.removeAll();
-
-        // Reset the state of the overlay since none of them are technically open
-        this.overlayStateManager.closeOverlay();
-
-        if (!this.isAddCardSection) {
-            this.isAddCardSection = true;
-            addCardsToSection(cardManager.getAvailableCards());
+        if (!this.overlayStateManager.isAvailableCardsOpen()) {
+            renderAvailableCards();
+        } else {
+            this.overlayStateManager.closeOverlay();
+            this.heldCardsSection.removeAll();
+            this.selectionSection.removeAll();
+            this.selectionSection.revalidate();
+            this.selectionSection.repaint();
         }
-        else {
-            this.isAddCardSection = false;
-        }
-
-        this.selectionSection.revalidate();
-        this.selectionSection.repaint();
     }
 
     private void addCardsToSection(List<Card> cards) {
         this.filterCards.clear();
         this.filterCards.addAll(cards);
 
+        JButton deleteAllButton = createButton("Delete all held cards?",
+                e -> this.deleteAllCards(this.searchBar));
+
         this.selectionSection.add(this.searchBar);
+
+        // Only add the delete all button if the held card overlay is open
+        if (this.overlayStateManager.isHeldCardsOpen()) {
+            this.selectionSection.add(Box.createVerticalStrut(2));
+            this.selectionSection.add(deleteAllButton);
+        }
+
         this.selectionSection.add(Box.createVerticalStrut(8));
 
         this.renderCardList(cards);
     }
 
+    //    private void renderCardList(List<Card> heldCards) {
+//        if (heldCards.isEmpty())
+//            return;
+//
+//        for (Card card : heldCards) {
+//            JPanel cardRow = new JPanel(new BorderLayout(0, 8));
+//            JPanel buttonPanel = new JPanel(new BorderLayout(0, 2));
+//
+//            // Create the label for the card name
+//            JLabel cardLabel = new JLabel(card.getName());
+//
+//            // Create the view card button
+//            JButton openCardButton = new JButton("View card");
+//            openCardButton.addActionListener(event -> this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.SingleCard, card));
+//
+//            // Create the delete card button
+//            JButton deleteCardButton = new JButton("Delete card");
+//            deleteCardButton.addActionListener(event -> this.deleteCard(card, buttonPanel));
+//
+//            // Create the add card button
+//            JButton addCardButton = new JButton("Add card");
+//            addCardButton.addActionListener(event -> this.addCard(card));
+//
+//            if (overlayStateManager.isAvailableCardsOpen())
+//                buttonPanel.add(addCardButton, BorderLayout.SOUTH);
+//            else
+//                buttonPanel.add(deleteCardButton, BorderLayout.SOUTH);
+//
+//            buttonPanel.add(openCardButton, BorderLayout.NORTH);
+//
+//            cardRow.add(cardLabel, BorderLayout.CENTER);
+//            cardRow.add(buttonPanel, BorderLayout.EAST);
+//
+//            this.heldCardsSection.add(cardRow);
+//        }
+//        this.selectionSection.add(this.heldCardsSection);
+//    }
     private void renderCardList(List<Card> heldCards) {
-        if (!heldCards.isEmpty()) {
-            for (Card card : heldCards) {
+        if (heldCards.isEmpty())
+            return;
+
+        final int batchSize = 50;
+        final int[] index = {0};
+
+        Timer timer = new Timer(1, null);
+        timer.addActionListener(e ->
+        {
+            int processed = 0;
+
+            while (index[0] < heldCards.size() && processed < batchSize) {
+                Card card = heldCards.get(index[0]++);
+
                 JPanel cardRow = new JPanel(new BorderLayout(0, 8));
                 JPanel buttonPanel = new JPanel(new BorderLayout(0, 2));
 
@@ -178,17 +212,26 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
 
                 // Create the view card button
                 JButton openCardButton = new JButton("View card");
-                openCardButton.addActionListener(event -> this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.SingleCard, card));
+                openCardButton.addActionListener(event ->
+                        this.overlayStateManager.openOverlay(
+                                OverlayStateManager.OverlayComponent.SingleCard,
+                                card
+                        )
+                );
 
                 // Create the delete card button
                 JButton deleteCardButton = new JButton("Delete card");
-                deleteCardButton.addActionListener(event -> this.deleteCard(card, buttonPanel));
+                deleteCardButton.addActionListener(event ->
+                        this.deleteCard(card, buttonPanel)
+                );
 
                 // Create the add card button
                 JButton addCardButton = new JButton("Add card");
-                addCardButton.addActionListener(event -> this.addCard(card));
+                addCardButton.addActionListener(event ->
+                        this.addCard(card)
+                );
 
-                if (isAddCardSection)
+                if (overlayStateManager.isAvailableCardsOpen())
                     buttonPanel.add(addCardButton, BorderLayout.SOUTH);
                 else
                     buttonPanel.add(deleteCardButton, BorderLayout.SOUTH);
@@ -199,9 +242,22 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
                 cardRow.add(buttonPanel, BorderLayout.EAST);
 
                 this.heldCardsSection.add(cardRow);
+
+                processed++;
             }
-            this.selectionSection.add(this.heldCardsSection);
-        }
+
+            this.heldCardsSection.revalidate();
+            this.heldCardsSection.repaint();
+
+            if (index[0] >= heldCards.size()) {
+                this.selectionSection.add(this.heldCardsSection);
+                this.selectionSection.revalidate();
+                this.selectionSection.repaint();
+                timer.stop();
+            }
+        });
+
+        timer.start();
     }
 
     public void filter(List<Card> cards) {
@@ -237,30 +293,64 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
     }
 
     public void deleteCard(Card card, JPanel parent) {
+        if (openConfirmDialog("Are you sure you want to delete this card?", parent))
+            cardManager.deleteHeldCard(card);
+    }
+
+    private void deleteAllCards(JPanel parent) {
+        if (openConfirmDialog("Are you sure you want to delete all held cards?", parent)) {
+            cardManager.deleteAllHeldCards();
+        }
+    }
+
+    private boolean openConfirmDialog(String message, JPanel parent) {
         int result = JOptionPane.showConfirmDialog(
                 parent,
-                "Are you sure you want to delete this task?",
-                "Confirm Reset",
+                message,
+                "Confirm",
                 JOptionPane.YES_NO_OPTION
         );
-        if (result == JOptionPane.YES_OPTION) {
-            cardManager.deleteHeldCard(card);
-        }
+        return result == JOptionPane.YES_OPTION;
     }
 
     public void addCard(Card card) {
         cardManager.addCard(card);
-        // Do this to reset the add card section so it re-renders
-        this.isAddCardSection = false;
         this.renderAddCardSection();
         this.filter(this.filterCards);
     }
 
     @Override
     public void onCardsChanged() {
-        if (isAddCardSection)
-            renderAddCardSection();
-        else
-            buildHeldCardsSection();
+        if (this.overlayStateManager.isAvailableCardsOpen()) {
+            renderAvailableCards();
+        } else {
+            renderHeldCards();
+        }
+    }
+
+    private void renderAvailableCards() {
+        this.heldCardsSection.removeAll();
+        this.selectionSection.removeAll();
+
+        // Get the list of available cards
+        List<Card> availableCards = cardManager.getAvailableCards();
+        this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.AvailableCards, availableCards);
+        addCardsToSection(availableCards);
+
+        this.selectionSection.revalidate();
+        this.selectionSection.repaint();
+    }
+
+    private void renderHeldCards() {
+        heldCardsSection.removeAll();
+        selectionSection.removeAll();
+
+        this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.HeldCards);
+        this.overlayStateManager.addOverlayCards(this.cardManager.getHeldCards());
+
+        addCardsToSection(cardManager.getHeldCards());
+
+        this.selectionSection.revalidate();
+        this.selectionSection.repaint();
     }
 }

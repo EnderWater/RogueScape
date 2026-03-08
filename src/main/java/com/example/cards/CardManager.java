@@ -43,9 +43,6 @@ public class CardManager {
     @Getter
     private int openedPacks;
 
-    @Getter
-    private boolean isPackOpen = false;
-
     private final List<CardChangeListener> listeners = new ArrayList<>();
 
     public void addListener(CardChangeListener listener) {
@@ -162,6 +159,13 @@ public class CardManager {
     public void deleteHeldCard(Card card) {
         this.heldCards.remove(card);
         this.availableCards.add(card);
+        this.save();
+        this.notifyListeners();
+    }
+
+    public void deleteAllHeldCards() {
+        this.availableCards.addAll(this.heldCards);
+        this.heldCards.clear();
         this.save();
         this.notifyListeners();
     }

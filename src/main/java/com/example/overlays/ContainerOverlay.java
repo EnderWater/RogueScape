@@ -86,8 +86,8 @@ public class ContainerOverlay extends Overlay {
             case PackOpening:
                 g.drawString("Select a pack card", x + 12, y + 18);
                 break;
-            case AllCards:
-                g.drawString("All cards", x + 12, y + 18);
+            case AvailableCards:
+                g.drawString("Available cards", x + 12, y + 18);
                 break;
             case HeldCards:
                 g.drawString("Held Cards", x + 12, y + 18);

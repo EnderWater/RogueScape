@@ -27,7 +27,7 @@ public class OverlayStateManager {
 
     public enum OverlayComponent {
         None,
-        AllCards,
+        AvailableCards,
         SingleCard,
         HeldCards,
         PackOpening
@@ -41,6 +41,7 @@ public class OverlayStateManager {
         windowOpen = false;
         overlayComponent = OverlayComponent.None;
         currentPage = 1;
+        clearOverlayCards();
     }
 
     public void openOverlay(OverlayComponent component) {
@@ -67,8 +68,8 @@ public class OverlayStateManager {
         return this.overlayComponent == OverlayComponent.None;
     }
 
-    public boolean isAllCardsOpen() {
-        return this.overlayComponent == OverlayComponent.AllCards;
+    public boolean isAvailableCardsOpen() {
+        return this.overlayComponent == OverlayComponent.AvailableCards;
     }
 
     public boolean isHeldCardsOpen() {

@@ -118,12 +118,22 @@ public class CardListOverlay {
         }
 
         // Check to see if a card was clicked during the all or held cards view to display the "details" (single card) view
-        if (overlayStateManager.isAllCardsOpen() || overlayStateManager.isHeldCardsOpen()) {
+        if (overlayStateManager.isHeldCardsOpen()) {
             Rectangle cardBound = isClickOnCard(event);
             if (cardBound != null) {
                 Card card = getCardFromBounds(cardBound);
                 overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.SingleCard);
                 overlayStateManager.addOverlayCards(card);
+                return true;
+            }
+        }
+
+        // Check to see if a card was clicked during the "Available Cards" view
+        if (overlayStateManager.isAvailableCardsOpen()) {
+            Rectangle cardBound = isClickOnCard(event);
+            if (cardBound != null) {
+                Card card = getCardFromBounds(cardBound);
+                cardManager.selectCard(card);
                 return true;
             }
         }
