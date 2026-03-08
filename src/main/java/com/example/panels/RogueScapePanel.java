@@ -127,7 +127,10 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
         // Create all the rows for the task
         JPanel taskInfoRow = new JPanel(new BorderLayout());
         JPanel progressBarRow = new JPanel(new BorderLayout());
+
+        // Create the task buttons section and make it invisible to start
         JPanel taskButtons = new JPanel(new GridLayout(0,2,8,8));
+        taskButtons.setVisible(false);
 
         taskInfoRow.setToolTipText(task.getDescription());
 
@@ -141,6 +144,12 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
         JProgressBar progressBar = new JProgressBar(0, task.getTarget());
         progressBar.setValue(task.getCurrent());
         progressBar.setStringPainted(true);
+
+        // Create the collapse buttons button (lol)
+        JButton collapseButton = new JButton("...");
+        collapseButton.addActionListener(e-> {
+            taskButtons.setVisible(!taskButtons.isVisible());
+        });
 
         // Create the pin button to pin a task to the top
         JButton pinButton = new JButton();
@@ -187,8 +196,11 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
         // Add all the UI components to their corresponding row
         taskInfoRow.add(nameLabel, BorderLayout.WEST);
         taskInfoRow.add(taskCountLabel, BorderLayout.EAST);
+
         progressBarRow.add(progressBar, BorderLayout.CENTER);
+        progressBarRow.add(collapseButton, BorderLayout.EAST);
         progressBarRow.add(Box.createVerticalStrut(8), BorderLayout.SOUTH);
+
         taskButtons.add(pinButton);
         taskButtons.add(addButton);
         taskButtons.add(resetButton);
