@@ -3,6 +3,7 @@ package com.example.panels;
 import com.example.cards.Card;
 import com.example.cards.CardManager;
 import com.example.cards.OverlayCard;
+import com.example.overlays.OverlayStateManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.IconTextField;
 
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 public class PackManagerPanel extends JPanel {
     private final CardManager cardManager;
+    private final OverlayStateManager overlayStateManager;
     private final JPanel selectionSection;
     private final JPanel heldCardsSection;
     private final JButton viewCardsButton;
@@ -28,8 +30,9 @@ public class PackManagerPanel extends JPanel {
     private boolean isHeldCardViewOpen = false;
 
     @Inject
-    PackManagerPanel(CardManager cardManager) {
+    PackManagerPanel(CardManager cardManager, OverlayStateManager overlayStateManager) {
         this.cardManager = cardManager;
+        this.overlayStateManager = overlayStateManager;
 
         // Set the view to be a BoxLayout to add things in vertically
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -38,12 +41,22 @@ public class PackManagerPanel extends JPanel {
         JPanel buttonSection = new JPanel();
         buttonSection.setLayout(new GridLayout(0,2, 8,8));
 
+        this.viewCardsButton = new JButton("Held cards");
+        viewCardsButton.setPreferredSize(new Dimension(100, 20));
+        viewCardsButton.addActionListener(e -> {
+            this.buildHeldCardsSection();
+        });
+
         // Create the buttons for the button section
         JButton openPackButton = createButton("Open pack", e -> {
-            if (this.cardManager.getAvailablePacks() > 0 && !this.cardManager.isPackOpen()) {
-                this.cardManager.openPack();
-            } else if (this.cardManager.isPackOpen()) {
-                this.cardManager.closePack();
+            // Check if there are available packs and if the pack opening is not open. If so, open the pack opening overlay
+            if (this.cardManager.getAvailablePacks() > 0 && !this.overlayStateManager.isPackOpeningOpen()) {
+                List<Card> packCards = this.cardManager.getCardsInPack();
+                this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.PackOpening, packCards);
+            }
+            // If the pack opening overlay is already open, close it.
+            else if (this.overlayStateManager.isPackOpeningOpen()) {
+                this.overlayStateManager.closeOverlay();
             }
         });
 
@@ -85,12 +98,6 @@ public class PackManagerPanel extends JPanel {
             }
         });
 
-        this.viewCardsButton = new JButton("Held cards");
-        viewCardsButton.setPreferredSize(new Dimension(100, 20));
-        viewCardsButton.addActionListener(e -> {
-            this.buildHeldCardsSection();
-        });
-
         // Add the UI elements to the panel
         this.selectionSection.add(heldCardsSection);
 
@@ -108,17 +115,19 @@ public class PackManagerPanel extends JPanel {
         this.selectionSection.removeAll();
         this.heldCardsSection.removeAll();
 
-        if (!isHeldCardViewOpen) {
+        if (!overlayStateManager.isHeldCardsOpen() || overlayStateManager.isSingleCardOpen()) {
             List<Card> heldCards = this.cardManager.getHeldCards();
 
             this.selectionSection.add(this.searchBar);
             this.selectionSection.add(Box.createVerticalStrut(8));
 
             this.renderCardList(heldCards);
-        } else {
-            this.isHeldCardViewOpen = false;
-            viewCardsButton.setText("Held cards");
-            this.cardManager.closePack();
+
+            this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.HeldCards);
+            this.overlayStateManager.addOverlayCards(this.cardManager.getHeldCards());
+        }
+        else {
+            this.overlayStateManager.closeOverlay();
         }
 
         this.selectionSection.revalidate();
@@ -132,7 +141,7 @@ public class PackManagerPanel extends JPanel {
 
                 JButton openCardButton = new JButton("View card");
                 openCardButton.addActionListener(event -> {
-                    this.cardManager.displaySingleCard(card);
+                    this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.SingleCard, card);
                 });
                 JLabel cardLabel = new JLabel(card.getName());
 
@@ -144,7 +153,6 @@ public class PackManagerPanel extends JPanel {
             this.selectionSection.add(this.heldCardsSection);
         }
         this.isHeldCardViewOpen = true;
-        viewCardsButton.setText("Close cards");
     }
 
     void filter() {

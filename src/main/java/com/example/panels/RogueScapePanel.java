@@ -2,6 +2,7 @@
 
 import com.example.cards.CardManager;
 import com.example.listeners.TaskChangeListener;
+import com.example.overlays.OverlayStateManager;
 import com.example.tasks.KillTask;
 import com.example.tasks.SkillTask;
 import com.example.tasks.Task;
@@ -18,11 +19,10 @@ import java.util.stream.Collectors;
 public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
 
     private final TaskManager taskManager;
-
     private final CardManager cardManager;
+    private final OverlayStateManager overlayStateManager;
 
     private PackManagerPanel packManagerPanel;
-
     private final CollapsiblePanel pinnedSection;
     private final CollapsiblePanel killSection;
     private final CollapsiblePanel skillSection;
@@ -31,11 +31,12 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
     private final CollapsiblePanel packManagerSection;
 
     @Inject
-    public RogueScapePanel(TaskManager taskManager, CardManager cardManager)
+    public RogueScapePanel(TaskManager taskManager, CardManager cardManager, OverlayStateManager overlayStateManager)
     {
         this.taskManager = taskManager;
         this.cardManager = cardManager;
-        this.packManagerPanel = new PackManagerPanel(this.cardManager);
+        this.overlayStateManager = overlayStateManager;
+        this.packManagerPanel = new PackManagerPanel(this.cardManager, this.overlayStateManager);
 
         this.taskManager.addListener(this);
 

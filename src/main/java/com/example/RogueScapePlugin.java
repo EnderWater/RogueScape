@@ -1,10 +1,7 @@
 package com.example;
 
 import com.example.cards.CardManager;
-import com.example.overlays.ChunkIndicatorOverlay;
-import com.example.overlays.PackOpeningOverlay;
-import com.example.overlays.PackCountOverlay;
-import com.example.overlays.TaskProgressOverlay;
+import com.example.overlays.*;
 import com.example.panels.RogueScapePanel;
 import com.example.relics.RelicManager;
 import com.example.tasks.TaskManager;
@@ -43,16 +40,22 @@ public class RogueScapePlugin extends Plugin {
     private OverlayManager overlayManager;
 
     @Inject
+    private OverlayStateManager overlayStateManager;
+
+    @Inject
     private TaskProgressOverlay taskProgressOverlay;
 
     @Inject
     private PackCountOverlay packCountOverlay;
 
     @Inject
-    private PackOpeningOverlay packOpeningOverlay;
+    private CardListOverlay cardListOverlay;
 
     @Inject
     private ChunkIndicatorOverlay chunkIndicatorOverlay;
+
+    @Inject
+    private ContainerOverlay containerOverlay;
 
     @Inject
     private RogueScapeConfig config;
@@ -94,11 +97,14 @@ public class RogueScapePlugin extends Plugin {
         @Override
         public MouseEvent mousePressed(MouseEvent event)
         {
-            int overlayIndex = packOpeningOverlay.isClickOnButton(event);
-            if (overlayIndex >= 0 && cardManager.isPackOpen())
+            // Check if the click was in the window first
+            if (containerOverlay.handleClick(event)) {
+                event.consume();
+            }
+
+            // Then check if the click was on the pack
+            if (cardListOverlay.isClickOnButton(event))
             {
-                cardManager.selectCard(cardManager.getOverlayCards().get(overlayIndex));
-                cardManager.completePackOpening();
                 event.consume();
             }
 
@@ -139,12 +145,13 @@ public class RogueScapePlugin extends Plugin {
     protected void startUp() throws Exception {
         this.overlayManager.add(this.taskProgressOverlay);
         this.overlayManager.add(this.packCountOverlay);
-        this.overlayManager.add(this.packOpeningOverlay);
+//        this.overlayManager.add(this.packOpeningOverlay);
         this.overlayManager.add(this.chunkIndicatorOverlay);
+        this.overlayManager.add(this.containerOverlay);
 
         this.mouseManager.registerMouseListener(this.mouseListener);
 
-        this.panel = new RogueScapePanel(this.taskManager, this.cardManager);
+        this.panel = new RogueScapePanel(this.taskManager, this.cardManager, this.overlayStateManager);
 
         // Create the button on the toolbar to open the panel
         this.navButton = NavigationButton.builder()
