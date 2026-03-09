@@ -21,8 +21,6 @@ public class CardListOverlay {
     private final CardManager cardManager;
     private final OverlayStateManager overlayStateManager;
     private final CardRenderer cardRenderer;
-
-    private final Map<String, BufferedImage> iconMap = new HashMap<>();
     private final List<Rectangle> cardBounds = new ArrayList<>();
 
     @Inject
@@ -30,8 +28,6 @@ public class CardListOverlay {
         this.cardManager = cardManager;
         this.overlayStateManager = overlayStateManager;
         this.cardRenderer = cardRenderer;
-
-        loadIcons();
     }
 
     /**
@@ -72,37 +68,9 @@ public class CardListOverlay {
             int x = rowStartX + col * (cardWidth + SPACING) + containerX;
             int y = startY + row * (cardHeight + SPACING) + containerY;
 
-            Rectangle cardBound = cardRenderer.renderCard(graphics, cards.get(i), x, y, cardWidth, cardHeight, iconMap);
+            Rectangle cardBound = cardRenderer.renderCard(graphics, cards.get(i), x, y, cardWidth, cardHeight);
 
             cardBounds.add(cardBound);
-        }
-    }
-
-    private void loadIcons() {
-        loadIcon("Boon", "/com/example/icons/Boon.png");
-        loadIcon("Goal", "/com/example/icons/Goal.png");
-        loadIcon("Item", "/com/example/icons/Item.png");
-        loadIcon("Land", "/com/example/icons/Land.png");
-        loadIcon("Main_hand", "/com/example/icons/Main_Hand.png");
-        loadIcon("Minigame", "/com/example/icons/Minigame.png");
-        loadIcon("Off_hand", "/com/example/icons/Off_Hand.png");
-        loadIcon("Quest", "/com/example/icons/Quest.png");
-        loadIcon("Relic", "/com/example/icons/Relic.png");
-        loadIcon("Skill", "/com/example/icons/Skill.png");
-
-        loadIcon("Common", "/com/example/icons/Common.png");
-        loadIcon("Uncommon", "/com/example/icons/Uncommon.png");
-        loadIcon("Rare", "/com/example/icons/Rare.png");
-        loadIcon("Mythic", "/com/example/icons/Mythic.png");
-        loadIcon("Legendary", "/com/example/icons/Legendary.png");
-    }
-
-    private void loadIcon(String key, String path) {
-        try {
-            BufferedImage image = ImageIO.read(getClass().getResourceAsStream(path));
-            iconMap.put(key, image);
-        } catch (Exception e) {
-            System.out.println("Error loading image" + e);
         }
     }
 

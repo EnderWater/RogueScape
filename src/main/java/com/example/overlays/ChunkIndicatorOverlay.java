@@ -16,22 +16,36 @@ import java.awt.image.BufferedImage;
 
 @Singleton
 public class ChunkIndicatorOverlay extends Overlay {
-    private BufferedImage chunkIcon;
-    private final ImageComponent panel;
+    private final OverlayStateManager overlayStateManager;
 
-    ChunkIndicatorOverlay() {
-//        panel.setPreferredSize(new Dimension(100, 0));
-        chunkIcon = ImageUtil.loadImageResource(RogueScapePlugin.class, "/com/example/icons/Quest.png");
-        chunkIcon = ImageUtil.resizeImage(chunkIcon, 32, 32);
-        panel = new ImageComponent(chunkIcon);
-        panel.setPreferredSize(new Dimension(32,32));
+    private BufferedImage lastIcon;
+    private ImageComponent panel;
+
+    @Inject
+    ChunkIndicatorOverlay(OverlayStateManager overlayStateManager) {
+        this.overlayStateManager = overlayStateManager;
 
         setPosition(OverlayPosition.BOTTOM_LEFT);
         setLayer(OverlayLayer.ABOVE_WIDGETS);
     }
 
     @Override
-    public Dimension render(Graphics2D graphics) {
+    public Dimension render(Graphics2D graphics)
+    {
+        BufferedImage icon = overlayStateManager.getIconForRegion();
+
+        if (icon == null)
+        {
+            return null;
+        }
+
+        if (icon != lastIcon)
+        {
+            lastIcon = icon;
+            panel = new ImageComponent(icon);
+            panel.setPreferredSize(new Dimension(32, 32));
+        }
+
         return panel.render(graphics);
     }
 }

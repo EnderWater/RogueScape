@@ -2,6 +2,7 @@ package com.example;
 
 import com.example.cards.CardManager;
 import com.example.overlays.*;
+import com.example.packs.PackManager;
 import com.example.panels.RogueScapePanel;
 import com.example.relics.RelicManager;
 import com.example.tasks.TaskManager;
@@ -13,6 +14,7 @@ import com.google.inject.Provides;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.FakeXpDrop;
 import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
@@ -76,6 +78,10 @@ public class RogueScapePlugin extends Plugin {
     private CardManager cardManager;
 
     @Inject
+    @Getter
+    private PackManager packManager;
+
+    @Inject
     // Initialize the relic manager
     private RelicManager relicManager;
 
@@ -132,9 +138,14 @@ public class RogueScapePlugin extends Plugin {
         }
     };
 
-    private final String taskFilePath = "plugins/roguescape/tasks.json";
+    // Tracks how many ticks since the plugin last saved
     private int gameTicksSinceLastSave = 0;
+
+    // The button on the sidebar used to open the panels
     private NavigationButton navButton;
+
+    private int lastChunkX = -1;
+    private int lastChunkY = -1;
 
     @Override
     protected void startUp() throws Exception {
@@ -186,15 +197,37 @@ public class RogueScapePlugin extends Plugin {
 
     @Subscribe
     public void onGameTick(GameTick gameTick) {
+        // Handle saving
         if (gameTicksSinceLastSave >= 25) {
             taskManager.saveTasks();
+            packManager.savePacks();
+            cardManager.saveCards();
             gameTicksSinceLastSave = 0;
         }
         gameTicksSinceLastSave++;
+
+        // Check the user's current chunk
+        WorldPoint playerlocation = client.getLocalPlayer().getWorldLocation();
+
+        int chunkX = playerlocation.getX() >> 6;
+        int chunkY = playerlocation.getY() >> 6;
+
+        if (chunkX != lastChunkX || chunkY != lastChunkY)
+        {
+            lastChunkX = chunkX;
+            lastChunkY = chunkY;
+
+            onChunkChanged(chunkX, chunkY);
+        }
     }
 
     @Provides
     RogueScapeConfig provideConfig(ConfigManager configManager) {
         return configManager.getConfig(RogueScapeConfig.class);
+    }
+
+    private void onChunkChanged(int chunkX, int chunkY) {
+        int regionId = chunkX << 8 | chunkY;
+        overlayStateManager.updateRegionIcon(regionId);
     }
 }

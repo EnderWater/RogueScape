@@ -10,15 +10,17 @@ import java.util.Map;
 
 public class CardRenderer {
     private final ItemManager itemManager;
+    private final OverlayStateManager overlayStateManager;
 
     private final int PADDING = 12;
 
     @Inject
-    public CardRenderer(ItemManager itemManager) {
+    public CardRenderer(ItemManager itemManager, OverlayStateManager overlayStateManager) {
         this.itemManager = itemManager;
+        this.overlayStateManager = overlayStateManager;
     }
 
-    public Rectangle renderCard(Graphics2D graphics, Card card, int x, int y, int width, int height, Map<String, BufferedImage> iconMap) {
+    public Rectangle renderCard(Graphics2D graphics, Card card, int x, int y, int width, int height) {
         int cursorY = y + PADDING;
 
         // -----------------------------
@@ -148,13 +150,13 @@ public class CardRenderer {
         int iconSize = 22;
         int iconY = y + height - iconSize - PADDING;
 
-        BufferedImage rarityIcon = iconMap.get(card.getRarity().toString());
+        BufferedImage rarityIcon = overlayStateManager.getOverlayIcon(card.getRarity().toString());
 
         if (rarityIcon != null) {
             graphics.drawImage(rarityIcon, x + PADDING, iconY, iconSize, iconSize, null);
         }
 
-        BufferedImage typeIcon = iconMap.get(card.getType());
+        BufferedImage typeIcon = overlayStateManager.getOverlayIcon(card.getType());
 
         if (typeIcon != null) {
             graphics.drawImage(typeIcon, x + width - PADDING - iconSize, iconY, iconSize, iconSize, null);
