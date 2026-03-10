@@ -3,23 +3,31 @@ package com.example.packs;
 import com.example.JsonManager;
 import com.google.common.reflect.TypeToken;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 @Singleton
 public class PackManager {
     @Getter
-    private final List<Pack> packs;
+    private final Map<String, Pack> packs;
     private final JsonManager jsonManager;
+
+    @Getter
+    @Setter
+    private String currentPackName;
 
     @Inject
     public PackManager(JsonManager jsonManager) {
         this.jsonManager = jsonManager;
 
-        List<Pack> packs1;
+        Map<String, Pack> packs1;
         packs1 = loadSavedPacks();
 
         // If there was an issue loading the saved pack data, load the default data instead
@@ -29,13 +37,13 @@ public class PackManager {
         packs = packs1;
     }
 
-    private List<Pack> loadDefaultPacks() {
+    private Map<String, Pack> loadDefaultPacks() {
         Path packFile = Paths.get("plugins", "roguescape", "defaultPacks.csv");
         return PackCsvAdapter.readAllCards(packFile);
     }
 
-    private List<Pack> loadSavedPacks() {
-        return jsonManager.load("savedPacks.json", new TypeToken<List<Pack>>(){}.getType());
+    private Map<String, Pack> loadSavedPacks() {
+        return jsonManager.load("savedPacks.json", new TypeToken<Map<String, Pack>>(){}.getType());
     }
 
     private void save() {
@@ -44,5 +52,44 @@ public class PackManager {
 
     public void savePacks() {
         save();
+    }
+
+    public void addPacks(int num, String packName) {
+        Pack currentRegionPack = this.packs.get(packName);
+
+        // Add to the available and opened packs
+        currentRegionPack.addAvailablePack(num);
+        currentRegionPack.addOpenedPack(num);
+
+        this.save();
+    }
+
+    public void addOpenedPacks(String packName) {
+        Pack pack = this.packs.get(packName);
+
+        if (pack == null) return;
+
+        pack.addOpenedPack(1);
+        pack.addAvailablePack(-1);
+    }
+
+    public int getAvailablePacks(String packName) {
+        Pack pack = this.packs.get(packName);
+
+        if (pack == null) return -1;
+
+        return pack.getAvailable();
+    }
+
+    public Map<Integer, String> getRegionIdToPackNameMap() {
+        Map<Integer, String> returnMap = new HashMap<>();
+
+        for (Pack pack : this.packs.values()) {
+            for (Integer regionId : pack.getChunkIds()) {
+                returnMap.put(regionId, pack.getName());
+            }
+        }
+
+        return returnMap;
     }
 }

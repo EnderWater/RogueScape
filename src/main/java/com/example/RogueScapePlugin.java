@@ -31,6 +31,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
 
 import java.awt.event.MouseEvent;
+import java.util.Map;
 
 @Slf4j
 @PluginDescriptor(name = "RogueScape")
@@ -80,6 +81,14 @@ public class RogueScapePlugin extends Plugin {
     @Inject
     @Getter
     private PackManager packManager;
+
+    @Inject
+    @Getter
+    private RegionManager regionManager;
+
+    @Inject
+    @Getter
+    private IconManager iconManager;
 
     @Inject
     // Initialize the relic manager
@@ -157,8 +166,15 @@ public class RogueScapePlugin extends Plugin {
 
         this.mouseManager.registerMouseListener(this.mouseListener);
 
+        // Get the map of chunkIds to pack names since the packs csv has that info. I want to move it to the regionManager
+        // because the packManager should not be handling anything outside of packs
+        Map<Integer, String> regionIdToPackName = this.packManager.getRegionIdToPackNameMap();
+
+        // With this, the regionManager now has all info relating to regions that I should need
+        this.regionManager.setRegionIdsToPackName(regionIdToPackName);
+
         // Create the side panel and then add it to RuneLite
-        RogueScapePanel panel = new RogueScapePanel(taskManager, cardManager, overlayStateManager);
+        RogueScapePanel panel = new RogueScapePanel(taskManager, cardManager, overlayStateManager, packManager);
 
         // Create the button on the toolbar to open the panel
         this.navButton = NavigationButton.builder()
@@ -228,6 +244,8 @@ public class RogueScapePlugin extends Plugin {
 
     private void onChunkChanged(int chunkX, int chunkY) {
         int regionId = chunkX << 8 | chunkY;
-        overlayStateManager.updateRegionIcon(regionId);
+        regionManager.setId(regionId);
+        packManager.setCurrentPackName(regionManager.getRegionIdsToPackName().get(regionId));
+        iconManager.setCurrentChunkIcon(packManager.getCurrentPackName());
     }
 }

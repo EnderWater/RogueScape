@@ -4,34 +4,27 @@ import lombok.Getter;
 
 public abstract class Card {
     @Getter
-    int cardId;
+    private int cardId;
     @Getter
-    String type;
+    private String type;
     @Getter
-    String name;
+    private String name;
     @Getter
-    String description;
+    private String description;
     @Getter
-    String icon;
+    private String icon;
     @Getter
-    CardRarity rarity;
+    private CardRarity rarity;
     @Getter
-    int imageId;
+    private String packName;
 
-//    Card(String name, String description, String icon, CardRarity rarity) {
-//        this.name = name;
-//        this.description = description;
-//        this.icon = icon;
-//        this.rarity = rarity;
-//    }
-
-    Card(int cardId, String name, String description, String icon, CardRarity rarity, int imageId, String type) {
+    Card(int cardId, String name, String description, String icon, CardRarity rarity, String type, String packName) {
         this.cardId = cardId;
         this.name = name;
         this.description = description;
         this.icon = icon;
         this.rarity = rarity;
-        this.imageId = imageId;
         this.type = type;
+        this.packName = packName;
     }
 }

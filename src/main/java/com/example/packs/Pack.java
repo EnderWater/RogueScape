@@ -1,19 +1,28 @@
 package com.example.packs;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 public class Pack {
     @Getter
     private final String name;
-    private final String regionName;
+
     @Getter
     private final List<Integer> chunkIds;
-    private final String iconName;
+
+    @Getter
     private int available = 0;
+
+    @Getter
     private int opened = 0;
+
+    @Getter
     private int earned = 0;
+
+    private final String iconName;
+    private final String regionName;
 
     public Pack(String name, String regionName, List<Integer> chunkIds, String iconName) {
         this.name = name;
@@ -31,4 +40,17 @@ public class Pack {
         this.opened = opened;
         this.earned = earned;
     }
+
+    public void addAvailablePack(int num) {
+        this.available += num;
+    }
+
+    public void addEarnedPack(int num) {
+        this.earned += num;
+    }
+
+    public void addOpenedPack(int num) {
+        this.opened += num;
+    }
+
 }

@@ -21,9 +21,9 @@ public class CardDeserializer implements JsonDeserializer<Card> {
 
         String cardType = obj.get("type").getAsString();
         int cardId = obj.get("cardId").getAsInt();
-        int imageId = obj.get("imageId").getAsInt();
         String name = obj.get("name").getAsString();
         String description = obj.get("description").getAsString();
+        String packName = obj.get("packName").getAsString();
 
         CardRarity cardRarity;
 
@@ -37,18 +37,18 @@ public class CardDeserializer implements JsonDeserializer<Card> {
         switch (cardType) {
             case "Item":
                 int itemId = obj.get("itemId").getAsInt();
-                return new ItemCard(name, description, "", cardRarity, itemId, cardId, imageId, cardType);
+                return new ItemCard(name, description, "", cardRarity, itemId, cardId, cardType, packName);
             case "Boon":
-                return new BoonCard(cardId, name, description, "", cardRarity, imageId, cardType);
+                return new BoonCard(cardId, name, description, "", cardRarity, cardType, packName);
             case "Relic":
-                return new RelicCard(cardId, name, description, "", cardRarity, new AnthologyOfProficiency(eventBus), imageId, cardType);
+                return new RelicCard(cardId, name, description, "", cardRarity, new AnthologyOfProficiency(eventBus), cardType, packName);
             case "Land":
             case "Quest":
-                return new QuestCard(cardId, name, description, "", cardRarity, Quest.DORICS_QUEST, imageId, cardType);
+                return new QuestCard(cardId, name, description, "", cardRarity, Quest.DORICS_QUEST, cardType, packName);
             case "Mini Quest":
             case "Minigame":
                 cardRarity = CardRarity.Mythic;
-                return new QuestCard(cardId, name, description, "", cardRarity, Quest.DORICS_QUEST, imageId, cardType);
+                return new QuestCard(cardId, name, description, "", cardRarity, Quest.DORICS_QUEST, cardType, packName);
 
             default:
                 throw new JsonParseException("Unknown cardType: " + cardType);

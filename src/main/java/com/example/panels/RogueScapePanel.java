@@ -3,6 +3,7 @@
 import com.example.cards.CardManager;
 import com.example.listeners.TaskChangeListener;
 import com.example.overlays.OverlayStateManager;
+import com.example.packs.PackManager;
 import com.example.tasks.*;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
@@ -27,10 +28,10 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
     private final CollapsiblePanel addTaskSection;
     private final CollapsiblePanel packManagerSection;
 
-    public RogueScapePanel(TaskManager taskManager, CardManager cardManager, OverlayStateManager overlayStateManager)
+    public RogueScapePanel(TaskManager taskManager, CardManager cardManager, OverlayStateManager overlayStateManager, PackManager packManager)
     {
         this.taskManager = taskManager;
-        PackManagerPanel packManagerPanel = new PackManagerPanel(cardManager, overlayStateManager);
+        PackManagerPanel packManagerPanel = new PackManagerPanel(cardManager, overlayStateManager, packManager);
 
         this.taskManager.addListener(this);
 

@@ -5,14 +5,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PackCsvAdapter {
 
-    public static List<Pack> readAllCards(Path csvPath) {
+    public static Map<String, Pack> readAllCards(Path csvPath) {
         ensureFileExists(csvPath);
 
-        List<Pack> packs = new ArrayList<>();
+        Map<String, Pack> packs = new HashMap<>();
 
         try (BufferedReader reader = Files.newBufferedReader(csvPath)) {
             String line;
@@ -46,63 +48,7 @@ public class PackCsvAdapter {
                     }
 
                     Pack pack = new Pack(setName, regionName, chunkIds, iconName);
-                    packs.add(pack);
-                }
-                catch (Exception e) {
-                    System.err.println(
-                            "Skipping bad CSV row at line " + lineNumber + ": " + e.getMessage()
-                    );
-                }
-            }
-        }
-        catch (IOException e) {
-            System.err.println("Failed to read pack CSV: " + e.getMessage());
-        }
-
-        return packs;
-    }
-
-    public static List<Pack> read(Path csvPath) {
-        ensureFileExists(csvPath);
-
-        List<Pack> packs = new ArrayList<>();
-
-        try (BufferedReader reader = Files.newBufferedReader(csvPath)) {
-            String line;
-
-            // Skip header
-            reader.readLine();
-
-            int lineNumber = 1;
-
-            while ((line = reader.readLine()) != null) {
-                lineNumber++;
-
-                if (line.isBlank()) {
-                    continue;
-                }
-
-                try {
-                    String[] parts = line.split(",", -1);
-
-                    if (parts.length < 6) {
-                        continue;
-                    }
-
-                    String setName = safe(parts, 0);
-                    String regionName = safe(parts, 1);
-                    List<Integer> chunkIds = parseChunkIds(parts, 2);
-                    String iconName = safe(parts, 3);
-                    int available = Integer.parseInt(parts[4]);
-                    int opened = Integer.parseInt(parts[5]);
-                    int earned = Integer.parseInt(parts[6]);
-
-                    if (setName.isBlank()) {
-                        continue;
-                    }
-
-                    Pack pack = new Pack(setName, regionName, chunkIds, iconName, available, opened, earned);
-                    packs.add(pack);
+                    packs.put(setName, pack);
                 }
                 catch (Exception e) {
                     System.err.println(

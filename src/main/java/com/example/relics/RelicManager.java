@@ -25,7 +25,6 @@ public class RelicManager {
         this.jsonManager = jsonManager;
 
         loadRelics();
-//        activateRelics();
     }
 
     private void loadRelics() {

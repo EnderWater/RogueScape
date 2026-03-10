@@ -1,23 +1,28 @@
 package com.example.overlays;
 
+import com.example.IconManager;
+import com.example.ItemLookup;
 import com.example.cards.Card;
 import net.runelite.client.game.ItemManager;
 
 import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.Map;
 
 public class CardRenderer {
     private final ItemManager itemManager;
     private final OverlayStateManager overlayStateManager;
+    private final ItemLookup itemLookup;
+    private final IconManager iconManager;
 
     private final int PADDING = 12;
 
     @Inject
-    public CardRenderer(ItemManager itemManager, OverlayStateManager overlayStateManager) {
+    public CardRenderer(ItemManager itemManager, OverlayStateManager overlayStateManager, ItemLookup itemLookup, IconManager iconManager) {
         this.itemManager = itemManager;
         this.overlayStateManager = overlayStateManager;
+        this.itemLookup = itemLookup;
+        this.iconManager = iconManager;
     }
 
     public Rectangle renderCard(Graphics2D graphics, Card card, int x, int y, int width, int height) {
@@ -82,7 +87,7 @@ public class CardRenderer {
         // -----------------------------
         // IMAGE
         // -----------------------------
-        BufferedImage image = itemManager.getImage(card.getImageId());
+        BufferedImage image = iconManager.getItemIcon(card.getName());
 
         if (image != null) {
             int maxWidth = width - 20;
@@ -150,13 +155,13 @@ public class CardRenderer {
         int iconSize = 22;
         int iconY = y + height - iconSize - PADDING;
 
-        BufferedImage rarityIcon = overlayStateManager.getOverlayIcon(card.getRarity().toString());
+        BufferedImage rarityIcon = iconManager.getOverlayIcon(card.getRarity().toString());
 
         if (rarityIcon != null) {
             graphics.drawImage(rarityIcon, x + PADDING, iconY, iconSize, iconSize, null);
         }
 
-        BufferedImage typeIcon = overlayStateManager.getOverlayIcon(card.getType());
+        BufferedImage typeIcon = iconManager.getOverlayIcon(card.getType());
 
         if (typeIcon != null) {
             graphics.drawImage(typeIcon, x + width - PADDING - iconSize, iconY, iconSize, iconSize, null);

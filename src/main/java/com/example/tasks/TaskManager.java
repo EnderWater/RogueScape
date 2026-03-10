@@ -2,6 +2,8 @@ package com.example.tasks;
 
 import com.example.cards.CardManager;
 import com.example.JsonManager;
+import com.example.overlays.OverlayStateManager;
+import com.example.packs.PackManager;
 import com.google.common.reflect.TypeToken;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +18,8 @@ import java.util.List;
 public class TaskManager {
     private final CardManager cardManager;
     private final JsonManager jsonManager;
+    private final PackManager packManager;
+    private final OverlayStateManager overlayStateManager;
 
     @Getter
     private List<Task> tasks = new ArrayList<>();
@@ -43,9 +47,11 @@ public class TaskManager {
     }
 
     @Inject
-    public TaskManager(CardManager cardManager, JsonManager jsonManager) {
+    public TaskManager(CardManager cardManager, JsonManager jsonManager, PackManager packManager, OverlayStateManager overlayStateManager) {
         this.cardManager = cardManager;
         this.jsonManager = jsonManager;
+        this.packManager = packManager;
+        this.overlayStateManager = overlayStateManager;
 
         // Load the user's tasks
         List<Task> tasks = jsonManager.load("tasks.json", new TypeToken<List<Task>>(){}.getType());
@@ -100,7 +106,7 @@ public class TaskManager {
 
     public void completeTask(Task task) {
         task.setCompleted();
-        this.cardManager.addAvailablePack(task);
+        this.packManager.addPacks(task.getPacksAwarded(), this.packManager.getCurrentPackName());
         this.notifyListeners();
     }
 

@@ -7,8 +7,8 @@ public class ItemCard extends Card {
     @Getter
     int itemId;
 
-    ItemCard(String name, String description, String icon, CardRarity rarity, int itemId, int cardId, int imageId, String type) {
-        super(cardId, name, description, icon, rarity, imageId, type);
+    ItemCard(String name, String description, String icon, CardRarity rarity, int itemId, int cardId, String type, String packName) {
+        super(cardId, name, description, icon, rarity, type, packName);
         this.itemId = itemId;
     }
 }

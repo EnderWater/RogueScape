@@ -33,7 +33,7 @@ public class JsonManager {
                 .registerTypeAdapter(Task.class, new TaskAdapter(this))
                 .registerTypeAdapter(Relic.class, new RelicDeserializer())
                 .registerTypeAdapter(CardManager.class, new CardManagerAdapter(this))
-                .registerTypeAdapter(Card.class, new CardDeserializer(this.eventBus))
+                .registerTypeAdapter(Card.class, new CardDeserializer(eventBus))
                 .setPrettyPrinting()
                 .create();
     }

@@ -1,5 +1,6 @@
 package com.example.overlays;
 
+import com.example.IconManager;
 import com.example.RogueScapePlugin;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
@@ -16,14 +17,14 @@ import java.awt.image.BufferedImage;
 
 @Singleton
 public class ChunkIndicatorOverlay extends Overlay {
-    private final OverlayStateManager overlayStateManager;
+    private final IconManager iconManager;
 
     private BufferedImage lastIcon;
     private ImageComponent panel;
 
     @Inject
-    ChunkIndicatorOverlay(OverlayStateManager overlayStateManager) {
-        this.overlayStateManager = overlayStateManager;
+    ChunkIndicatorOverlay(IconManager iconManager) {
+        this.iconManager = iconManager;
 
         setPosition(OverlayPosition.BOTTOM_LEFT);
         setLayer(OverlayLayer.ABOVE_WIDGETS);
@@ -32,7 +33,7 @@ public class ChunkIndicatorOverlay extends Overlay {
     @Override
     public Dimension render(Graphics2D graphics)
     {
-        BufferedImage icon = overlayStateManager.getIconForRegion();
+        BufferedImage icon = iconManager.getIconForRegion();
 
         if (icon == null)
         {

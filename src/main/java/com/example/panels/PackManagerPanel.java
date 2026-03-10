@@ -4,6 +4,7 @@ import com.example.cards.Card;
 import com.example.cards.CardManager;
 import com.example.listeners.CardChangeListener;
 import com.example.overlays.OverlayStateManager;
+import com.example.packs.PackManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.IconTextField;
 
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 public class PackManagerPanel extends JPanel implements CardChangeListener {
     private final CardManager cardManager;
     private final OverlayStateManager overlayStateManager;
+    private final PackManager packManager;
 
     private final JPanel selectionSection;
     private final JPanel heldCardsSection;
@@ -29,9 +31,10 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
     private static final int FILTER_DELAY = 250; // in milliseconds
     private final List<Card> filterCards = new ArrayList<>();
 
-    PackManagerPanel(CardManager cardManager, OverlayStateManager overlayStateManager) {
+    PackManagerPanel(CardManager cardManager, OverlayStateManager overlayStateManager, PackManager packManager) {
         this.cardManager = cardManager;
         this.overlayStateManager = overlayStateManager;
+        this.packManager = packManager;
 
         // Add this as a listener so it can update after the cards have been updated
         this.cardManager.addListener(this);
@@ -50,11 +53,8 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
             // Reset this so the held cards can be opened again immediately
             openPack();
         });
-        JButton addPackButton = createButton("Add 1 Pack", e -> this.cardManager.addAvailablePack(null));
-        JButton addCardButton = createButton("Add card", e -> {
-            // Reset this so the held cards can be opened again immediately
-            this.renderAddCardSection();
-        });
+        JButton addPackButton = createButton("Add 1 Pack", e -> this.packManager.addPacks(1, packManager.getCurrentPackName()));
+        JButton addCardButton = createButton("Add card", e -> this.renderAddCardSection());
 
         // Create the section where the held cards will be displayed
         this.heldCardsSection = new JPanel();
@@ -280,8 +280,8 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
 
     public void openPack() {
         // Check if there are available packs and if the pack opening is not open. If so, open the pack opening overlay
-        if (this.cardManager.getAvailablePacks() > 0 && !this.overlayStateManager.isPackOpeningOpen()) {
-            List<Card> packCards = this.cardManager.getCardsInPack();
+        if (this.packManager.getAvailablePacks(packManager.getCurrentPackName()) > 0 && !this.overlayStateManager.isPackOpeningOpen()) {
+            List<Card> packCards = this.cardManager.getCardsInPack(packManager.getCurrentPackName());
             this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.PackOpening, packCards);
         }
         // If the pack opening overlay is already open, close it.
