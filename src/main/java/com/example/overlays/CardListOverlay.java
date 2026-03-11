@@ -17,7 +17,6 @@ public class CardListOverlay {
     private final double CARD_HEIGHT_PERCENTAGE = 0.40;
     private final int SPACING = 30;
 
-    //    private final ItemManager itemManager;
     private final CardManager cardManager;
     private final OverlayStateManager overlayStateManager;
     private final CardRenderer cardRenderer;
@@ -35,7 +34,7 @@ public class CardListOverlay {
      * Container size is provided by ContainerOverlay.
      */
     public void render(Graphics2D graphics, int containerX, int containerY, int containerWidth, int containerHeight) {
-        List<Card> cards = overlayStateManager.getOverlayCards();
+        List<Card> cards = overlayStateManager.getPaginatedCards();
 
         if (cards == null || cards.isEmpty()) {
             return;

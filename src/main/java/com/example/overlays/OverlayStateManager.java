@@ -4,21 +4,15 @@ import com.example.cards.Card;
 import com.example.packs.Pack;
 import com.example.packs.PackManager;
 import lombok.Getter;
-import lombok.Setter;
-import net.runelite.client.util.ImageUtil;
 
-import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.ArrayList;
-import java.util.List;
-import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Singleton
 public class OverlayStateManager {
-//    private final PackManager packManager;
+    private final PackManager packManager;
 
     private final int MAX_CARDS_PER_PAGE = 10;
 
@@ -28,37 +22,41 @@ public class OverlayStateManager {
     @Getter
     private int currentPage = 1;
 
+    @Getter
     private final List<Card> overlayCards = new ArrayList<>();
+
+    @Getter
+    private final List<Pack> overlayPacks = new ArrayList<>();
 
     @Getter
     private final List<Card> paginatedCards = new ArrayList<>();
 
     @Getter
-    private OverlayComponent overlayComponent = OverlayComponent.None;
+    private final List<Pack> paginatedPacks = new ArrayList<>();
 
-//    @Getter
-//    @Setter
-//    private int currentChunkId = 0;
-//
-//    @Getter
-//    private BufferedImage currentChunkIcon;
-//
-//    @Getter
-//    private String currentPackName;
-//
-//    private final Map<String, BufferedImage> iconMap = new HashMap<>();
+    @Getter
+    private final List<String> overlayPackNames;
+
+    @Getter
+    private String currentPackName;
+
+    @Getter
+    private OverlayComponent overlayComponent = OverlayComponent.None;
 
     public enum OverlayComponent {
         None,
         AvailableCards,
         SingleCard,
         HeldCards,
-        PackOpening
+        PackOpening,
+        AllPacks,
+        PackAvailableCards,
     }
 
     @Inject
-    public OverlayStateManager() {
-//        this.packManager = packManager;
+    public OverlayStateManager(PackManager packManager) {
+        this.packManager = packManager;
+        this.overlayPackNames = this.packManager.getPackNameList().stream().sorted().collect(Collectors.toList());
     }
 
     public void openWindow() {
@@ -69,13 +67,14 @@ public class OverlayStateManager {
         windowOpen = false;
         overlayComponent = OverlayComponent.None;
         currentPage = 1;
-        clearOverlayCards();
+        clearOverlay();
     }
 
     public void openOverlay(OverlayComponent component) {
         openWindow();
         currentPage = 1;
         overlayComponent = component;
+        clearOverlay();
     }
 
     public void openOverlay(OverlayComponent component, Card card) {
@@ -90,6 +89,13 @@ public class OverlayStateManager {
         currentPage = 1;
         overlayComponent = component;
         addOverlayCards(cards);
+    }
+
+    public void openPackOverlay(OverlayComponent component, List<Pack> packs) {
+        openWindow();
+        currentPage = 1;
+        overlayComponent = component;
+        addOverlayPacks(packs);
     }
 
     public boolean isNoneOpen() {
@@ -112,10 +118,18 @@ public class OverlayStateManager {
         return this.overlayComponent == OverlayComponent.PackOpening;
     }
 
+    public boolean isAllPacksOpen() {
+        return this.overlayComponent == OverlayComponent.AllPacks;
+    }
+
+    public boolean isPackCardsOpen() {
+        return this.overlayComponent == OverlayComponent.PackAvailableCards;
+    }
+
     // Add the cards that should be displayed
     public void addOverlayCards(Card card) {
         // Use this to clear any overlayCards that may be left over
-        clearOverlayCards();
+        clearOverlay();
 
         // Reset the page back to 1
         resetPage();
@@ -123,31 +137,59 @@ public class OverlayStateManager {
         // Add them to the overlay
         this.overlayCards.add(card);
 
-        this.paginateCards();
+        this.paginate();
     }
 
     // Add the cards that should be displayed
     public void addOverlayCards(List<Card> cards) {
         // Use this to clear any overlayCards that may be left over
-        clearOverlayCards();
+        clearOverlay();
 
         // Reset the page back to 1
         resetPage();
 
         // Add them to the overlay
         this.overlayCards.addAll(cards);
-        this.paginateCards();
+        this.paginate();
     }
 
-    public void clearOverlayCards() {
+    public void clearOverlay() {
+        // Clear card data
         this.overlayCards.clear();
         this.paginatedCards.clear();
+
+        // Clear pack data
+        this.overlayPacks.clear();
+        this.paginatedPacks.clear();
+    }
+
+    // Add the cards that should be displayed
+    public void addOverlayPacks(List<Pack> packs) {
+        // Use this to clear any overlayCards that may be left over
+        clearOverlay();
+
+        // Reset the page back to 1
+        resetPage();
+
+        // Sort the cards
+        packs.sort(Comparator.comparing(Pack::getName));
+
+        // Add them to the overlay
+        this.overlayPacks.addAll(packs);
+        this.paginate();
+    }
+
+    private void paginate() {
+        if (!overlayPacks.isEmpty())
+            paginatePacks();
+        else if (!overlayCards.isEmpty())
+            paginateCards();
     }
 
     private void paginateCards() {
         this.paginatedCards.clear();
 
-        int startingIndex = (currentPage-1) * MAX_CARDS_PER_PAGE; // 0 for first page if cards per page is 20
+        int startingIndex = (currentPage - 1) * MAX_CARDS_PER_PAGE; // 0 for first page if cards per page is 20
         int endingIndex = (currentPage * MAX_CARDS_PER_PAGE); // 20 for first page if cards per page is 20
 
         if (endingIndex >= overlayCards.size())
@@ -156,91 +198,44 @@ public class OverlayStateManager {
         this.paginatedCards.addAll(overlayCards.subList(startingIndex, endingIndex));
     }
 
+    private void paginatePacks() {
+        this.paginatedPacks.clear();
+
+        int startingIndex = (currentPage - 1) * 6; // 0 for first page if cards per page is 20
+        int endingIndex = (currentPage * 6); // 20 for first page if cards per page is 20
+
+        if (endingIndex >= overlayPacks.size())
+            endingIndex = overlayPacks.size();
+
+        this.paginatedPacks.addAll(overlayPacks.subList(startingIndex, endingIndex));
+    }
+
     public int getTotalPages() {
-        return (this.overlayCards.size() - 1) / MAX_CARDS_PER_PAGE + 1;
+        int totalPages;
+        if (!overlayCards.isEmpty())
+            totalPages = (this.overlayCards.size() - 1) / MAX_CARDS_PER_PAGE + 1;
+        else if (!overlayPacks.isEmpty()) {
+            totalPages = (this.overlayPacks.size() - 1) / MAX_CARDS_PER_PAGE + 1;
+        }
+        else
+            totalPages = 0;
+
+        return totalPages;
     }
 
     public void setCurrentPage(int page) {
         currentPage = page;
-        this.paginateCards();
+        this.paginate();
     }
 
     private void resetPage() {
         currentPage = 1;
     }
 
-    public List<Card> getOverlayCards() {
-        return this.paginatedCards;
+    public void selectPackName(int index, List<Card> cards) {
+        String packName = this.overlayPackNames.get(index);
+
+        // Once we have the name, we need to change the view to a card view and add specific cards to a view
+        this.openOverlay(OverlayComponent.PackAvailableCards, cards);
     }
-
-//    private void loadIcons() {
-//        // Card type icons
-//        loadIcon("Boon", "/com/example/icons/Boon.png");
-//        loadIcon("Goal", "/com/example/icons/Goal.png");
-//        loadIcon("Item", "/com/example/icons/Item.png");
-//        loadIcon("Land", "/com/example/icons/Land.png");
-//        loadIcon("Main_hand", "/com/example/icons/Main_Hand.png");
-//        loadIcon("Minigame", "/com/example/icons/Minigame.png");
-//        loadIcon("Off_hand", "/com/example/icons/Off_Hand.png");
-//        loadIcon("Quest", "/com/example/icons/Quest.png");
-//        loadIcon("Relic", "/com/example/icons/Relic.png");
-//        loadIcon("Skill", "/com/example/icons/Skill.png");
-//
-//        // Rarity icons
-//        loadIcon("Common", "/com/example/icons/Common.png");
-//        loadIcon("Uncommon", "/com/example/icons/Uncommon.png");
-//        loadIcon("Rare", "/com/example/icons/Rare.png");
-//        loadIcon("Mythic", "/com/example/icons/Mythic.png");
-//        loadIcon("Legendary", "/com/example/icons/Legendary.png");
-//
-//        // Pack icons
-//        loadIcon("Creatures of the Night", "/com/example/icons/pack-icons/Creatures_of_the_Night.png");
-//        loadIcon("Emirs Dominion", "/com/example/icons/pack-icons/Emirs_Dominion.png");
-//        loadIcon("Fallen Empires", "/com/example/icons/pack-icons/Fallen_Empires.png");
-//        loadIcon("Humble Beginnings", "/com/example/icons/pack-icons/Humble_Beginnings.png");
-//        loadIcon("Humble Beginnings Goal", "/com/example/icons/pack-icons/Humble_Beginnings_Goal.png");
-//        loadIcon("Jewel of Misthalin", "/com/example/icons/pack-icons/Jewel_of_Misthalin.png");
-//        loadIcon("Jewel of Misthalin Goal", "/com/example/icons/pack-icons/Jewel_of_Misthalin_Goal.png");
-//        loadIcon("Knights of Saradomin", "/com/example/icons/pack-icons/Knights_of_Saradomin.png");
-//        loadIcon("Light of Saradomin", "/com/example/icons/pack-icons/Light_of_Saradomin.png");
-//        loadIcon("Light of Saradomin Goal Pack", "/com/example/icons/pack-icons/Light_of_Saradomin_Goal_Pack.png");
-//        loadIcon("Mages of the Shore", "/com/example/icons/pack-icons/Mages_of_the_Shore.png");
-//        loadIcon("Ports and POHs Edit", "/com/example/icons/pack-icons/Ports_and_POHs_Edit.png");
-//        loadIcon("Ruins of Senntisten", "/com/example/icons/pack-icons/Ruins_of_Senntisten.png");
-//        loadIcon("Shadows Over Hallowvale Edit", "/com/example/icons/pack-icons/Shadows_Over_Hallowvale_Edit.png");
-//        loadIcon("Shadows Over Hallowvale Goal", "/com/example/icons/pack-icons/Shadows_Over_Hallowvale_Goal.png");
-//        loadIcon("Shifting Sands", "/com/example/icons/pack-icons/Shifting_Sands.png");
-//    }
-//
-//    private void loadIcon(String key, String path) {
-//        try {
-//            BufferedImage image = ImageIO.read(getClass().getResourceAsStream(path));
-//            BufferedImage resizedImage = ImageUtil.resizeImage(image, 32, 32);
-//            iconMap.put(key, resizedImage);
-//        } catch (Exception e) {
-//            System.out.println("Error loading image" + e);
-//        }
-//    }
-
-//    public void updateRegionIcon(int chunkId) {
-//        if (chunkId == this.currentChunkId)
-//            return;
-//
-//        for (Pack pack : packManager.getPacks().values()) {
-//            if (pack.getChunkIds().contains(chunkId)) {
-//                currentChunkIcon = this.iconMap.get(pack.getName());
-//                currentPackName = pack.getName();
-//                currentChunkId = chunkId;
-//                break;
-//            }
-//        }
-//    }
-//
-//    public BufferedImage getIconForRegion() {
-//        return currentChunkIcon;
-//    }
-//
-//    public BufferedImage getOverlayIcon(String key) {
-//        return this.iconMap.get(key);
-//    }
 }

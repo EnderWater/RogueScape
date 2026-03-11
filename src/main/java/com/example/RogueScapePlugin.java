@@ -3,7 +3,7 @@ package com.example;
 import com.example.cards.CardManager;
 import com.example.overlays.*;
 import com.example.packs.PackManager;
-import com.example.panels.RogueScapePanel;
+import com.example.panels.TaskTrackingPanel;
 import com.example.relics.RelicManager;
 import com.example.tasks.TaskManager;
 //import com.example.widgets.WidgetManager;
@@ -55,10 +55,13 @@ public class RogueScapePlugin extends Plugin {
     private CardListOverlay cardListOverlay;
 
     @Inject
+    private AvailablePacksOverlay availablePacksOverlay;
+
+    @Inject
     private ChunkIndicatorOverlay chunkIndicatorOverlay;
 
     @Inject
-    private ContainerOverlay containerOverlay;
+    private WindowOverlay windowOverlay;
 
     @Inject
     private RogueScapeConfig config;
@@ -107,14 +110,23 @@ public class RogueScapePlugin extends Plugin {
         @Override
         public MouseEvent mousePressed(MouseEvent event)
         {
-            // Check if the click was in the window first
-            if (containerOverlay.handleClick(event)) {
+            // Check if the click was on the pack
+            if (!event.isConsumed() && cardListOverlay.isClickOnButton(event)) {
                 event.consume();
             }
 
-            // Then check if the click was on the pack
-            if (cardListOverlay.isClickOnButton(event))
-            {
+            // Check if the user clicked on the available packs overlay
+            if (!event.isConsumed() && availablePacksOverlay.handleClick(event)) {
+                event.consume();
+            }
+
+            // Check if the click was on the pack count overlay
+            if (!event.isConsumed() && packCountOverlay.mouseClicked(event)) {
+                event.consume();
+            }
+
+            // Check if the click was in the window first
+            if (!event.isConsumed() && windowOverlay.handleClick(event)) {
                 event.consume();
             }
 
@@ -162,7 +174,7 @@ public class RogueScapePlugin extends Plugin {
         this.overlayManager.add(this.packCountOverlay);
 //        this.overlayManager.add(this.packOpeningOverlay);
         this.overlayManager.add(this.chunkIndicatorOverlay);
-        this.overlayManager.add(this.containerOverlay);
+        this.overlayManager.add(this.windowOverlay);
 
         this.mouseManager.registerMouseListener(this.mouseListener);
 
@@ -174,7 +186,7 @@ public class RogueScapePlugin extends Plugin {
         this.regionManager.setRegionIdsToPackName(regionIdToPackName);
 
         // Create the side panel and then add it to RuneLite
-        RogueScapePanel panel = new RogueScapePanel(taskManager, cardManager, overlayStateManager, packManager);
+        TaskTrackingPanel panel = new TaskTrackingPanel(taskManager, cardManager, overlayStateManager, packManager);
 
         // Create the button on the toolbar to open the panel
         this.navButton = NavigationButton.builder()

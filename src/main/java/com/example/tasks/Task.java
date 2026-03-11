@@ -20,6 +20,10 @@ public abstract class Task {
 
     @Getter
     @Setter
+    private boolean isExpanded = false;
+
+    @Getter
+    @Setter
     private int target;
 
     @Getter

@@ -77,7 +77,7 @@ public class CardManager {
         jsonManager.save("cardmanager.json", this);
     }
 
-    public List<Card> getCardsInPack(String packName) {
+    public List<Card> openPack(String packName) {
         if (packName.isBlank()) return null;
 
         List<Card> regionOpenedPackCards = this.openedPackCards.get(packName);
@@ -98,12 +98,19 @@ public class CardManager {
         Random random = new Random();
 
         int i = 0;
+
+        // If there are less than 5 cards, just add them all and skip the while loop
+        if (regionPackCards.size() < 5) {
+            this.openedPackCards.get(packName).addAll(regionPackCards);
+            i = 5;
+        }
+
         while (i < 5) {
             int randInt = random.nextInt(regionPackCards.size()-1);
             Card randCard = regionPackCards.get(randInt);
 
             // If the selected card is already in the user's hand somehow
-            if (this.heldCards.contains(randCard))
+            if (this.heldCards.contains(randCard) || this.openedPackCards.get(packName).contains(randCard))
                 continue;
 
             // This will help the app "remember" which cards were used during the last opening
@@ -135,9 +142,6 @@ public class CardManager {
         if (card != null) {
             this.heldCards.add(card);
             this.availableCards.remove(card);
-
-            // Get the pack name
-//            String packName = overlayStateManager.getCurrentPackName();
 
             this.save();
             this.notifyListeners();

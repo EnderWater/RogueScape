@@ -9,9 +9,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Singleton
 public class PackManager {
@@ -86,10 +88,14 @@ public class PackManager {
 
         for (Pack pack : this.packs.values()) {
             for (Integer regionId : pack.getChunkIds()) {
-                returnMap.put(regionId, pack.getName());
+                returnMap.putIfAbsent(regionId, pack.getName());
             }
         }
 
         return returnMap;
+    }
+
+    public List<String> getPackNameList() {
+        return new ArrayList<>(packs.keySet());
     }
 }

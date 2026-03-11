@@ -9,13 +9,12 @@ import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
+public class TaskTrackingPanel extends PluginPanel implements TaskChangeListener {
 
     private final TaskManager taskManager;
 
@@ -28,7 +27,7 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
     private final CollapsiblePanel addTaskSection;
     private final CollapsiblePanel packManagerSection;
 
-    public RogueScapePanel(TaskManager taskManager, CardManager cardManager, OverlayStateManager overlayStateManager, PackManager packManager)
+    public TaskTrackingPanel(TaskManager taskManager, CardManager cardManager, OverlayStateManager overlayStateManager, PackManager packManager)
     {
         this.taskManager = taskManager;
         PackManagerPanel packManagerPanel = new PackManagerPanel(cardManager, overlayStateManager, packManager);
@@ -147,7 +146,10 @@ public class RogueScapePanel extends PluginPanel implements TaskChangeListener {
         // Create the collapse buttons button (lol)
         JButton collapseButton = new JButton("...");
         collapseButton.addActionListener(e-> {
-            taskButtons.setVisible(!taskButtons.isVisible());
+            task.setExpanded(!task.isExpanded());
+            taskButtons.setVisible(task.isExpanded());
+            taskRow.revalidate();
+            taskRow.repaint();
         });
 
         // Create the pin button to pin a task to the top

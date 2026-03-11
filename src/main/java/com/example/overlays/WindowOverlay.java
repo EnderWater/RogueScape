@@ -9,10 +9,11 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
-public class ContainerOverlay extends Overlay {
+public class WindowOverlay extends Overlay {
     private final Client client;
     private final OverlayStateManager overlayStateManager;
     private final CardListOverlay cardListOverlay;
+    private final AvailablePacksOverlay availablePacksOverlay;
 
     private final Rectangle window = new Rectangle();
     private final Rectangle closeButton = new Rectangle();
@@ -23,10 +24,11 @@ public class ContainerOverlay extends Overlay {
     private final double WINDOW_HEIGHT_PERCENTAGE = 0.75;
 
     @Inject
-    public ContainerOverlay(Client client, OverlayStateManager overlayStateManager, CardListOverlay cardListOverlay) {
+    public WindowOverlay(Client client, OverlayStateManager overlayStateManager, CardListOverlay cardListOverlay, AvailablePacksOverlay availablePacksOverlay) {
         this.client = client;
         this.overlayStateManager = overlayStateManager;
         this.cardListOverlay = cardListOverlay;
+        this.availablePacksOverlay = availablePacksOverlay;
 
         setLayer(OverlayLayer.ALWAYS_ON_TOP);
         setPosition(OverlayPosition.DYNAMIC);
@@ -60,9 +62,18 @@ public class ContainerOverlay extends Overlay {
         drawTitleBar(graphics2D, x, y);
         drawPagination(graphics2D, x, y);
 
+        // Update y coordinate and height because the title bar pushes the available space down 28 pixels
+        y += 28;
+        windowHeight -= 28; // Update for the title bar
+        windowHeight -= 30; // Update for the pagination bar
+
+
+        if (overlayStateManager.isAllPacksOpen()) {
+            this.availablePacksOverlay.render(graphics2D, x, y, windowWidth, windowHeight);
+        }
+
         // If the state is anything but none, render the cards
-        if (!overlayStateManager.isNoneOpen())
-        {
+        if (!overlayStateManager.isNoneOpen()) {
             cardListOverlay.render(graphics2D, x, y, windowWidth, windowHeight);
         }
 
@@ -91,6 +102,12 @@ public class ContainerOverlay extends Overlay {
                 break;
             case HeldCards:
                 g.drawString("Held Cards", x + 12, y + 18);
+                break;
+            case AllPacks:
+                g.drawString("Available packs", x + 12, y + 18);
+                break;
+            case PackAvailableCards:
+                g.drawString("Remaining pack cards", x + 12, y + 18);
                 break;
             case None:
             default:

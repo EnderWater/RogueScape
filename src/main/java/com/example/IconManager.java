@@ -1,8 +1,6 @@
 package com.example;
 
-import lombok.Setter;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.util.ImageUtil;
 
 import javax.imageio.ImageIO;
@@ -53,28 +51,32 @@ public class IconManager {
 
         // Pack icons
         loadIcon("Creatures of the Night", "/com/example/icons/pack-icons/Creatures_of_the_Night.png");
+        loadIcon("Echoes of the Past", "/com/example/icons/pack-icons/Echoes_of_the_Past.png");
         loadIcon("Emirs Dominion", "/com/example/icons/pack-icons/Emirs_Dominion.png");
         loadIcon("Fallen Empires", "/com/example/icons/pack-icons/Fallen_Empires.png");
         loadIcon("Humble Beginnings", "/com/example/icons/pack-icons/Humble_Beginnings.png");
         loadIcon("Humble Beginnings Goal", "/com/example/icons/pack-icons/Humble_Beginnings_Goal.png");
         loadIcon("Jewel of Misthalin", "/com/example/icons/pack-icons/Jewel_of_Misthalin.png");
         loadIcon("Jewel of Misthalin Goal", "/com/example/icons/pack-icons/Jewel_of_Misthalin_Goal.png");
+        loadIcon("Keystone of the Ardent", "/com/example/icons/pack-icons/Keystone_of_the_Ardent.png");
         loadIcon("Knights of Saradomin", "/com/example/icons/pack-icons/Knights_of_Saradomin.png");
         loadIcon("Light of Saradomin", "/com/example/icons/pack-icons/Light_of_Saradomin.png");
         loadIcon("Light of Saradomin Goal Pack", "/com/example/icons/pack-icons/Light_of_Saradomin_Goal_Pack.png");
         loadIcon("Mages of the Shore", "/com/example/icons/pack-icons/Mages_of_the_Shore.png");
-        loadIcon("Ports and POHs Edit", "/com/example/icons/pack-icons/Ports_and_POHs_Edit.png");
+        loadIcon("Ports and POHs", "/com/example/icons/pack-icons/Ports_and_POHs.png");
+        loadIcon("Ritual of Balance", "/com/example/icons/pack-icons/Ritual_of_Balance.png");
         loadIcon("Ruins of Senntisten", "/com/example/icons/pack-icons/Ruins_of_Senntisten.png");
-        loadIcon("Shadows Over Hallowvale Edit", "/com/example/icons/pack-icons/Shadows_Over_Hallowvale_Edit.png");
-        loadIcon("Shadows Over Hallowvale Goal", "/com/example/icons/pack-icons/Shadows_Over_Hallowvale_Goal.png");
+        loadIcon("Scars of Forinthry", "/com/example/icons/pack-icons/Scars_of_Forinthry.png");
+        loadIcon("Shadows over Hallowvale", "/com/example/icons/pack-icons/Shadows_Over_Hallowvale.png");
+        loadIcon("Shadows over Hallowvale Goal", "/com/example/icons/pack-icons/Shadows_Over_Hallowvale_Goal.png");
         loadIcon("Shifting Sands", "/com/example/icons/pack-icons/Shifting_Sands.png");
+        loadIcon("The Concealed King", "/com/example/icons/pack-icons/The_Concealed_King.png");
     }
 
     private void loadIcon(String key, String path) {
         try {
             BufferedImage image = ImageIO.read(getClass().getResourceAsStream(path));
-            BufferedImage resizedImage = ImageUtil.resizeImage(image, 32, 32);
-            iconMap.put(key, resizedImage);
+            iconMap.put(key, image);
         } catch (Exception e) {
             System.out.println("Error loading image" + e);
         }
@@ -83,13 +85,17 @@ public class IconManager {
     public BufferedImage getIconForRegion() {
         return currentChunkIcon;
     }
+
     public BufferedImage getOverlayIcon(String key) {
         BufferedImage image = this.iconMap.get(key);
         return image;
     }
 
     public void setCurrentChunkIcon(String packName) {
-        this.currentChunkIcon = getOverlayIcon(packName);
+        if (packName == null)
+            this.currentChunkIcon = null;
+
+        this.currentChunkIcon = ImageUtil.resizeImage(getOverlayIcon(packName), 32, 32);
     }
 
     public BufferedImage getItemIcon(String itemName) {

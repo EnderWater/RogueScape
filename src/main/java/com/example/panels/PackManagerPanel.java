@@ -281,7 +281,7 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
     public void openPack() {
         // Check if there are available packs and if the pack opening is not open. If so, open the pack opening overlay
         if (this.packManager.getAvailablePacks(packManager.getCurrentPackName()) > 0 && !this.overlayStateManager.isPackOpeningOpen()) {
-            List<Card> packCards = this.cardManager.getCardsInPack(packManager.getCurrentPackName());
+            List<Card> packCards = this.cardManager.openPack(packManager.getCurrentPackName());
             this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.PackOpening, packCards);
         }
         // If the pack opening overlay is already open, close it.
