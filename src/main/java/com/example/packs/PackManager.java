@@ -1,6 +1,7 @@
 package com.example.packs;
 
 import com.example.JsonManager;
+import com.example.overlays.OverlayStateManager;
 import com.google.common.reflect.TypeToken;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,25 +10,27 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Singleton
 public class PackManager {
-    @Getter
     private final Map<String, Pack> packs;
     private final JsonManager jsonManager;
+    private final OverlayStateManager overlayStateManager;
+    private final int MAX_PACKS_PER_PAGE = 6;
 
     @Getter
     @Setter
     private String currentPackName;
 
+    @Getter
+    private final List<String> packNames;
+
     @Inject
-    public PackManager(JsonManager jsonManager) {
+    public PackManager(JsonManager jsonManager, OverlayStateManager overlayStateManager) {
         this.jsonManager = jsonManager;
+        this.overlayStateManager = overlayStateManager;
 
         Map<String, Pack> packs1;
         packs1 = loadSavedPacks();
@@ -37,6 +40,12 @@ public class PackManager {
             packs1 = loadDefaultPacks();
 
         packs = packs1;
+
+        this.packNames = packs.keySet().stream().sorted().collect(Collectors.toList());
+    }
+
+    public Collection<Pack> getPacks() {
+        return packs.values();
     }
 
     private Map<String, Pack> loadDefaultPacks() {
@@ -83,6 +92,12 @@ public class PackManager {
         return pack.getAvailable();
     }
 
+    public List<String> getOverlayPackNames() {
+        if (this.packNames.size() < this.packs.size())
+            return new ArrayList<>(this.packs.keySet());
+        return this.packNames;
+    }
+
     public Map<Integer, String> getRegionIdToPackNameMap() {
         Map<Integer, String> returnMap = new HashMap<>();
 
@@ -95,7 +110,9 @@ public class PackManager {
         return returnMap;
     }
 
-    public List<String> getPackNameList() {
-        return new ArrayList<>(packs.keySet());
+    public void openAllPacksOverlay() {
+        // Since the packs stored in this manager are in a map, just get the values and store them as a list to give to the overlay
+        List<Pack> packs = new ArrayList<>(this.packs.values());
+        this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.AllPacks, packs, MAX_PACKS_PER_PAGE);
     }
 }

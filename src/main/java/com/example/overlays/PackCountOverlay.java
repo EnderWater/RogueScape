@@ -39,7 +39,7 @@ public class PackCountOverlay extends Overlay
     @Override
     public Dimension render(Graphics2D graphics)
     {
-        List<Pack> packs = new ArrayList<>(packManager.getPacks().values());
+        List<Pack> packs = new ArrayList<>(packManager.getPacks());
 
         panel.getChildren().clear();
 
@@ -54,7 +54,7 @@ public class PackCountOverlay extends Overlay
 
         int shown = 0;
 
-        for (Pack pack : packManager.getPacks().values())
+        for (Pack pack : packManager.getPacks())
         {
             if (pack.getAvailable() <= 0)
                 continue;
@@ -87,7 +87,7 @@ public class PackCountOverlay extends Overlay
     public boolean mouseClicked(MouseEvent event)
     {
         if (bounds.contains(event.getPoint()) && !overlayStateManager.isAllPacksOpen()) {
-            overlayStateManager.openPackOverlay(OverlayStateManager.OverlayComponent.AllPacks, new ArrayList<>(packManager.getPacks().values()));
+            this.packManager.openAllPacksOverlay();
             return true;
         }
         else if (bounds.contains(event.getPoint()) && overlayStateManager.isAllPacksOpen()) {

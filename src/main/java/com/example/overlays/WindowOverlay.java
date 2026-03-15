@@ -1,6 +1,7 @@
 package com.example.overlays;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import net.runelite.api.Client;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
@@ -9,6 +10,7 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
+@Singleton
 public class WindowOverlay extends Overlay {
     private final Client client;
     private final OverlayStateManager overlayStateManager;
@@ -106,7 +108,7 @@ public class WindowOverlay extends Overlay {
             case AllPacks:
                 g.drawString("Available packs", x + 12, y + 18);
                 break;
-            case PackAvailableCards:
+            case FilteredCards:
                 g.drawString("Remaining pack cards", x + 12, y + 18);
                 break;
             case None:

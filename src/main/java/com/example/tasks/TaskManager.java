@@ -16,10 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 @Singleton
 public class TaskManager {
-    private final CardManager cardManager;
     private final JsonManager jsonManager;
     private final PackManager packManager;
     private final OverlayStateManager overlayStateManager;
+    private final int MAX_PINNED_TASKS = 3;
+    private final int MAX_PACKS_PER_PAGE = 6;
+    private final List<TaskChangeListener> listeners = new ArrayList<>();
 
     @Getter
     private List<Task> tasks = new ArrayList<>();
@@ -28,27 +30,8 @@ public class TaskManager {
     @Setter
     private List<Task> pinnedTasks = new ArrayList<>();
 
-    private final int MAX_PINNED_TASKS = 3;
-
-    private final List<TaskChangeListener> listeners = new ArrayList<>();
-
-    public void addListener(TaskChangeListener listener) {
-        listeners.add(listener);
-    }
-
-    public void removeListener(TaskChangeListener listener) {
-        listeners.remove(listener);
-    }
-
-    private void notifyListeners() {
-        for (TaskChangeListener l : listeners) {
-            l.onTasksChanged();
-        }
-    }
-
     @Inject
-    public TaskManager(CardManager cardManager, JsonManager jsonManager, PackManager packManager, OverlayStateManager overlayStateManager) {
-        this.cardManager = cardManager;
+    public TaskManager(JsonManager jsonManager, PackManager packManager, OverlayStateManager overlayStateManager) {
         this.jsonManager = jsonManager;
         this.packManager = packManager;
         this.overlayStateManager = overlayStateManager;
@@ -62,6 +45,20 @@ public class TaskManager {
 
         // Load any saved pinned tasks
         loadPinnedTasks();
+    }
+
+    public void addListener(TaskChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(TaskChangeListener listener) {
+        listeners.remove(listener);
+    }
+
+    private void notifyListeners() {
+        for (TaskChangeListener l : listeners) {
+            l.onTasksChanged();
+        }
     }
 
     public void saveTasks() {
@@ -151,5 +148,9 @@ public class TaskManager {
             this.saveTasks();
             this.notifyListeners();
         }
+    }
+
+    public void openTaskOverlay() {
+        this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.AllTasks, tasks, MAX_PACKS_PER_PAGE);
     }
 }

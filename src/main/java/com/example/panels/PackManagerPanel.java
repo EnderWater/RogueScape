@@ -25,7 +25,6 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
 
     private final JPanel selectionSection;
     private final JPanel heldCardsSection;
-    private final JButton viewCardsButton;
     private final Timer filterTimer;
     private final IconTextField searchBar;
     private static final int FILTER_DELAY = 250; // in milliseconds
@@ -46,7 +45,7 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
         JPanel buttonSection = new JPanel();
         buttonSection.setLayout(new GridLayout(0, 2, 8, 8));
 
-        this.viewCardsButton = createButton("Held cards", e -> this.buildHeldCardsSection());
+        JButton viewCardsButton = createButton("Held cards", e -> this.buildHeldCardsSection());
 
         // Create the open pack and add pack buttons for the button section
         JButton openPackButton = createButton("Open pack", e -> {
@@ -211,10 +210,8 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
                 // Create the view card button
                 JButton openCardButton = new JButton("View card");
                 openCardButton.addActionListener(event ->
-                        this.overlayStateManager.openOverlay(
-                                OverlayStateManager.OverlayComponent.SingleCard,
-                                card
-                        )
+//                    this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.SingleCard, card)
+                        this.cardManager.openSingleCardOverlay(card)
                 );
 
                 // Create the delete card button
@@ -265,7 +262,7 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
         List<Card> searchedCards = cards.stream().filter(card -> card.getName().toLowerCase().contains(query)).collect(Collectors.toList());
 
         this.renderCardList(searchedCards);
-        this.overlayStateManager.addOverlayCards(searchedCards);
+        this.cardManager.openFilteredCardsOverlay(searchedCards);
 
         this.heldCardsSection.revalidate();
         this.heldCardsSection.repaint();
@@ -281,8 +278,8 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
     public void openPack() {
         // Check if there are available packs and if the pack opening is not open. If so, open the pack opening overlay
         if (this.packManager.getAvailablePacks(packManager.getCurrentPackName()) > 0 && !this.overlayStateManager.isPackOpeningOpen()) {
-            List<Card> packCards = this.cardManager.openPack(packManager.getCurrentPackName());
-            this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.PackOpening, packCards);
+            // Let the card manager handle opening the overlay
+            this.cardManager.openPackOverlay(packManager.getCurrentPackName());
         }
         // If the pack opening overlay is already open, close it.
         else if (this.overlayStateManager.isPackOpeningOpen()) {
@@ -330,9 +327,10 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
         this.heldCardsSection.removeAll();
         this.selectionSection.removeAll();
 
-        // Get the list of available cards
+        // Open the overlay of available cards
+        cardManager.openAvailableCardsOverlay();
+
         List<Card> availableCards = cardManager.getAvailableCards();
-        this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.AvailableCards, availableCards);
         addCardsToSection(availableCards);
 
         this.selectionSection.revalidate();
@@ -343,8 +341,7 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
         heldCardsSection.removeAll();
         selectionSection.removeAll();
 
-        this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.HeldCards);
-        this.overlayStateManager.addOverlayCards(this.cardManager.getHeldCards());
+        this.cardManager.openHeldCardsOverlay();
 
         addCardsToSection(cardManager.getHeldCards());
 

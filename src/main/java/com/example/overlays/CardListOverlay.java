@@ -34,7 +34,7 @@ public class CardListOverlay {
      * Container size is provided by ContainerOverlay.
      */
     public void render(Graphics2D graphics, int containerX, int containerY, int containerWidth, int containerHeight) {
-        List<Card> cards = overlayStateManager.getPaginatedCards();
+        List<Card> cards = overlayStateManager.getPaginatedItems();
 
         if (cards == null || cards.isEmpty()) {
             return;
@@ -75,7 +75,7 @@ public class CardListOverlay {
 
     public boolean isClickOnButton(MouseEvent event) {
         // Check to see if a card was clicked during a pack opening
-        if (overlayStateManager.isPackOpeningOpen() && !overlayStateManager.getOverlayCards().isEmpty()) {
+        if (overlayStateManager.isPackOpeningOpen() && !overlayStateManager.getOverlayItems().isEmpty()) {
             Rectangle cardBound = isClickOnCard(event);
             if (cardBound != null) {
                 cardManager.selectCard(getCardFromBounds(cardBound));
@@ -89,8 +89,7 @@ public class CardListOverlay {
             Rectangle cardBound = isClickOnCard(event);
             if (cardBound != null) {
                 Card card = getCardFromBounds(cardBound);
-                overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.SingleCard);
-                overlayStateManager.addOverlayCards(card);
+                this.cardManager.openSingleCardOverlay(card);
                 return true;
             }
         }
@@ -110,7 +109,7 @@ public class CardListOverlay {
 
     public Card getCardFromBounds(Rectangle cardRectangle) {
         int index = cardBounds.indexOf(cardRectangle);
-        return overlayStateManager.getOverlayCards().get(index);
+        return overlayStateManager.<Card>getOverlayItems().get(index);
     }
 
     public Rectangle isClickOnCard(MouseEvent event) {

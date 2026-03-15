@@ -4,15 +4,10 @@ import com.example.JsonManager;
 import com.example.listeners.CardChangeListener;
 import com.example.overlays.OverlayStateManager;
 import com.example.packs.PackManager;
-import com.example.tasks.Task;
-import com.google.common.reflect.TypeToken;
 import lombok.Getter;
-import net.runelite.api.Client;
-import net.runelite.api.ItemComposition;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,9 +17,8 @@ public class CardManager {
     private final JsonManager jsonManager;
     private final PackManager packManager;
     private final OverlayStateManager overlayStateManager;
-    private final Client client;
 
-    private List<Card> allCards;
+    private final int MAX_CARDS_PER_PAGE = 10;
 
     // This list contains all the cards that the user does not have
     @Getter
@@ -50,11 +44,10 @@ public class CardManager {
     }
 
     @Inject
-    public CardManager(JsonManager jsonManager, PackManager packManager, OverlayStateManager overlayStateManager, Client client) {
+    public CardManager(JsonManager jsonManager, PackManager packManager, OverlayStateManager overlayStateManager) {
         this.jsonManager = jsonManager;
         this.packManager = packManager;
         this.overlayStateManager = overlayStateManager;
-        this.client = client;
 
         CardManager cardManager = jsonManager.load("cardmanager.json", CardManager.class);
         if (cardManager != null) {
@@ -62,65 +55,19 @@ public class CardManager {
             this.openedPackCards = cardManager.openedPackCards;
         }
 
-        this.allCards = CardCsvLoader.read(Paths.get("plugins", "roguescape", "allCards.csv"));
+        List<Card> allCards = CardCsvLoader.read(Paths.get("plugins", "roguescape", "allCards.csv"));
 
         Set<Integer> heldIds = this.heldCards.stream()
                 .map(Card::getCardId)
                 .collect(Collectors.toSet());
 
-        this.availableCards = this.allCards.stream()
+        this.availableCards = allCards.stream()
                 .filter(card -> !heldIds.contains(card.getCardId()))
                 .collect(Collectors.toList());
     }
 
     private void save() {
         jsonManager.save("cardmanager.json", this);
-    }
-
-    public List<Card> openPack(String packName) {
-        if (packName.isBlank()) return null;
-
-        List<Card> regionOpenedPackCards = this.openedPackCards.get(packName);
-
-        if (regionOpenedPackCards != null && !regionOpenedPackCards.isEmpty()) {
-            return regionOpenedPackCards;
-        }
-
-        // Check to see if an entry in the map for the packName exists. If not, create it.
-        if (!openedPackCards.containsKey(packName))
-            openedPackCards.put(packName, new ArrayList<>());
-
-        // If the region hasn't had a pack opened already, open a new one
-        List<Card> regionPackCards = this.availableCards.stream()
-                .filter(card -> Objects.equals(card.getPackName(), packName))
-                .collect(Collectors.toList());
-
-        Random random = new Random();
-
-        int i = 0;
-
-        // If there are less than 5 cards, just add them all and skip the while loop
-        if (regionPackCards.size() < 5) {
-            this.openedPackCards.get(packName).addAll(regionPackCards);
-            i = 5;
-        }
-
-        while (i < 5) {
-            int randInt = random.nextInt(regionPackCards.size()-1);
-            Card randCard = regionPackCards.get(randInt);
-
-            // If the selected card is already in the user's hand somehow
-            if (this.heldCards.contains(randCard) || this.openedPackCards.get(packName).contains(randCard))
-                continue;
-
-            // This will help the app "remember" which cards were used during the last opening
-            this.openedPackCards.get(packName).add(randCard);
-            i++;
-        }
-        // Save the openedPackCards after they've been set
-        this.save();
-
-        return this.openedPackCards.get(packName);
     }
 
     // Add a card to the user's held cards
@@ -170,5 +117,69 @@ public class CardManager {
 
     public void saveCards() {
         save();
+    }
+
+    public void openPackOverlay(String packName) {
+        if (packName.isBlank()) return;
+
+        List<Card> regionOpenedPackCards = this.openedPackCards.get(packName);
+
+        if (regionOpenedPackCards != null && !regionOpenedPackCards.isEmpty()) {
+            this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.PackOpening, regionOpenedPackCards, 6);
+            return;
+        }
+
+        // Check to see if an entry in the map for the packName exists. If not, create it.
+        if (!openedPackCards.containsKey(packName))
+            openedPackCards.put(packName, new ArrayList<>());
+
+        // If the region hasn't had a pack opened already, open a new one
+        List<Card> regionPackCards = this.availableCards.stream()
+                .filter(card -> Objects.equals(card.getPackName(), packName))
+                .collect(Collectors.toList());
+
+        Random random = new Random();
+
+        int i = 0;
+
+        // If there are less than 5 cards, just add them all and skip the while loop
+        if (regionPackCards.size() < 5) {
+            this.openedPackCards.get(packName).addAll(regionPackCards);
+            i = 5;
+        }
+
+        while (i < 5) {
+            int randInt = random.nextInt(regionPackCards.size()-1);
+            Card randCard = regionPackCards.get(randInt);
+
+            // If the selected card is already in the user's hand somehow
+            if (this.heldCards.contains(randCard) || this.openedPackCards.get(packName).contains(randCard))
+                continue;
+
+            // This will help the app "remember" which cards were used during the last opening
+            this.openedPackCards.get(packName).add(randCard);
+            i++;
+        }
+        // Save the openedPackCards after they've been set
+        this.save();
+
+        List<Card> packCards = this.openedPackCards.get(packName);
+        this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.PackOpening, packCards, MAX_CARDS_PER_PAGE);
+    }
+
+    public void openAvailableCardsOverlay() {
+        this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.AvailableCards, availableCards, MAX_CARDS_PER_PAGE);
+    }
+
+    public void openHeldCardsOverlay() {
+        this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.HeldCards, heldCards, MAX_CARDS_PER_PAGE);
+    }
+
+    public void openSingleCardOverlay(Card card) {
+        this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.SingleCard, card, MAX_CARDS_PER_PAGE);
+    }
+
+    public void openFilteredCardsOverlay(List<Card> cards) {
+        this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.FilteredCards, cards, MAX_CARDS_PER_PAGE);
     }
 }

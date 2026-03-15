@@ -26,6 +26,7 @@ public class AvailablePacksOverlay {
     private final CardManager cardManager;
     private final OverlayStateManager overlayStateManager;
     private final PackRenderer packRenderer;
+    private final PackManager packManager;
 
     private final List<Rectangle> packBounds = new ArrayList<>();
     private final List<Rectangle> sidebarBounds = new ArrayList<>();
@@ -35,11 +36,12 @@ public class AvailablePacksOverlay {
         this.cardManager = cardManager;
         this.overlayStateManager = overlayStateManager;
         this.packRenderer = packRenderer;
+        this.packManager = packManager;
     }
 
     public void render(Graphics2D graphics, int containerX, int containerY, int containerWidth, int containerHeight) {
-        List<Pack> packs = overlayStateManager.getPaginatedPacks();
-        List<String> packCategories = overlayStateManager.getOverlayPackNames();
+        List<Pack> packs = overlayStateManager.getPaginatedItems();
+        List<String> packCategories = packManager.getOverlayPackNames();
 
         if (packs == null || !overlayStateManager.isAllPacksOpen()) {
             return;
@@ -127,14 +129,19 @@ public class AvailablePacksOverlay {
             int index = sidebarBounds.indexOf(sidebarClick);
             packBounds.clear();
             sidebarBounds.clear();
-            String clickedPackName = overlayStateManager.getOverlayPackNames().get(index);
+            String clickedPackName = packManager.getOverlayPackNames().get(index);
             List<Card> heldCards = cardManager.getHeldCards();
 
             List<Card> cards = cardManager.getAvailableCards().stream()
                     .filter(card -> Objects.equals(card.getPackName(), clickedPackName) && !heldCards.contains(card))
                     .collect(Collectors.toList());
 
-            overlayStateManager.selectPackName(index, cards);
+//            overlayStateManager.selectPackName(index, cards);
+//            String packName = this.overlayPackNames.get(index);
+
+            // Once we have the name, we need to change the view to a card view and add specific cards to a view
+//            overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.PackAvailableCards, cards, 10);
+            this.cardManager.openFilteredCardsOverlay(cards);
             return true;
         }
 
@@ -149,9 +156,8 @@ public class AvailablePacksOverlay {
             packBounds.clear();
             sidebarBounds.clear();
 
-            // Open the pack and get the cards then pass it to the overlayStateManager
-            List<Card> packCards = this.cardManager.openPack(pack.getName());
-            this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.PackOpening, packCards);
+            // Open the pack and let the cardManager handle opening the overlay
+            this.cardManager.openPackOverlay(pack.getName());
             return true;
         }
 
@@ -160,7 +166,7 @@ public class AvailablePacksOverlay {
 
     private Pack getPackFromBounds(Rectangle bounds) {
         int index = packBounds.indexOf(bounds);
-        return overlayStateManager.getPaginatedPacks().get(index);
+        return overlayStateManager.<Pack>getPaginatedItems().get(index);
     }
 
     private Rectangle isClickOnPack(MouseEvent event) {
