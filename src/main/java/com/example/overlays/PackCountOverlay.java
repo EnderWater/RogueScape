@@ -84,8 +84,9 @@ public class PackCountOverlay extends Overlay
     }
 
 
-    public boolean mouseClicked(MouseEvent event)
-    {
+    public boolean mouseClicked(MouseEvent event) {
+        if (event.isConsumed()) return true;
+
         if (bounds.contains(event.getPoint()) && !overlayStateManager.isAllPacksOpen()) {
             this.packManager.openAllPacksOverlay();
             return true;

@@ -119,6 +119,8 @@ public class AvailablePacksOverlay {
     }
 
     public boolean handleClick(MouseEvent event) {
+        if (event.isConsumed()) return true;
+
         // If neither the availablePacks nor the cards in pack component are open, don't let them consume the event
         if (!overlayStateManager.isAllPacksOpen() && !overlayStateManager.isPackCardsOpen())
             return false;
@@ -136,11 +138,6 @@ public class AvailablePacksOverlay {
                     .filter(card -> Objects.equals(card.getPackName(), clickedPackName) && !heldCards.contains(card))
                     .collect(Collectors.toList());
 
-//            overlayStateManager.selectPackName(index, cards);
-//            String packName = this.overlayPackNames.get(index);
-
-            // Once we have the name, we need to change the view to a card view and add specific cards to a view
-//            overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.PackAvailableCards, cards, 10);
             this.cardManager.openFilteredCardsOverlay(cards);
             return true;
         }

@@ -68,7 +68,7 @@ public class OverlayStateManager {
         return this.overlayComponent == OverlayComponent.FilteredCards;
     }
 
-    public boolean isTaskListOpen() {
+    public boolean isAllTasksOpen() {
         return this.overlayComponent == OverlayComponent.AllTasks;
     }
 

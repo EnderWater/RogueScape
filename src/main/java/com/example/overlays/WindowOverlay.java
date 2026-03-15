@@ -16,6 +16,7 @@ public class WindowOverlay extends Overlay {
     private final OverlayStateManager overlayStateManager;
     private final CardListOverlay cardListOverlay;
     private final AvailablePacksOverlay availablePacksOverlay;
+    private final TaskListOverlay taskListOverlay;
 
     private final Rectangle window = new Rectangle();
     private final Rectangle closeButton = new Rectangle();
@@ -26,11 +27,12 @@ public class WindowOverlay extends Overlay {
     private final double WINDOW_HEIGHT_PERCENTAGE = 0.75;
 
     @Inject
-    public WindowOverlay(Client client, OverlayStateManager overlayStateManager, CardListOverlay cardListOverlay, AvailablePacksOverlay availablePacksOverlay) {
+    public WindowOverlay(Client client, OverlayStateManager overlayStateManager, CardListOverlay cardListOverlay, AvailablePacksOverlay availablePacksOverlay, TaskListOverlay taskListOverlay) {
         this.client = client;
         this.overlayStateManager = overlayStateManager;
         this.cardListOverlay = cardListOverlay;
         this.availablePacksOverlay = availablePacksOverlay;
+        this.taskListOverlay = taskListOverlay;
 
         setLayer(OverlayLayer.ALWAYS_ON_TOP);
         setPosition(OverlayPosition.DYNAMIC);
@@ -69,14 +71,16 @@ public class WindowOverlay extends Overlay {
         windowHeight -= 28; // Update for the title bar
         windowHeight -= 30; // Update for the pagination bar
 
-
-        if (overlayStateManager.isAllPacksOpen()) {
-            this.availablePacksOverlay.render(graphics2D, x, y, windowWidth, windowHeight);
-        }
-
-        // If the state is anything but none, render the cards
-        if (!overlayStateManager.isNoneOpen()) {
-            cardListOverlay.render(graphics2D, x, y, windowWidth, windowHeight);
+        switch (overlayStateManager.getOverlayComponent()) {
+            case AllTasks:
+                this.taskListOverlay.render(graphics2D, x, y, windowWidth, windowHeight);
+                break;
+            case AllPacks:
+                this.availablePacksOverlay.render(graphics2D, x, y, windowWidth, windowHeight);
+                break;
+            default:
+                cardListOverlay.render(graphics2D, x, y, windowWidth, windowHeight);
+                break;
         }
 
         return null;
@@ -180,8 +184,10 @@ public class WindowOverlay extends Overlay {
         g.drawRect(rx, bottomY, arrowSize, arrowSize);
     }
 
-    public boolean handleClick(MouseEvent e) {
-        Point p = e.getPoint();
+    public boolean handleClick(MouseEvent event) {
+        if (event.isConsumed()) return true;
+
+        Point p = event.getPoint();
         int currentPage = overlayStateManager.getCurrentPage();
         int totalPages = overlayStateManager.getTotalPages();
 

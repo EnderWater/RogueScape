@@ -58,6 +58,12 @@ public class RogueScapePlugin extends Plugin {
     private AvailablePacksOverlay availablePacksOverlay;
 
     @Inject
+    private TaskButtonOverlay taskButtonOverlay;
+
+    @Inject
+    private TaskListOverlay taskListOverlay;
+
+    @Inject
     private ChunkIndicatorOverlay chunkIndicatorOverlay;
 
     @Inject
@@ -111,22 +117,31 @@ public class RogueScapePlugin extends Plugin {
         public MouseEvent mousePressed(MouseEvent event)
         {
             // Check if the click was on the pack
-            if (!event.isConsumed() && cardListOverlay.isClickOnButton(event)) {
+            if (cardListOverlay.isClickOnButton(event)) {
                 event.consume();
             }
 
             // Check if the user clicked on the available packs overlay
-            if (!event.isConsumed() && availablePacksOverlay.handleClick(event)) {
+            if (availablePacksOverlay.handleClick(event)) {
+                event.consume();
+            }
+
+            // Check if the user clicked a button in the task overlay
+            if (taskListOverlay.isClickOnButton(event)) {
                 event.consume();
             }
 
             // Check if the click was on the pack count overlay
-            if (!event.isConsumed() && packCountOverlay.mouseClicked(event)) {
+            if (packCountOverlay.mouseClicked(event)) {
                 event.consume();
             }
 
             // Check if the click was in the window first
-            if (!event.isConsumed() && windowOverlay.handleClick(event)) {
+            if (windowOverlay.handleClick(event)) {
+                event.consume();
+            }
+
+            if (taskButtonOverlay.mouseClicked(event)) {
                 event.consume();
             }
 
@@ -172,7 +187,7 @@ public class RogueScapePlugin extends Plugin {
     protected void startUp() throws Exception {
         this.overlayManager.add(this.taskProgressOverlay);
         this.overlayManager.add(this.packCountOverlay);
-//        this.overlayManager.add(this.packOpeningOverlay);
+        this.overlayManager.add(this.taskButtonOverlay);
         this.overlayManager.add(this.chunkIndicatorOverlay);
         this.overlayManager.add(this.windowOverlay);
 

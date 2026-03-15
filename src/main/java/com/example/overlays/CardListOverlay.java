@@ -74,6 +74,8 @@ public class CardListOverlay {
     }
 
     public boolean isClickOnButton(MouseEvent event) {
+        if (event.isConsumed()) return true;
+
         // Check to see if a card was clicked during a pack opening
         if (overlayStateManager.isPackOpeningOpen() && !overlayStateManager.getOverlayItems().isEmpty()) {
             Rectangle cardBound = isClickOnCard(event);
