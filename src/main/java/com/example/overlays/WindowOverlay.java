@@ -1,5 +1,9 @@
 package com.example.overlays;
 
+
+import com.example.cards.CardManager;
+import com.example.packs.PackManager;
+import com.example.tasks.TaskManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.runelite.api.Client;
@@ -9,30 +13,43 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 @Singleton
 public class WindowOverlay extends Overlay {
-    private final Client client;
-    private final OverlayStateManager overlayStateManager;
-    private final CardListOverlay cardListOverlay;
-    private final AvailablePacksOverlay availablePacksOverlay;
-    private final TaskListOverlay taskListOverlay;
+    @Inject
+    private Client client;
+    @Inject
+    private OverlayStateManager overlayStateManager;
+    @Inject
+    private CardManager cardManager;
+    @Inject
+    private TaskManager taskManager;
+    @Inject
+    private PackManager packManager;
+    @Inject
+    private CardListOverlay cardListOverlay;
+    @Inject
+    private AvailablePacksOverlay availablePacksOverlay;
+    @Inject
+    private TaskListOverlay taskListOverlay;
 
     private final Rectangle window = new Rectangle();
     private final Rectangle closeButton = new Rectangle();
     private final Rectangle leftArrow = new Rectangle();
     private final Rectangle rightArrow = new Rectangle();
+    private final List<TabButton> tabs = new ArrayList<TabButton>();
 
     private final double WINDOW_WIDTH_PERCENTAGE = 0.75;
     private final double WINDOW_HEIGHT_PERCENTAGE = 0.75;
 
     @Inject
-    public WindowOverlay(Client client, OverlayStateManager overlayStateManager, CardListOverlay cardListOverlay, AvailablePacksOverlay availablePacksOverlay, TaskListOverlay taskListOverlay) {
-        this.client = client;
-        this.overlayStateManager = overlayStateManager;
-        this.cardListOverlay = cardListOverlay;
-        this.availablePacksOverlay = availablePacksOverlay;
-        this.taskListOverlay = taskListOverlay;
+    public WindowOverlay() {
+        tabs.add(new TabButton("Tasks", OverlayStateManager.OverlayComponent.AllTasks));
+        tabs.add(new TabButton("Packs", OverlayStateManager.OverlayComponent.AllPacks));
+        tabs.add(new TabButton("Held Cards", OverlayStateManager.OverlayComponent.HeldCards));
+        tabs.add(new TabButton("Available Cards", OverlayStateManager.OverlayComponent.AvailableCards));
 
         setLayer(OverlayLayer.ALWAYS_ON_TOP);
         setPosition(OverlayPosition.DYNAMIC);
@@ -64,12 +81,19 @@ public class WindowOverlay extends Overlay {
         graphics2D.drawRoundRect(x, y, windowWidth, windowHeight, 12, 12);
 
         drawTitleBar(graphics2D, x, y);
-        drawPagination(graphics2D, x, y);
 
-        // Update y coordinate and height because the title bar pushes the available space down 28 pixels
         y += 28;
-        windowHeight -= 28; // Update for the title bar
-        windowHeight -= 30; // Update for the pagination bar
+
+        int tabsHeight = drawTabs(graphics2D, x, y, windowWidth);
+        int contentPadding = 8;
+
+        y += tabsHeight;
+        windowHeight -= (28 + tabsHeight);
+
+        drawPagination(graphics2D, x, y);
+        windowHeight -= 30;
+
+        windowHeight -= contentPadding;
 
         switch (overlayStateManager.getOverlayComponent()) {
             case AllTasks:
@@ -133,13 +157,10 @@ public class WindowOverlay extends Overlay {
     }
 
     private void drawPagination(Graphics2D g, int x, int y) {
-        int canvasWidth = client.getCanvasWidth();
-        int canvasHeight = client.getCanvasHeight();
+        int windowWidth = window.width;
+        int windowHeight = window.height;
 
-        int windowWidth = (int) (canvasWidth * WINDOW_WIDTH_PERCENTAGE);
-        int windowHeight = (int) (canvasHeight * WINDOW_HEIGHT_PERCENTAGE);
-
-        int bottomY = y + windowHeight - 30;
+        int bottomY = window.y + windowHeight - 30;
 
         int centerX = x + windowWidth / 2;
 
@@ -150,9 +171,8 @@ public class WindowOverlay extends Overlay {
         leftArrow.setBounds(lx, bottomY, arrowSize, arrowSize);
 
         g.setColor(Color.WHITE);
-        g.drawString("<", lx + 10, bottomY + 19); // adjust text position inside box
+        g.drawString("<", lx + 10, bottomY + 19);
 
-        // Draw border around left arrow
         g.setColor(Color.GRAY);
         g.drawRect(lx, bottomY, arrowSize, arrowSize);
 
@@ -162,12 +182,11 @@ public class WindowOverlay extends Overlay {
         FontMetrics metrics = g.getFontMetrics();
         int textWidth = metrics.stringWidth(pageText);
         int textX = centerX - textWidth / 2;
-        int textY = bottomY + 18; // align with arrows
+        int textY = bottomY + 18;
 
         g.setColor(Color.WHITE);
         g.drawString(pageText, textX, textY);
 
-        // Draw border around page text
         int padding = 4;
         g.setColor(Color.GRAY);
         g.drawRect(textX - padding, bottomY, textWidth + 2 * padding, arrowSize);
@@ -179,9 +198,51 @@ public class WindowOverlay extends Overlay {
         g.setColor(Color.WHITE);
         g.drawString(">", rx + 10, bottomY + 19);
 
-        // Draw border around right arrow
         g.setColor(Color.GRAY);
         g.drawRect(rx, bottomY, arrowSize, arrowSize);
+    }
+
+    private int drawTabs(Graphics2D g, int x, int y, int windowWidth) {
+        int tabHeight = 24;
+        int tabCount = tabs.size();
+
+        if (tabCount == 0)
+            return 0;
+
+        int tabWidth = windowWidth / tabCount;
+
+        for (int i = 0; i < tabCount; i++) {
+            TabButton tab = tabs.get(i);
+
+            int tx = x + (i * tabWidth);
+            int ty = y;
+
+            tab.bounds.setBounds(tx, ty, tabWidth, tabHeight);
+
+            boolean active = overlayStateManager.getOverlayComponent() == tab.component;
+
+            if (active)
+                g.setColor(new Color(60, 60, 60, 240));
+            else
+                g.setColor(new Color(40, 40, 40, 240));
+
+            g.fillRect(tx, ty, tabWidth, tabHeight);
+
+            g.setColor(Color.GRAY);
+            g.drawRect(tx, ty, tabWidth, tabHeight);
+
+            g.setColor(Color.WHITE);
+
+            FontMetrics metrics = g.getFontMetrics();
+            int textWidth = metrics.stringWidth(tab.label);
+
+            int textX = tx + (tabWidth - textWidth) / 2;
+            int textY = ty + 16;
+
+            g.drawString(tab.label, textX, textY);
+        }
+
+        return tabHeight;
     }
 
     public boolean handleClick(MouseEvent event) {
@@ -210,9 +271,43 @@ public class WindowOverlay extends Overlay {
             return true;
         }
 
+        for (TabButton tab : tabs) {
+            if (tab.isClickInBounds(p)) {
+                switch (tab.component) {
+                    case AllTasks:
+                        taskManager.openTaskOverlay();
+                        break;
+                    case AllPacks:
+                        packManager.openAllPacksOverlay();
+                        break;
+                    case HeldCards:
+                        cardManager.openHeldCardsOverlay();
+                        break;
+                    case AvailableCards:
+                        cardManager.openAvailableCardsOverlay();
+                        break;
+                }
+            }
+        }
+
         if (window.contains(p) && overlayStateManager.isWindowOpen())
             return true;
 
         return false;
+    }
+
+    public static class TabButton {
+        String label;
+        OverlayStateManager.OverlayComponent component;
+        Rectangle bounds = new Rectangle();
+
+        public TabButton(String label, OverlayStateManager.OverlayComponent component) {
+            this.label = label;
+            this.component = component;
+        }
+
+        public boolean isClickInBounds(Point point) {
+            return bounds.contains(point);
+        }
     }
 }
