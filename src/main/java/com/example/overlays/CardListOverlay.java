@@ -1,6 +1,7 @@
 package com.example.overlays;
 
 import com.example.cards.*;
+import com.example.packs.PackManager;
 
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
@@ -19,14 +20,16 @@ public class CardListOverlay {
 
     private final CardManager cardManager;
     private final OverlayStateManager overlayStateManager;
+    private final PackManager packManager;
     private final CardRenderer cardRenderer;
     private final List<Rectangle> cardBounds = new ArrayList<>();
 
     @Inject
-    public CardListOverlay(CardManager cardManager, OverlayStateManager overlayStateManager, CardRenderer cardRenderer) {
+    public CardListOverlay(CardManager cardManager, OverlayStateManager overlayStateManager, CardRenderer cardRenderer, PackManager packManager) {
         this.cardManager = cardManager;
         this.overlayStateManager = overlayStateManager;
         this.cardRenderer = cardRenderer;
+        this.packManager = packManager;
     }
 
     /**
@@ -81,7 +84,8 @@ public class CardListOverlay {
             Rectangle cardBound = isClickOnCard(event);
             if (cardBound != null) {
                 cardManager.selectCard(getCardFromBounds(cardBound));
-                overlayStateManager.closeOverlay();
+                // Navigate back to the pack overlay
+                this.packManager.openAllPacksOverlay();
                 return true;
             }
         }
