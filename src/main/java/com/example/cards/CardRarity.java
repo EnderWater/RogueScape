@@ -5,5 +5,6 @@ public enum CardRarity {
     Uncommon,
     Rare,
     Mythic,
-    Legendary
+    Legendary,
+    Special,
 }

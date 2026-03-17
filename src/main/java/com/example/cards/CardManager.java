@@ -197,7 +197,7 @@ public class CardManager {
             Card randCard = regionPackCards.get(randInt);
 
             // If the selected card is already in the user's hand somehow
-            if (this.heldCards.contains(randCard) || this.openedPackCards.get(packName).contains(randCard)) {
+            if (this.heldCards.contains(randCard) || returnCards.contains(randCard)) {
                 retry++;
                 continue;
             }

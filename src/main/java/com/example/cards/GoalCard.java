@@ -8,10 +8,10 @@ import java.util.List;
  * special goal cards that the user can select.
 */
 public class GoalCard extends Card {
-    // These are the cards associated with the goal booster pack/card
-    private final List<Card> goalCards = new ArrayList<>();
+    private final int packsAwarded;
 
-    GoalCard(int cardId, String name, String description, String icon, CardRarity rarity, String type, String packName) {
+    GoalCard(int cardId, String name, String description, String icon, CardRarity rarity, String type, String packName, int packsAwarded) {
         super(cardId, name, description, icon, rarity, type, packName);
+        this.packsAwarded = packsAwarded;
     }
 }

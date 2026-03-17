@@ -3,6 +3,7 @@ package com.example.cards;
 import com.example.relics.AnthologyOfProficiency;
 import com.google.gson.*;
 import net.runelite.api.Quest;
+import net.runelite.api.Skill;
 import net.runelite.client.eventbus.EventBus;
 
 import java.io.Console;
@@ -40,6 +41,8 @@ public class CardDeserializer implements JsonDeserializer<Card> {
                 return new ItemCard(name, description, "", cardRarity, itemId, cardId, cardType, packName);
             case "Boon":
                 return new BoonCard(cardId, name, description, "", cardRarity, cardType, packName);
+            case "Skill":
+                return new SkillCard(cardId, name, description, "", cardRarity, Skill.AGILITY, cardType, packName);
             case "Relic":
                 return new RelicCard(cardId, name, description, "", cardRarity, new AnthologyOfProficiency(eventBus), cardType, packName);
             case "Land":
@@ -49,6 +52,9 @@ public class CardDeserializer implements JsonDeserializer<Card> {
             case "Minigame":
                 cardRarity = CardRarity.Mythic;
                 return new QuestCard(cardId, name, description, "", cardRarity, Quest.DORICS_QUEST, cardType, packName);
+            case "Goal":
+                int packsAwarded = obj.get("packsAwarded").getAsInt();
+                return new GoalCard(cardId, name, description, "", cardRarity, cardType, packName, packsAwarded);
 
             default:
                 throw new JsonParseException("Unknown cardType: " + cardType);

@@ -10,18 +10,12 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class CardRenderer {
-    private final ItemManager itemManager;
-    private final OverlayStateManager overlayStateManager;
-    private final ItemLookup itemLookup;
     private final IconManager iconManager;
 
     private final int PADDING = 12;
 
     @Inject
-    public CardRenderer(ItemManager itemManager, OverlayStateManager overlayStateManager, ItemLookup itemLookup, IconManager iconManager) {
-        this.itemManager = itemManager;
-        this.overlayStateManager = overlayStateManager;
-        this.itemLookup = itemLookup;
+    public CardRenderer(IconManager iconManager) {
         this.iconManager = iconManager;
     }
 
@@ -87,7 +81,8 @@ public class CardRenderer {
         // -----------------------------
         // IMAGE
         // -----------------------------
-        BufferedImage image = iconManager.getItemIcon(card.getName());
+        BufferedImage image;
+        image = iconManager.getOverlayIcon(card);
 
         if (image != null) {
             int maxWidth = width - 20;
@@ -155,13 +150,13 @@ public class CardRenderer {
         int iconSize = 22;
         int iconY = y + height - iconSize - PADDING;
 
-        BufferedImage rarityIcon = iconManager.getOverlayIcon(card.getRarity().toString());
+        BufferedImage rarityIcon = iconManager.getRarityIcon(card);
 
         if (rarityIcon != null) {
             graphics.drawImage(rarityIcon, x + PADDING, iconY, iconSize, iconSize, null);
         }
 
-        BufferedImage typeIcon = iconManager.getOverlayIcon(card.getType());
+        BufferedImage typeIcon = iconManager.getTypeIcon(card);
 
         if (typeIcon != null) {
             graphics.drawImage(typeIcon, x + width - PADDING - iconSize, iconY, iconSize, iconSize, null);

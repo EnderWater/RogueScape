@@ -41,6 +41,7 @@ public class CardCsvLoader {
                     int cardId = parseIntSafe(parts, 4);
                     String packName = safe(parts, 5);
                     String setNumber = safe(parts, 6);
+                    int packsAwarded = parseIntSafe(parts, 7);
 
                     CardRarity rarity;
                     try {
@@ -50,7 +51,7 @@ public class CardCsvLoader {
                         rarity = CardRarity.Legendary;
                     }
 
-                    Card card = createCard(type, name, description, rarity, cardId, packName);
+                    Card card = createCard(type, name, description, rarity, cardId, packName, packsAwarded);
                     if (card != null) {
                         cards.add(card);
                     }
@@ -68,7 +69,7 @@ public class CardCsvLoader {
     }
 
     private static Card createCard(String type, String name, String description, CardRarity rarity,
-                                   int cardId, String packName) {
+                                   int cardId, String packName, int packsAwarded) {
         switch (type) {
             case "Item":
                 // Replace 0 with itemId if you have it in your CSV or a lookup table
@@ -77,6 +78,9 @@ public class CardCsvLoader {
 
             case "Boon":
                 return new BoonCard(cardId, name, description, "", rarity, type, packName);
+
+            case "Goal":
+                return new GoalCard(cardId, name, description, "", rarity, type, packName, packsAwarded);
 
             case "Relic":
 //                return new RelicCard(cardId, name, description, "", rarity, new AnthologyOfProficiency(), type, packName);

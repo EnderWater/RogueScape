@@ -1,5 +1,8 @@
 package com.example;
 
+import com.example.cards.Card;
+import com.example.cards.ItemCard;
+import net.runelite.api.Item;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.util.ImageUtil;
 
@@ -49,26 +52,28 @@ public class IconManager {
         loadIcon("Mythic", "/com/example/icons/Mythic.png");
         loadIcon("Legendary", "/com/example/icons/Legendary.png");
 
+        // Goal icons
+        loadIcon("Humble Beginnings Goal", "/com/example/icons/pack-icons/Humble_Beginnings_Goal.png");
+        loadIcon("Jewel of Misthalin Goal", "/com/example/icons/pack-icons/Jewel_of_Misthalin_Goal.png");
+        loadIcon("Light of Saradomin Goal", "/com/example/icons/pack-icons/Light_of_Saradomin_Goal.png");
+        loadIcon("Shadows over Hallowvale Goal", "/com/example/icons/pack-icons/Shadows_Over_Hallowvale_Goal.png");
+
         // Pack icons
         loadIcon("Creatures of the Night", "/com/example/icons/pack-icons/Creatures_of_the_Night.png");
         loadIcon("Echoes of the Past", "/com/example/icons/pack-icons/Echoes_of_the_Past.png");
         loadIcon("Emirs Dominion", "/com/example/icons/pack-icons/Emirs_Dominion.png");
         loadIcon("Fallen Empires", "/com/example/icons/pack-icons/Fallen_Empires.png");
         loadIcon("Humble Beginnings", "/com/example/icons/pack-icons/Humble_Beginnings.png");
-        loadIcon("Humble Beginnings Goal", "/com/example/icons/pack-icons/Humble_Beginnings_Goal.png");
         loadIcon("Jewel of Misthalin", "/com/example/icons/pack-icons/Jewel_of_Misthalin.png");
-        loadIcon("Jewel of Misthalin Goal", "/com/example/icons/pack-icons/Jewel_of_Misthalin_Goal.png");
         loadIcon("Keystone of the Ardent", "/com/example/icons/pack-icons/Keystone_of_the_Ardent.png");
         loadIcon("Knights of Saradomin", "/com/example/icons/pack-icons/Knights_of_Saradomin.png");
         loadIcon("Light of Saradomin", "/com/example/icons/pack-icons/Light_of_Saradomin.png");
-        loadIcon("Light of Saradomin Goal Pack", "/com/example/icons/pack-icons/Light_of_Saradomin_Goal_Pack.png");
         loadIcon("Mages of the Shore", "/com/example/icons/pack-icons/Mages_of_the_Shore.png");
         loadIcon("Ports and POHs", "/com/example/icons/pack-icons/Ports_and_POHs.png");
         loadIcon("Ritual of Balance", "/com/example/icons/pack-icons/Ritual_of_Balance.png");
         loadIcon("Ruins of Senntisten", "/com/example/icons/pack-icons/Ruins_of_Senntisten.png");
         loadIcon("Scars of Forinthry", "/com/example/icons/pack-icons/Scars_of_Forinthry.png");
         loadIcon("Shadows over Hallowvale", "/com/example/icons/pack-icons/Shadows_Over_Hallowvale.png");
-        loadIcon("Shadows over Hallowvale Goal", "/com/example/icons/pack-icons/Shadows_Over_Hallowvale_Goal.png");
         loadIcon("Shifting Sands", "/com/example/icons/pack-icons/Shifting_Sands.png");
         loadIcon("The Concealed King", "/com/example/icons/pack-icons/The_Concealed_King.png");
     }
@@ -86,19 +91,24 @@ public class IconManager {
         return currentChunkIcon;
     }
 
-    public BufferedImage getOverlayIcon(String key) {
+    public BufferedImage getOverlayIcon(String iconKey) {
+        return getIconFromMap(iconKey);
+    }
+
+    public BufferedImage getOverlayIcon(Card card) {
+        if (card instanceof ItemCard) {
+            return getItemIcon(card.getName());
+        }
+        else
+            return getIconFromMap(card.getType());
+    }
+
+    private BufferedImage getIconFromMap(String key) {
         BufferedImage image = this.iconMap.get(key);
         return image;
     }
 
-    public void setCurrentChunkIcon(String packName) {
-        if (packName == null)
-            this.currentChunkIcon = null;
-
-        this.currentChunkIcon = ImageUtil.resizeImage(getOverlayIcon(packName), 32, 32);
-    }
-
-    public BufferedImage getItemIcon(String itemName) {
+    private BufferedImage getItemIcon(String itemName) {
         int itemId = itemLookup.getItemId(itemName);
         BufferedImage image = this.itemManager.getImage(itemId);
 
@@ -107,5 +117,20 @@ public class IconManager {
         }
 
         return image;
+    }
+
+    public BufferedImage getRarityIcon(Card card) {
+        return getIconFromMap(card.getRarity().toString());
+    }
+
+    public BufferedImage getTypeIcon(Card card) {
+        return getIconFromMap(card.getType());
+    }
+
+    public void setCurrentChunkIcon(String packName) {
+        if (packName == null)
+            this.currentChunkIcon = null;
+
+        this.currentChunkIcon = ImageUtil.resizeImage(getIconFromMap(packName), 32, 32);
     }
 }
