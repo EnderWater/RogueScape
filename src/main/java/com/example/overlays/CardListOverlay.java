@@ -87,9 +87,9 @@ public class CardListOverlay {
         if (overlayStateManager.isPackOpeningOpen() && !overlayStateManager.getOverlayItems().isEmpty()) {
             Rectangle cardBound = isClickOnCard(event);
             if (cardBound != null) {
-                cardManager.selectCard(getCardFromBounds(cardBound));
-                // Navigate back to the pack overlay
-                this.packManager.openAllPacksOverlay();
+                boolean navigate = cardManager.selectCard(getCardFromBounds(cardBound));
+                // Navigate back to the pack overlay if navigate is true
+                if (navigate) this.packManager.openAllPacksOverlay();
                 return true;
             }
         }
@@ -119,7 +119,7 @@ public class CardListOverlay {
 
     public Card getCardFromBounds(Rectangle cardRectangle) {
         int index = cardBounds.indexOf(cardRectangle);
-        return overlayStateManager.<Card>getOverlayItems().get(index);
+        return overlayStateManager.<Card>getPaginatedItems().get(index);
     }
 
     public Rectangle isClickOnCard(MouseEvent event) {
