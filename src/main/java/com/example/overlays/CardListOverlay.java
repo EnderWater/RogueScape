@@ -15,8 +15,8 @@ import java.util.List;
 @Singleton
 public class CardListOverlay {
     private final double CARD_WIDTH_PERCENTAGE = 0.15;
-    private final double CARD_HEIGHT_PERCENTAGE = 0.40;
-    private final int SPACING = 30;
+    private final double CARD_HEIGHT_PERCENTAGE = 0.47;
+    private final int SPACING = 12;
 
     private final CardManager cardManager;
     private final OverlayStateManager overlayStateManager;
@@ -53,6 +53,10 @@ public class CardListOverlay {
 
         int COLUMNS = 5;
         int ROWS = Math.min((int)Math.ceil((double) cards.size() / 5), 2);
+
+        if (ROWS == 1) {
+            cardHeight = (int) (containerHeight * .60);
+        }
 
         int gridHeight = (ROWS * cardHeight) + ((ROWS - 1) * SPACING);
         int startY = (containerHeight - gridHeight) / 2;
