@@ -4,6 +4,8 @@ import com.example.JsonManager;
 import com.example.listeners.CardChangeListener;
 import com.example.overlays.OverlayStateManager;
 import com.example.packs.PackManager;
+import com.example.tasks.GoalTask;
+import com.example.tasks.TaskManager;
 import lombok.Getter;
 
 import javax.inject.Inject;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class CardManager {
     private final JsonManager jsonManager;
     private final PackManager packManager;
+    private final TaskManager taskManager;
     private final OverlayStateManager overlayStateManager;
 
     // This controls the max number of cards that can be shown per page
@@ -38,10 +41,6 @@ public class CardManager {
     @Getter
     private Map<String, List<Card>> openedPackCards = new HashMap<>();
 
-    // This map contains a list of all cards of a region where the region name is the key and the list is the value
-    @Getter
-    private Map<String, List<Card>> regionCards = new HashMap<>();
-
     // Stores the listeners
     private final List<CardChangeListener> listeners = new ArrayList<>();
 
@@ -53,10 +52,11 @@ public class CardManager {
     // Injects everything the CardManager needs and loads previous CardManager state from disk. If no previous state was
     // found, load the default and build CardManager from the ground up.
     @Inject
-    public CardManager(JsonManager jsonManager, PackManager packManager, OverlayStateManager overlayStateManager) {
+    public CardManager(JsonManager jsonManager, PackManager packManager, OverlayStateManager overlayStateManager, TaskManager taskManager) {
         this.jsonManager = jsonManager;
         this.packManager = packManager;
         this.overlayStateManager = overlayStateManager;
+        this.taskManager = taskManager;
 
         CardManager cardManager = jsonManager.load("cardmanager.json", CardManager.class);
         if (cardManager != null) {
@@ -81,31 +81,57 @@ public class CardManager {
     }
 
     // Add a card to the user's held cards
-    public void selectCard(Card card) {
+    public boolean selectCard(Card card) {
         if (card != null) {
-            // If the card is a goal card, intercept the normal workflow and instead run the goal card (pack technically) workflow
+            // If the card is a goal pack, intercept the normal workflow and instead run the goal pack workflow
+            // A card is a goal pack if it is a GoalCard object with an id of -8 because it's my favorite number :)
+            if (card instanceof GoalCard && card.getCardId() == -8) {
+                this.selectGoalCard((GoalCard) card);
+                return false;
+            }
+
+            // If the card is a goal card, a special task needs to be created since the user is selecting it
             if (card instanceof GoalCard) {
-                this.selectGoalCard((GoalCard)card);
-                return;
+//                GoalTask(String taskType, String taskName, String description, int current, int target, boolean isPinned, int packsAwarded)
+                GoalTask goalTask = new GoalTask("Goal", card.getName(), card.getDescription(), 0, 1, true, ((GoalCard) card).getPacksAwarded());
+                // Add the new task
+                taskManager.addTask(goalTask);
             }
 
             this.addCard(card);
 
-            this.openedPackCards.clear();
+            // Clear out the openedPackCards for the given packName
+            this.openedPackCards.get(card.getPackName()).clear();
 
             // Since a card was chosen, increment the opened packs and reduce the available packs
             this.packManager.addOpenedPacks(card.getPackName());
 
             // Save your work! :)
             this.save();
+
+            return true;
         }
+        return false;
     }
 
     // Select a goal card - this opens a special set of cards to choose from
     public void selectGoalCard(GoalCard card) {
         String packName = card.getPackName();
-        List<Card> goalCards = this.getRandomCards(packName, 3);
 
+        // goalCards contains cards that are in the same pack, with a rarity of special, that are not already held.
+        List<Card> goalCards = this.getAvailableCards().stream()
+                .filter(c -> Objects.equals(c.getPackName(), packName) && c.getRarity() == CardRarity.Special && !heldCards.contains(c))
+                .collect(Collectors.toList());
+
+        List<Card> randomCards = getRandomCards(goalCards, packName, 3);
+        this.openedPackCards.get(packName).clear();
+        this.openedPackCards.get(packName).addAll(randomCards);
+
+        // Save the openedPackCards after they've been set
+        this.save();
+
+        List<Card> packCards = this.openedPackCards.get(packName);
+        this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.PackOpening, packCards, MAX_CARDS_PER_PAGE);
     }
 
     // Add a single card to the user's held cards
@@ -154,7 +180,7 @@ public class CardManager {
         List<Card> regionOpenedPackCards = this.openedPackCards.get(packName);
 
         if (regionOpenedPackCards != null && !regionOpenedPackCards.isEmpty()) {
-            this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.PackOpening, regionOpenedPackCards, 6);
+            this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.PackOpening, regionOpenedPackCards, 5);
             return;
         }
 
@@ -162,7 +188,9 @@ public class CardManager {
         if (!openedPackCards.containsKey(packName))
             openedPackCards.put(packName, new ArrayList<>());
 
-        List<Card> randomCards = getRandomCards(packName, 5);
+        List<Card> randomCards = getRandomCards(this.availableCards, packName, 5);
+        // Replace any GoalCards found with default GoalCards (which are called Goal Packs)
+        randomCards.replaceAll(this::replaceIfGoalCard);
         this.openedPackCards.get(packName).addAll(randomCards);
 
         // Save the openedPackCards after they've been set
@@ -172,12 +200,12 @@ public class CardManager {
         this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.PackOpening, packCards, MAX_CARDS_PER_PAGE);
     }
 
-    // This method will grab 5 random cards from the given packName and return them in a list
-    private List<Card> getRandomCards(String packName, int numCards) {
+    // This method will grab numCards random cards from the given packName and return them in a list
+    private List<Card> getRandomCards(List<Card> cards, String packName, int numCards) {
         List<Card> returnCards = new ArrayList<>();
 
-        // If the region hasn't had a pack opened already, open a new one
-        List<Card> regionPackCards = this.availableCards.stream()
+        // Get the list of cards with the same packName
+        List<Card> regionPackCards = cards.stream()
                 .filter(card -> Objects.equals(card.getPackName(), packName))
                 .collect(Collectors.toList());
 
@@ -193,7 +221,7 @@ public class CardManager {
 
         // Loop x times and select x random cards. If a new card isn't found within 100 retries, stop the loop and return what was found
         while (i < numCards && retry < 100) {
-            int randInt = random.nextInt(regionPackCards.size()-1);
+            int randInt = random.nextInt(regionPackCards.size() - 1);
             Card randCard = regionPackCards.get(randInt);
 
             // If the selected card is already in the user's hand somehow
@@ -224,5 +252,20 @@ public class CardManager {
 
     public void openFilteredCardsOverlay(List<Card> cards) {
         this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.FilteredCards, cards, MAX_CARDS_PER_PAGE);
+    }
+
+    /*
+      This is a strange method. In order to facilitate goal packs, there are x number of goal cards per region pack.
+      If one of those goal cards appears in the random card choice, we're not going to let the user select it by itself.
+      Instead, clicking it should open another card view where the user will be able to select 3 different types of goals.
+      Essentially, the user gets a choice of multiple goal cards if they roll one. So, if a goal card is rolled, set up a
+      new GoalCard instance that will be part of the list. Clicking on this card as a choice will run the selectGoalCard()
+      method in CardManager. Check the logic there for further details about what happens after selecting the new GoalCard.
+     */
+    private Card replaceIfGoalCard(Card card) {
+        if (card instanceof GoalCard) {
+            return new GoalCard(-8, "Goal Pack", "Open a Goal Pack", "", CardRarity.Special, "Goal", card.getPackName(), 0);
+        }
+        return card;
     }
 }

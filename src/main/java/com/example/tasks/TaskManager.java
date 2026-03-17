@@ -67,6 +67,10 @@ public class TaskManager {
 
     public void addTask(Task task) {
         this.tasks.add(task);
+
+        if (task.isPinned())
+            pinTask(task);
+
         this.saveTasks();
         this.notifyListeners();
     }
@@ -102,6 +106,8 @@ public class TaskManager {
     }
 
     public void completeTask(Task task) {
+        if (task.isTaskComplete()) return;
+
         task.setCompleted();
         this.packManager.addPacks(task.getPacksAwarded(), this.packManager.getCurrentPackName());
         this.notifyListeners();
