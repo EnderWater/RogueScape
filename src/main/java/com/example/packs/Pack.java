@@ -1,5 +1,6 @@
 package com.example.packs;
 
+import com.example.SoundPlayer;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -42,6 +43,7 @@ public class Pack {
     }
 
     public void addAvailablePack(int num) {
+        SoundPlayer.play("sounds/Booster_Pack_Obtained_Sound.wav");
         this.available += num;
     }
 
