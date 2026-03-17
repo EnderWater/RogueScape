@@ -1,6 +1,7 @@
 package com.example;
 
 import com.example.cards.Card;
+import com.example.cards.GoalCard;
 import com.example.cards.ItemCard;
 import net.runelite.api.Item;
 import net.runelite.client.game.ItemManager;
@@ -51,6 +52,7 @@ public class IconManager {
         loadIcon("Rare", "/com/example/icons/Rare.png");
         loadIcon("Mythic", "/com/example/icons/Mythic.png");
         loadIcon("Legendary", "/com/example/icons/Legendary.png");
+        loadIcon("Special", "/com/example/icons/Special.png");
 
         // Goal icons
         loadIcon("Humble Beginnings Goal", "/com/example/icons/pack-icons/Humble_Beginnings_Goal.png");
@@ -98,6 +100,9 @@ public class IconManager {
     public BufferedImage getOverlayIcon(Card card) {
         if (card instanceof ItemCard) {
             return getItemIcon(card.getName());
+        }
+        else if (card instanceof GoalCard) {
+            return getIconFromMap(card.getRarity().toString());
         }
         else
             return getIconFromMap(card.getType());
