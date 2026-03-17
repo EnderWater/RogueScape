@@ -42,7 +42,7 @@ public class WindowOverlay extends Overlay {
     private final List<TabButton> tabs = new ArrayList<TabButton>();
 
     private final double WINDOW_WIDTH_PERCENTAGE = 0.75;
-    private final double WINDOW_HEIGHT_PERCENTAGE = 0.75;
+    private final double WINDOW_HEIGHT_PERCENTAGE = 0.85;
 
     @Inject
     public WindowOverlay() {
