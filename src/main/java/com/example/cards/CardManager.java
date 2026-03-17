@@ -183,8 +183,8 @@ public class CardManager {
 
         Random random = new Random();
 
-        // If there are less than 5 cards, just add them all and skip the while loop
-        if (regionPackCards.size() < 5) {
+        // If there are less than or equal to numCards, just add them all and skip the while loop
+        if (regionPackCards.size() <= numCards) {
             return regionPackCards;
         }
 
