@@ -116,28 +116,30 @@ public class RogueScapePlugin extends Plugin {
         @Override
         public MouseEvent mousePressed(MouseEvent event)
         {
-            // Check if the click was on the pack
-            if (cardListOverlay.isClickOnButton(event)) {
-                event.consume();
-            }
+            if (overlayStateManager.isWindowOpen()) {
+                // Check if the click was on the pack
+                if (cardListOverlay.isClickOnButton(event)) {
+                    event.consume();
+                }
 
-            // Check if the user clicked on the available packs overlay
-            if (availablePacksOverlay.handleClick(event)) {
-                event.consume();
-            }
+                // Check if the user clicked on the available packs overlay
+                if (availablePacksOverlay.handleClick(event)) {
+                    event.consume();
+                }
 
-            // Check if the user clicked a button in the task overlay
-            if (taskListOverlay.isClickOnButton(event)) {
-                event.consume();
+                // Check if the user clicked a button in the task overlay
+                if (taskListOverlay.isClickOnButton(event)) {
+                    event.consume();
+                }
+
+                // Check if the click was in the window first
+                if (windowOverlay.handleClick(event)) {
+                    event.consume();
+                }
             }
 
             // Check if the click was on the pack count overlay
             if (packCountOverlay.mouseClicked(event)) {
-                event.consume();
-            }
-
-            // Check if the click was in the window first
-            if (windowOverlay.handleClick(event)) {
                 event.consume();
             }
 
