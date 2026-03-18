@@ -52,7 +52,7 @@ public class PackManagerPanel extends JPanel implements CardChangeListener {
             // Reset this so the held cards can be opened again immediately
             openPack();
         });
-        JButton addPackButton = createButton("Add 1 Pack", e -> this.packManager.addPacks(1, packManager.getCurrentPackName()));
+        JButton addPackButton = createButton("Add 1 Pack", e -> this.packManager.addCurrentRegionPacks(1));
         JButton addCardButton = createButton("Add card", e -> this.renderAddCardSection());
 
         // Create the section where the held cards will be displayed
