@@ -65,8 +65,8 @@ public class PackManager {
         save();
     }
 
-    public void addPacks(int num, String packName) {
-        Pack currentRegionPack = this.packs.get(packName);
+    public void addCurrentRegionPacks(int num) {
+        Pack currentRegionPack = this.packs.get(getCurrentPackName());
 
         // Add to the available and opened packs
         currentRegionPack.addAvailablePack(num);
@@ -75,13 +75,25 @@ public class PackManager {
         this.save();
     }
 
-    public void addOpenedPacks(String packName) {
+    public void completePackOpening(String packName, int addOpenedCount, int removeAvailableCount) {
+        this.addOpenedPacks(packName, addOpenedCount);
+        this.removeAvailablePack(packName, removeAvailableCount);
+    }
+
+    public void addOpenedPacks(String packName, int count) {
         Pack pack = this.packs.get(packName);
 
         if (pack == null) return;
 
-        pack.addOpenedPack(1);
-        pack.addAvailablePack(-1);
+        pack.addOpenedPack(count);
+    }
+
+    public void removeAvailablePack(String packName, int count) {
+        Pack pack = this.packs.get(packName);
+
+        if (pack == null) return;
+
+        pack.removeAvailablePack(count);
     }
 
     public int getAvailablePacks(String packName) {
