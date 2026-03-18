@@ -1,6 +1,5 @@
 package com.example.tasks;
 
-import com.example.cards.CardManager;
 import com.example.JsonManager;
 import com.example.overlays.OverlayStateManager;
 import com.example.packs.PackManager;
@@ -109,7 +108,7 @@ public class TaskManager {
         if (task.isTaskComplete()) return;
 
         task.setCompleted();
-        this.packManager.addPacks(task.getPacksAwarded(), this.packManager.getCurrentPackName());
+        this.packManager.addCurrentRegionPacks(task.getPacksAwarded());
         this.notifyListeners();
     }
 

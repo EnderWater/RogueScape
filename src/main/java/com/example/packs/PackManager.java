@@ -27,6 +27,9 @@ public class PackManager {
     @Getter
     private final List<String> packNames;
 
+    @Getter
+    private final List<Pack> sortedPacks = new ArrayList<>();
+
     @Inject
     public PackManager(JsonManager jsonManager, OverlayStateManager overlayStateManager) {
         this.jsonManager = jsonManager;
@@ -41,7 +44,12 @@ public class PackManager {
 
         packs = packs1;
 
+        //  Load the packNames
         this.packNames = packs.keySet().stream().sorted().collect(Collectors.toList());
+
+        // Get and sort the list of packs based on their available packs
+        this.sortedPacks.addAll(packs.values());
+        this.sortPacks();
     }
 
     public Collection<Pack> getPacks() {
@@ -66,26 +74,30 @@ public class PackManager {
     }
 
     public void addCurrentRegionPacks(int num) {
-        Pack currentRegionPack = this.packs.get(getCurrentPackName());
-
-        // Add to the available and opened packs
-        currentRegionPack.addAvailablePack(num);
-        currentRegionPack.addOpenedPack(num);
-
+        completePackOpening(getCurrentPackName(), num, num);
         this.save();
     }
 
     public void completePackOpening(String packName, int addOpenedCount, int removeAvailableCount) {
-        this.addOpenedPacks(packName, addOpenedCount);
+        this.addEarnedPacks(packName, addOpenedCount);
         this.removeAvailablePack(packName, removeAvailableCount);
+        this.sortPacks();
     }
 
-    public void addOpenedPacks(String packName, int count) {
+    public void addAvailablePacks(String packName, int count) {
         Pack pack = this.packs.get(packName);
 
         if (pack == null) return;
 
-        pack.addOpenedPack(count);
+        pack.addAvailablePack(count);
+    }
+
+    public void addEarnedPacks(String packName, int count) {
+        Pack pack = this.packs.get(packName);
+
+        if (pack == null) return;
+
+        pack.addEarnedPack(count);
     }
 
     public void removeAvailablePack(String packName, int count) {
@@ -122,9 +134,12 @@ public class PackManager {
         return returnMap;
     }
 
+    private void sortPacks() {
+        this.sortedPacks.sort(Comparator.comparing(pack -> -pack.getAvailable()));
+    }
+
     public void openAllPacksOverlay() {
         // Since the packs stored in this manager are in a map, just get the values and store them as a list to give to the overlay
-        List<Pack> packs = new ArrayList<>(this.packs.values());
-        this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.AllPacks, packs, MAX_PACKS_PER_PAGE);
+        this.overlayStateManager.openOverlay(OverlayStateManager.OverlayComponent.AllPacks, sortedPacks, MAX_PACKS_PER_PAGE);
     }
 }
