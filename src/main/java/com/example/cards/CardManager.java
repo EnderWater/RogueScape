@@ -104,7 +104,7 @@ public class CardManager {
             this.openedPackCards.get(card.getPackName()).clear();
 
             // Since a card was chosen, increment the opened packs and reduce the available packs
-            this.packManager.addOpenedPacks(card.getPackName());
+            this.packManager.completePackOpening(card.getPackName(), 1, 1);
 
             // Save your work! :)
             this.save();
