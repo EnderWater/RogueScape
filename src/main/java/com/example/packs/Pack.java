@@ -43,8 +43,20 @@ public class Pack {
     }
 
     public void addAvailablePack(int num) {
+        // Make num positive if it is negative
+        if (num < 0)
+            num = -num;
+
         SoundPlayer.play("sounds/Booster_Pack_Obtained_Sound.wav");
         this.available += num;
+    }
+
+    public void removeAvailablePack(int num) {
+        // Make num positive if it is negative
+        if (num < 0)
+            num = -num;
+
+        this.available -= num;
     }
 
     public void addEarnedPack(int num) {
