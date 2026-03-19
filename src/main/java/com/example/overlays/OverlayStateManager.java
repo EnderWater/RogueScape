@@ -5,6 +5,7 @@ import lombok.Getter;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Singleton
 public class OverlayStateManager {
@@ -18,13 +19,13 @@ public class OverlayStateManager {
     private int currentPage = 1;
 
     @Getter
-    private final List<?> overlayItems = new ArrayList<>();
+    private final List<OverlayItem> overlayItems = new ArrayList<>();
 
     @Getter
-    private final List<?> paginatedItems = new ArrayList<>();
+    private final List<OverlayItem> filteredOverlayItems = new ArrayList<>();
 
     @Getter
-    private String currentPackName;
+    private final List<OverlayItem> paginatedItems = new ArrayList<>();
 
     @Getter
     private OverlayComponent overlayComponent = OverlayComponent.None;
@@ -75,14 +76,6 @@ public class OverlayStateManager {
     @Inject
     public OverlayStateManager() {}
 
-    public <T> List<T> getOverlayItems() {
-        return (List<T>)overlayItems;
-    }
-
-    public <T> List<T> getPaginatedItems() {
-        return (List<T>)paginatedItems;
-    }
-
     public void openWindow() {
         windowOpen = true;
     }
@@ -94,7 +87,7 @@ public class OverlayStateManager {
         clearOverlay();
     }
 
-    public <T> void openOverlay(OverlayComponent component, T item, int maxItemsPerPage) {
+    public void openOverlay(OverlayComponent component, OverlayItem item, int maxItemsPerPage) {
         openWindow();
         currentPage = 1;
         overlayComponent = component;
@@ -102,7 +95,7 @@ public class OverlayStateManager {
         addOverlayItems(item);
     }
 
-    public <T> void openOverlay(OverlayComponent component, List<T> items,  int maxItemsPerPage) {
+    public void openOverlay(OverlayComponent component, List<? extends OverlayItem> items,  int maxItemsPerPage) {
         openWindow();
         resetPage();
 
@@ -112,7 +105,7 @@ public class OverlayStateManager {
         addOverlayItems(items);
     }
 
-    public <T> void addOverlayItems(T item) {
+    public void addOverlayItems(OverlayItem item) {
         // Use this to clear any overlayCards that may be left over
         clearOverlay();
 
@@ -120,11 +113,11 @@ public class OverlayStateManager {
         resetPage();
 
         // Add them to the overlay
-        ((List<T>)this.overlayItems).add(item);
+        this.overlayItems.add(item);
         this.paginate();
     }
 
-    public <T> void addOverlayItems(List<T> items) {
+    public void addOverlayItems(List<? extends OverlayItem> items) {
         // Use this to clear any overlayCards that may be left over
         clearOverlay();
 
@@ -132,7 +125,7 @@ public class OverlayStateManager {
         resetPage();
 
         // Add them to the overlay
-        ((List<T>)this.overlayItems).addAll(items);
+        this.overlayItems.addAll(items);
         this.paginate();
     }
 
@@ -142,7 +135,7 @@ public class OverlayStateManager {
     }
 
 
-    private <T> void paginate() {
+    private void paginate() {
         this.paginatedItems.clear();
 
         int startingIndex = (currentPage - 1) * MAX_ITEMS_PER_PAGE; // 0 for first page if cards per page is 20
@@ -151,8 +144,8 @@ public class OverlayStateManager {
         if (endingIndex >= overlayItems.size())
             endingIndex = overlayItems.size();
 
-        List<T> overlayItems = (List<T>)this.overlayItems;
-        ((List<T>)this.paginatedItems).addAll(overlayItems.subList(startingIndex, endingIndex));
+        List<OverlayItem> overlayItems = this.overlayItems;
+        this.paginatedItems.addAll(overlayItems.subList(startingIndex, endingIndex));
     }
 
     public int getTotalPages() {
@@ -171,5 +164,15 @@ public class OverlayStateManager {
 
     private void resetPage() {
         currentPage = 1;
+    }
+
+    public void searchAndUpdateOverlayItems(String searchString) {
+        List<OverlayItem> searchedItems = this.overlayItems
+                .stream()
+                .filter(item -> item.getSearchableString().contains(searchString))
+                .collect(Collectors.toList());
+
+        this.filteredOverlayItems.clear();
+        this.filteredOverlayItems.addAll(searchedItems);
     }
 }

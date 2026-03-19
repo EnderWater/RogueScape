@@ -40,7 +40,10 @@ public class AvailablePacksOverlay {
     }
 
     public void render(Graphics2D graphics, int containerX, int containerY, int containerWidth, int containerHeight) {
-        List<Pack> packs = overlayStateManager.getPaginatedItems();
+        List<Pack> packs = overlayStateManager.getPaginatedItems()
+            .stream()
+            .map(pack -> (Pack)pack)
+            .collect(Collectors.toList());
         List<String> packCategories = packManager.getOverlayPackNames();
 
         if (packs == null || !overlayStateManager.isAllPacksOpen()) {
@@ -163,7 +166,11 @@ public class AvailablePacksOverlay {
 
     private Pack getPackFromBounds(Rectangle bounds) {
         int index = packBounds.indexOf(bounds);
-        return overlayStateManager.<Pack>getPaginatedItems().get(index);
+        return overlayStateManager.getPaginatedItems()
+                .stream()
+                .map(pack -> (Pack)pack)
+                .collect(Collectors.toList())
+                .get(index);
     }
 
     private Rectangle isClickOnPack(MouseEvent event) {

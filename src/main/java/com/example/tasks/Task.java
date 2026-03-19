@@ -1,9 +1,11 @@
 package com.example.tasks;
 
+import com.example.overlays.OverlayItem;
 import lombok.Getter;
 import lombok.Setter;
 
-public abstract class Task {
+public abstract class Task implements OverlayItem {
+    @Getter
     private String taskType;
 
     @Getter
@@ -74,5 +76,14 @@ public abstract class Task {
 
     public void removeFromTask(int x) {
         this.current -= x;
+    }
+
+    @Override
+    public String getSearchableString() {
+        return getName() +
+                " " +
+                getDescription() +
+                " " +
+                getTaskType();
     }
 }

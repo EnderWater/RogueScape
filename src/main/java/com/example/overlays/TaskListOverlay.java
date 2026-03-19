@@ -1,5 +1,6 @@
 package com.example.overlays;
 
+import com.example.packs.Pack;
 import com.example.tasks.Task;
 import com.example.tasks.TaskManager;
 
@@ -9,6 +10,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Singleton
 public class TaskListOverlay
@@ -35,7 +37,10 @@ public class TaskListOverlay
     {
         buttonBounds.clear();
 
-        List<Task> tasks = overlayStateManager.getPaginatedItems();
+        List<Task> tasks = overlayStateManager.getPaginatedItems()
+                .stream()
+                .map(task -> (Task)task)
+                .collect(Collectors.toList());
 
         int cardWidth = (containerWidth - (SPACING * (COLUMNS - 1))) / COLUMNS;
         int cardHeight = (containerHeight - (SPACING * (ROWS - 1))) / ROWS;

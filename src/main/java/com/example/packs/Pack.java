@@ -1,12 +1,13 @@
 package com.example.packs;
 
 import com.example.SoundPlayer;
+import com.example.overlays.OverlayItem;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
 
-public class Pack {
+public class Pack implements OverlayItem {
     @Getter
     private final String name;
 
@@ -67,4 +68,8 @@ public class Pack {
         this.opened += num;
     }
 
+    @Override
+    public String getSearchableString() {
+        return getName();
+    }
 }

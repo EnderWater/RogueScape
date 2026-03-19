@@ -1,6 +1,7 @@
 package com.example.overlays;
 
 import com.example.cards.*;
+import com.example.packs.Pack;
 import com.example.packs.PackManager;
 
 import javax.imageio.ImageIO;
@@ -11,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Singleton
 public class CardListOverlay {
@@ -37,7 +39,10 @@ public class CardListOverlay {
      * Container size is provided by ContainerOverlay.
      */
     public void render(Graphics2D graphics, int containerX, int containerY, int containerWidth, int containerHeight) {
-        List<Card> cards = overlayStateManager.getPaginatedItems();
+        List<Card> cards = overlayStateManager.getPaginatedItems()
+                .stream()
+                .map(card -> (Card)card)
+                .collect(Collectors.toList());
 
         if (cards == null || cards.isEmpty()) {
             return;
@@ -119,7 +124,11 @@ public class CardListOverlay {
 
     public Card getCardFromBounds(Rectangle cardRectangle) {
         int index = cardBounds.indexOf(cardRectangle);
-        return overlayStateManager.<Card>getPaginatedItems().get(index);
+        return overlayStateManager.getPaginatedItems()
+                .stream()
+                .map(card -> (Card)card)
+                .collect(Collectors.toList())
+                .get(index);
     }
 
     public Rectangle isClickOnCard(MouseEvent event) {

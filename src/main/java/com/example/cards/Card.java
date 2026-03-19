@@ -1,8 +1,9 @@
 package com.example.cards;
 
+import com.example.overlays.OverlayItem;
 import lombok.Getter;
 
-public abstract class Card {
+public abstract class Card implements OverlayItem {
     @Getter
     private int cardId;
     @Getter
@@ -26,5 +27,14 @@ public abstract class Card {
         this.rarity = rarity;
         this.type = type;
         this.packName = packName;
+    }
+
+    @Override
+    public String getSearchableString() {
+        return getDescription() + " " +
+                getName() + " " +
+                getRarity() + " " +
+                getPackName() + " " +
+                getType();
     }
 }

@@ -296,6 +296,10 @@ public class WindowOverlay extends Overlay {
         return false;
     }
 
+    public void searchOverlayItems(String searchString) {
+        overlayStateManager.searchAndUpdateOverlayItems(searchString);
+    }
+
     public static class TabButton {
         String label;
         OverlayStateManager.OverlayComponent component;

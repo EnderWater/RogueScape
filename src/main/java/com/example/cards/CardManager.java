@@ -2,6 +2,7 @@ package com.example.cards;
 
 import com.example.JsonManager;
 import com.example.listeners.CardChangeListener;
+import com.example.overlays.OverlayItem;
 import com.example.overlays.OverlayStateManager;
 import com.example.packs.PackManager;
 import com.example.tasks.GoalTask;
