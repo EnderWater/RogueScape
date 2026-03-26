@@ -11,6 +11,10 @@ import javax.inject.Inject;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
+/**
+ * Moved to using the PinnedTaskOverlay to open up the task list.
+ */
+@Deprecated
 public class TaskButtonOverlay extends Overlay {
 
     private final RogueScapeConfig config;
@@ -51,20 +55,5 @@ public class TaskButtonOverlay extends Overlay {
         );
 
         return size;
-    }
-
-
-    public boolean mouseClicked(MouseEvent event) {
-        if (event.isConsumed()) return true;
-
-        if (bounds.contains(event.getPoint()) && !overlayStateManager.isAllTasksOpen()) {
-            taskManager.openTaskOverlay();
-            return true;
-        }
-        else if (bounds.contains(event.getPoint())) {
-            overlayStateManager.closeOverlay();
-            return true;
-        }
-        return false;
     }
 }
