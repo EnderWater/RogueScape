@@ -33,8 +33,6 @@ public abstract class Card implements OverlayItem {
     public String getSearchableString() {
         return getDescription() + " " +
                 getName() + " " +
-                getRarity() + " " +
-                getPackName() + " " +
                 getType();
     }
 }

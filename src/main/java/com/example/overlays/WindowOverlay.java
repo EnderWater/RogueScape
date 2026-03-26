@@ -1,23 +1,25 @@
 package com.example.overlays;
 
-
 import com.example.cards.CardManager;
 import com.example.packs.PackManager;
 import com.example.tasks.TaskManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.runelite.api.Client;
+import net.runelite.client.input.KeyListener;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
-public class WindowOverlay extends Overlay {
+public class WindowOverlay extends Overlay implements KeyListener {
+
     @Inject
     private Client client;
     @Inject
@@ -39,7 +41,11 @@ public class WindowOverlay extends Overlay {
     private final Rectangle closeButton = new Rectangle();
     private final Rectangle leftArrow = new Rectangle();
     private final Rectangle rightArrow = new Rectangle();
-    private final List<TabButton> tabs = new ArrayList<TabButton>();
+    private final Rectangle searchBar = new Rectangle();
+    private String searchText = "";
+    private boolean searchFocused = false;
+
+    private final List<TabButton> tabs = new ArrayList<>();
 
     private final double WINDOW_WIDTH_PERCENTAGE = 0.75;
     private final double WINDOW_HEIGHT_PERCENTAGE = 0.85;
@@ -56,10 +62,8 @@ public class WindowOverlay extends Overlay {
     }
 
     @Override
-    public Dimension render(Graphics2D graphics2D) {
-        if (!this.overlayStateManager.isWindowOpen()) {
-            return null;
-        }
+    public Dimension render(Graphics2D g) {
+        if (!overlayStateManager.isWindowOpen()) return null;
 
         int canvasWidth = client.getCanvasWidth();
         int canvasHeight = client.getCanvasHeight();
@@ -73,37 +77,40 @@ public class WindowOverlay extends Overlay {
         window.setBounds(x, y, windowWidth, windowHeight);
 
         // Background
-        graphics2D.setColor(new Color(25, 25, 25, 240));
-        graphics2D.fillRoundRect(x, y, windowWidth, windowHeight, 12, 12);
+        g.setColor(new Color(25, 25, 25, 240));
+        g.fillRoundRect(x, y, windowWidth, windowHeight, 12, 12);
 
         // Border
-        graphics2D.setColor(Color.GRAY);
-        graphics2D.drawRoundRect(x, y, windowWidth, windowHeight, 12, 12);
+        g.setColor(Color.GRAY);
+        g.drawRoundRect(x, y, windowWidth, windowHeight, 12, 12);
 
-        drawTitleBar(graphics2D, x, y);
+        drawTitleBar(g, x, y);
 
         y += 28;
 
-        int tabsHeight = drawTabs(graphics2D, x, y, windowWidth);
-        int contentPadding = 8;
-
+        int tabsHeight = drawTabs(g, x, y, windowWidth);
         y += tabsHeight;
+
+        // Search bar
+        drawSearchBar(g);
+
+        int contentPadding = 8;
         windowHeight -= (28 + tabsHeight);
 
-        drawPagination(graphics2D, x, y);
+        drawPagination(g, x, y);
         windowHeight -= 30;
 
         windowHeight -= contentPadding;
 
         switch (overlayStateManager.getOverlayComponent()) {
             case AllTasks:
-                this.taskListOverlay.render(graphics2D, x, y, windowWidth, windowHeight);
+                taskListOverlay.render(g, x, y, windowWidth, windowHeight);
                 break;
             case AllPacks:
-                this.availablePacksOverlay.render(graphics2D, x, y, windowWidth, windowHeight);
+                availablePacksOverlay.render(g, x, y, windowWidth, windowHeight);
                 break;
             default:
-                cardListOverlay.render(graphics2D, x, y, windowWidth, windowHeight);
+                cardListOverlay.render(g, x, y, windowWidth, windowHeight);
                 break;
         }
 
@@ -112,39 +119,14 @@ public class WindowOverlay extends Overlay {
 
     private void drawTitleBar(Graphics2D g, int x, int y) {
         int barHeight = 28;
-
-        int canvasWidth = client.getCanvasWidth();
-        int windowWidth = (int) (canvasWidth * WINDOW_WIDTH_PERCENTAGE);
+        int windowWidth = (int) (client.getCanvasWidth() * WINDOW_WIDTH_PERCENTAGE);
 
         g.setColor(new Color(40, 40, 40, 240));
         g.fillRoundRect(x, y, windowWidth, barHeight, 12, 12);
 
         g.setColor(Color.WHITE);
-        switch (this.overlayStateManager.getOverlayComponent()) {
-            case SingleCard:
-                g.drawString("Card Details", x + 12, y + 18);
-                break;
-            case PackOpening:
-                g.drawString("Select a pack card", x + 12, y + 18);
-                break;
-            case AvailableCards:
-                g.drawString("Available cards", x + 12, y + 18);
-                break;
-            case HeldCards:
-                g.drawString("Held Cards", x + 12, y + 18);
-                break;
-            case AllPacks:
-                g.drawString("Available packs", x + 12, y + 18);
-                break;
-            case FilteredCards:
-                g.drawString("Remaining pack cards", x + 12, y + 18);
-                break;
-            case None:
-            default:
-                g.drawString("RogueScape Window", x + 12, y + 18);
-        }
+        g.drawString("RogueScape Window", x + 12, y + 18);
 
-        // Close button
         int size = 16;
         int bx = x + windowWidth - size - 10;
         int by = y + 6;
@@ -156,90 +138,98 @@ public class WindowOverlay extends Overlay {
         g.drawString("X", bx + 5, by + 14);
     }
 
+    private void drawSearchBar(Graphics2D g) {
+        int height = 22;
+        int padding = 10;
+        int gap = 8; // space between arrow and search bar
+
+        // Right boundary (window edge)
+        int rightEdge = window.x + window.width - padding;
+
+        // Left boundary (just to the right of the pagination arrow)
+        int leftEdge = rightArrow.x + rightArrow.width + gap;
+
+        int width = rightEdge - leftEdge;
+
+        // Safety clamp (in case layout gets weird)
+        if (width < 60) width = 60;
+
+        int sx = leftEdge;
+        int sy = window.y + window.height - height - padding;
+
+        searchBar.setBounds(sx, sy, width, height);
+
+        // Background
+        g.setColor(new Color(50, 50, 50, 240));
+        g.fillRoundRect(sx, sy, width, height, 6, 6);
+
+        // Border
+        g.setColor(searchFocused ? Color.WHITE : Color.GRAY);
+        g.drawRoundRect(sx, sy, width, height, 6, 6);
+
+        // Text
+        g.setColor(Color.WHITE);
+
+        String displayText = searchText.isEmpty() && !searchFocused
+                ? "Search..."
+                : searchText;
+
+        FontMetrics metrics = g.getFontMetrics();
+
+        int textY = sy + ((height - metrics.getHeight()) / 2) + metrics.getAscent();
+
+        g.drawString(displayText, sx + 6, textY);
+    }
+
     private void drawPagination(Graphics2D g, int x, int y) {
         int windowWidth = window.width;
         int windowHeight = window.height;
 
         int bottomY = window.y + windowHeight - 30;
-
         int centerX = x + windowWidth / 2;
 
         int arrowSize = 24;
 
-        // Left arrow
         int lx = centerX - 60;
         leftArrow.setBounds(lx, bottomY, arrowSize, arrowSize);
 
         g.setColor(Color.WHITE);
         g.drawString("<", lx + 10, bottomY + 19);
-
         g.setColor(Color.GRAY);
         g.drawRect(lx, bottomY, arrowSize, arrowSize);
 
-        // Page text
         String pageText = overlayStateManager.getCurrentPage() + " / " + overlayStateManager.getTotalPages();
 
         FontMetrics metrics = g.getFontMetrics();
         int textWidth = metrics.stringWidth(pageText);
-        int textX = centerX - textWidth / 2;
-        int textY = bottomY + 18;
 
-        g.setColor(Color.WHITE);
-        g.drawString(pageText, textX, textY);
+        g.drawString(pageText, centerX - textWidth / 2, bottomY + 18);
 
-        int padding = 4;
-        g.setColor(Color.GRAY);
-        g.drawRect(textX - padding, bottomY, textWidth + 2 * padding, arrowSize);
-
-        // Right arrow
         int rx = centerX + 44;
         rightArrow.setBounds(rx, bottomY, arrowSize, arrowSize);
 
-        g.setColor(Color.WHITE);
         g.drawString(">", rx + 10, bottomY + 19);
-
-        g.setColor(Color.GRAY);
         g.drawRect(rx, bottomY, arrowSize, arrowSize);
     }
 
     private int drawTabs(Graphics2D g, int x, int y, int windowWidth) {
         int tabHeight = 24;
-        int tabCount = tabs.size();
+        int tabWidth = windowWidth / tabs.size();
 
-        if (tabCount == 0)
-            return 0;
-
-        int tabWidth = windowWidth / tabCount;
-
-        for (int i = 0; i < tabCount; i++) {
+        for (int i = 0; i < tabs.size(); i++) {
             TabButton tab = tabs.get(i);
 
             int tx = x + (i * tabWidth);
-            int ty = y;
+            tab.bounds.setBounds(tx, y, tabWidth, tabHeight);
 
-            tab.bounds.setBounds(tx, ty, tabWidth, tabHeight);
-
-            boolean active = overlayStateManager.getOverlayComponent() == tab.component;
-
-            if (active)
-                g.setColor(new Color(60, 60, 60, 240));
-            else
-                g.setColor(new Color(40, 40, 40, 240));
-
-            g.fillRect(tx, ty, tabWidth, tabHeight);
+            g.setColor(new Color(40, 40, 40, 240));
+            g.fillRect(tx, y, tabWidth, tabHeight);
 
             g.setColor(Color.GRAY);
-            g.drawRect(tx, ty, tabWidth, tabHeight);
+            g.drawRect(tx, y, tabWidth, tabHeight);
 
             g.setColor(Color.WHITE);
-
-            FontMetrics metrics = g.getFontMetrics();
-            int textWidth = metrics.stringWidth(tab.label);
-
-            int textX = tx + (tabWidth - textWidth) / 2;
-            int textY = ty + 16;
-
-            g.drawString(tab.label, textX, textY);
+            g.drawString(tab.label, tx + 10, y + 16);
         }
 
         return tabHeight;
@@ -249,25 +239,26 @@ public class WindowOverlay extends Overlay {
         if (event.isConsumed()) return true;
 
         Point p = event.getPoint();
-        int currentPage = overlayStateManager.getCurrentPage();
-        int totalPages = overlayStateManager.getTotalPages();
+
+        if (searchBar.contains(p)) {
+            searchFocused = true;
+            return true;
+        } else {
+            searchFocused = false;
+        }
 
         if (closeButton.contains(p)) {
-            this.overlayStateManager.closeOverlay();
+            overlayStateManager.closeOverlay();
             return true;
         }
 
         if (leftArrow.contains(p)) {
-            if (currentPage > 1)
-                overlayStateManager.setCurrentPage(currentPage - 1);
-
+            overlayStateManager.setCurrentPage(overlayStateManager.getCurrentPage() - 1);
             return true;
         }
 
         if (rightArrow.contains(p)) {
-            if (currentPage < totalPages)
-                overlayStateManager.setCurrentPage(currentPage + 1);
-
+            overlayStateManager.setCurrentPage(overlayStateManager.getCurrentPage() + 1);
             return true;
         }
 
@@ -290,13 +281,39 @@ public class WindowOverlay extends Overlay {
             }
         }
 
-        if (window.contains(p) && overlayStateManager.isWindowOpen())
-            return true;
-
-        return false;
+        return window.contains(p);
     }
 
+    @Override
+    public void keyTyped(KeyEvent e) {
+        if (!searchFocused) return;
+
+        char c = e.getKeyChar();
+
+        if (Character.isLetterOrDigit(c) || Character.isSpaceChar(c)) {
+            searchText += c;
+            searchOverlayItems(searchText);
+        }
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (!searchFocused) return;
+
+        if (e.isConsumed())
+            System.out.println("Consumed!");
+
+        if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && !searchText.isEmpty()) {
+            searchText = searchText.substring(0, searchText.length() - 1);
+            searchOverlayItems(searchText);
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {}
+
     public void searchOverlayItems(String searchString) {
+        this.searchText = searchString;
         overlayStateManager.searchAndUpdateOverlayItems(searchString);
     }
 

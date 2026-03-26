@@ -21,15 +21,19 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.NpcLootReceived;
+import net.runelite.client.input.KeyListener;
+import net.runelite.client.input.KeyManager;
 import net.runelite.client.input.MouseListener;
 import net.runelite.client.input.MouseManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.chatcommands.ChatKeyboardListener;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
 
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.Map;
 
@@ -46,7 +50,7 @@ public class RogueScapePlugin extends Plugin {
     private OverlayStateManager overlayStateManager;
 
     @Inject
-    private TaskProgressOverlay taskProgressOverlay;
+    private PinnedTaskOverlay pinnedTaskOverlay;
 
     @Inject
     private PackCountOverlay packCountOverlay;
@@ -57,8 +61,8 @@ public class RogueScapePlugin extends Plugin {
     @Inject
     private AvailablePacksOverlay availablePacksOverlay;
 
-    @Inject
-    private TaskButtonOverlay taskButtonOverlay;
+//    @Inject
+//    private TaskButtonOverlay taskButtonOverlay;
 
     @Inject
     private TaskListOverlay taskListOverlay;
@@ -143,7 +147,7 @@ public class RogueScapePlugin extends Plugin {
                 event.consume();
             }
 
-            if (taskButtonOverlay.mouseClicked(event)) {
+            if (pinnedTaskOverlay.mouseClicked(event)) {
                 event.consume();
             }
 
@@ -176,6 +180,9 @@ public class RogueScapePlugin extends Plugin {
         }
     };
 
+    @Inject
+    private KeyManager keyManager;
+
     // Tracks how many ticks since the plugin last saved
     private int gameTicksSinceLastSave = 0;
 
@@ -187,13 +194,14 @@ public class RogueScapePlugin extends Plugin {
 
     @Override
     protected void startUp() throws Exception {
-        this.overlayManager.add(this.taskProgressOverlay);
+        this.overlayManager.add(this.pinnedTaskOverlay);
         this.overlayManager.add(this.packCountOverlay);
-        this.overlayManager.add(this.taskButtonOverlay);
+//        this.overlayManager.add(this.taskButtonOverlay);
         this.overlayManager.add(this.chunkIndicatorOverlay);
         this.overlayManager.add(this.windowOverlay);
 
         this.mouseManager.registerMouseListener(this.mouseListener);
+        this.keyManager.registerKeyListener(this.windowOverlay);
 
         // Get the map of chunkIds to pack names since the packs csv has that info. I want to move it to the regionManager
         // because the packManager should not be handling anything outside of packs

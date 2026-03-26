@@ -114,6 +114,7 @@ public class OverlayStateManager {
 
         // Add them to the overlay
         this.overlayItems.add(item);
+        this.filteredOverlayItems.add(item);
         this.paginate();
     }
 
@@ -126,11 +127,13 @@ public class OverlayStateManager {
 
         // Add them to the overlay
         this.overlayItems.addAll(items);
+        this.filteredOverlayItems.addAll(items);
         this.paginate();
     }
 
     public void clearOverlay() {
         this.overlayItems.clear();
+        this.filteredOverlayItems.clear();
         this.paginatedItems.clear();
     }
 
@@ -141,18 +144,18 @@ public class OverlayStateManager {
         int startingIndex = (currentPage - 1) * MAX_ITEMS_PER_PAGE; // 0 for first page if cards per page is 20
         int endingIndex = (currentPage * MAX_ITEMS_PER_PAGE); // 20 for first page if cards per page is 20
 
-        if (endingIndex >= overlayItems.size())
-            endingIndex = overlayItems.size();
+        if (endingIndex >= filteredOverlayItems.size())
+            endingIndex = filteredOverlayItems.size();
 
-        List<OverlayItem> overlayItems = this.overlayItems;
-        this.paginatedItems.addAll(overlayItems.subList(startingIndex, endingIndex));
+        List<OverlayItem> filteredOverlayItems = this.filteredOverlayItems;
+        this.paginatedItems.addAll(filteredOverlayItems.subList(startingIndex, endingIndex));
     }
 
     public int getTotalPages() {
         int totalPages = 0;
 
-        if (!overlayItems.isEmpty())
-            totalPages = (this.overlayItems.size() - 1) / MAX_ITEMS_PER_PAGE + 1;
+        if (!this.filteredOverlayItems.isEmpty())
+            totalPages = (this.filteredOverlayItems.size() - 1) / MAX_ITEMS_PER_PAGE + 1;
 
         return totalPages;
     }
@@ -167,12 +170,14 @@ public class OverlayStateManager {
     }
 
     public void searchAndUpdateOverlayItems(String searchString) {
+        String lowercaseSearch = searchString.toLowerCase();
         List<OverlayItem> searchedItems = this.overlayItems
                 .stream()
-                .filter(item -> item.getSearchableString().contains(searchString))
+                .filter(item -> item.getSearchableString().toLowerCase().contains(lowercaseSearch))
                 .collect(Collectors.toList());
 
         this.filteredOverlayItems.clear();
         this.filteredOverlayItems.addAll(searchedItems);
+        this.paginate();
     }
 }

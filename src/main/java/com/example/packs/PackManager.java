@@ -74,7 +74,7 @@ public class PackManager {
     }
 
     public void addCurrentRegionPacks(int num) {
-        completePackOpening(getCurrentPackName(), num, num);
+        addAvailablePacks(currentPackName, num);
         this.save();
     }
 
