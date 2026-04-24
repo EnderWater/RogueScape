@@ -1,5 +1,6 @@
 package com.example.overlays;
 
+import com.example.listeners.TaskChangeListener;
 import com.example.packs.Pack;
 import com.example.tasks.Task;
 import com.example.tasks.TaskManager;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Singleton
-public class TaskListOverlay
+public class TaskListOverlay implements TaskChangeListener
 {
     private final TaskManager taskManager;
     private final OverlayStateManager overlayStateManager;
@@ -31,6 +32,8 @@ public class TaskListOverlay
     TaskListOverlay(TaskManager taskManager, OverlayStateManager overlayStateManager) {
         this.taskManager = taskManager;
         this.overlayStateManager = overlayStateManager;
+
+        this.taskManager.addListener(this);
     }
 
     public void render(Graphics2D g, int containerX, int containerY, int containerWidth, int containerHeight)
@@ -183,6 +186,12 @@ public class TaskListOverlay
         }
 
         return null;
+    }
+
+    @Override
+    public void onTasksChanged() {
+        if (this.overlayStateManager.isAllTasksOpen())
+            this.overlayStateManager.addOverlayItems(this.taskManager.getTasks());
     }
 
     public static class TaskButtonBounds
