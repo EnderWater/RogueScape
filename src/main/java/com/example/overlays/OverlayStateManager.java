@@ -162,6 +162,11 @@ public class OverlayStateManager {
 
     public void setCurrentPage(int page) {
         currentPage = page;
+
+        // Bounds checking for the pagination
+        if (currentPage < 1) resetPage();
+        else if (currentPage > getTotalPages()) currentPage = getTotalPages();
+
         this.paginate();
     }
 
