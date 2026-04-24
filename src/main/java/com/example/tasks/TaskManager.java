@@ -145,11 +145,20 @@ public class TaskManager {
         this.notifyListeners();
     }
 
-    public void loadTasksFromCsv(Path taskFile) {
+    public void overwriteTasksFromCsv(Path taskFile) {
         List<Task> newTasks = TaskCsvLoader.read(taskFile);
         if (!newTasks.isEmpty()) {
             this.tasks = newTasks;
             this.pinnedTasks.clear();
+            this.saveTasks();
+            this.notifyListeners();
+        }
+    }
+
+    public void appendTasksFromCsv(Path taskFile) {
+        List<Task> newTasks = TaskCsvLoader.read(taskFile);
+        if (!newTasks.isEmpty()) {
+            this.tasks.addAll(newTasks);
             this.saveTasks();
             this.notifyListeners();
         }

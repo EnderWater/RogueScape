@@ -1,20 +1,16 @@
 package com.example.panels;
 
 import com.example.tasks.*;
-import net.runelite.api.Skill;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.components.FlatTextField;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Objects;
 
 public class TaskGeneratorPanel extends JPanel {
@@ -204,15 +200,31 @@ public class TaskGeneratorPanel extends JPanel {
                 "tasks.csv"
         );
         // Create the dialog string to show the path of the csv
-        StringBuilder dialog = new StringBuilder("Would you like to load tasks from ");
-        dialog.append(taskFile.toString());
-        dialog.append("?");
+        String dialog = "Would you like to load tasks from " + taskFile + "?";
 
-        int response = JOptionPane.showConfirmDialog(loadFromCsvButton, dialog.toString());
-        if (response != JOptionPane.YES_OPTION) return;
+        int response = JOptionPane.showConfirmDialog(loadFromCsvButton, dialog);
+        if (response == JOptionPane.NO_OPTION) return;
 
-        response = JOptionPane.showConfirmDialog(loadFromCsvButton, "This action will delete your current tasks and load the new ones. Continue?");
-        if (response == JOptionPane.YES_OPTION)
-            this.taskManager.loadTasksFromCsv(taskFile);
+        String[] options = {"Append", "Overwrite", "Cancel"};
+
+        response = JOptionPane.showOptionDialog(
+                loadFromCsvButton,
+                "How would you like to load the tasks?",
+                "Load Type",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+
+        switch (response) {
+            case 0: // Append
+                this.taskManager.appendTasksFromCsv(taskFile);
+                break;
+            case 1: // Overwrite
+                this.taskManager.overwriteTasksFromCsv(taskFile);
+                break;
+        }
     }
 }
