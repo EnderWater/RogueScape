@@ -2,6 +2,7 @@ package com.example.overlays;
 
 import com.example.IconManager;
 import com.example.RogueScapePlugin;
+import com.example.packs.PackManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -13,18 +14,24 @@ import net.runelite.client.util.ImageUtil;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 @Singleton
 public class ChunkIndicatorOverlay extends Overlay {
     private final IconManager iconManager;
+    private final OverlayStateManager overlayStateManager;
+    private final PackManager packManager;
+    private final Rectangle bounds = new Rectangle();
 
     private BufferedImage lastIcon;
     private ImageComponent panel;
 
     @Inject
-    ChunkIndicatorOverlay(IconManager iconManager) {
+    ChunkIndicatorOverlay(IconManager iconManager, OverlayStateManager overlayStateManager, PackManager packManager) {
         this.iconManager = iconManager;
+        this.overlayStateManager = overlayStateManager;
+        this.packManager = packManager;
 
         setPosition(OverlayPosition.BOTTOM_LEFT);
         setLayer(OverlayLayer.ABOVE_WIDGETS);
@@ -47,6 +54,30 @@ public class ChunkIndicatorOverlay extends Overlay {
             panel.setPreferredSize(new Dimension(32, 32));
         }
 
-        return panel.render(graphics);
+        Dimension size = panel.render(graphics);
+
+        bounds.setBounds(
+                getBounds().x,
+                getBounds().y,
+                size.width,
+                size.height
+        );
+
+        return size;
+    }
+
+    public boolean mouseClicked(MouseEvent event) {
+        if (event.isConsumed()) return true;
+
+        if (bounds.contains(event.getPoint()) && !overlayStateManager.isAllPacksOpen()) {
+            this.packManager.openAllPacksOverlay();
+            return true;
+        }
+        else if (bounds.contains(event.getPoint()) && overlayStateManager.isAllPacksOpen()) {
+            overlayStateManager.closeOverlay();
+            return true;
+        }
+
+        return false;
     }
 }

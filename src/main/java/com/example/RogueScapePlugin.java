@@ -147,6 +147,11 @@ public class RogueScapePlugin extends Plugin {
                 event.consume();
             }
 
+            // Check if the click was on the chunk indicator icon overlay
+            if (chunkIndicatorOverlay.mouseClicked(event)) {
+                event.consume();
+            }
+
             if (pinnedTaskOverlay.mouseClicked(event)) {
                 event.consume();
             }
