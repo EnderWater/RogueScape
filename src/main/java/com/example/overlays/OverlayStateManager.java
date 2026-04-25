@@ -81,6 +81,8 @@ public class OverlayStateManager {
         return this.overlayComponent == OverlayComponent.AllTasks;
     }
 
+    public boolean isComponentOpen(OverlayComponent component) { return this.overlayComponent == component; }
+
     @Inject
     public OverlayStateManager() {}
 

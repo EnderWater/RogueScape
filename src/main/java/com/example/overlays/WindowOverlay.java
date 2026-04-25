@@ -229,7 +229,12 @@ public class WindowOverlay extends Overlay implements KeyListener {
             g.setColor(new Color(40, 40, 40, 240));
             g.fillRect(tx, y, tabWidth, tabHeight);
 
-            g.setColor(Color.GRAY);
+            // If the tab's component is open, make the rectangle a lighter color
+            if (overlayStateManager.isComponentOpen(tab.component))
+                g.setColor(Color.white);
+            // Otherwise, just set it to gray
+            else
+                g.setColor(Color.GRAY);
             g.drawRect(tx, y, tabWidth, tabHeight);
 
             g.setColor(Color.WHITE);

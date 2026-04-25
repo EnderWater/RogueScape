@@ -1,7 +1,6 @@
 package com.example.overlays;
 
 import com.example.listeners.TaskChangeListener;
-import com.example.packs.Pack;
 import com.example.tasks.Task;
 import com.example.tasks.TaskManager;
 
@@ -44,6 +43,13 @@ public class TaskListOverlay implements TaskChangeListener {
                 .stream()
                 .map(task -> (Task) task)
                 .collect(Collectors.toList());
+
+        // Add a little bit of x and y padding
+        containerY += 8;
+        containerX += 8;
+        // The width and height need to have the values doubled to account for padding on every side (left and right) (top and bottom)
+        containerHeight -= 16;
+        containerWidth -= 16;
 
         int cardWidth = (containerWidth - (SPACING * (COLUMNS - 1))) / COLUMNS;
         int cardHeight = (containerHeight - (SPACING * (ROWS - 1))) / ROWS;
@@ -289,7 +295,11 @@ public class TaskListOverlay implements TaskChangeListener {
                         });
                 break;
             case COMPLETE:
-                taskManager.completeTask(taskButtonBounds.task);
+                modalOverlay.showConfirm("Are you sure you'd like to complete the task " + taskButtonBounds.task.getName() + "?",
+                        modalResult -> {
+                            if (modalResult == ModalOverlay.ModalResult.CONFIRM)
+                                taskManager.completeTask(taskButtonBounds.task);
+                        });
                 break;
             case ADD1:
                 modalOverlay.showInput("How many would you like to add?",
