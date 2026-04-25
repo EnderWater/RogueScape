@@ -36,6 +36,8 @@ public class WindowOverlay extends Overlay implements KeyListener {
     private AvailablePacksOverlay availablePacksOverlay;
     @Inject
     private TaskListOverlay taskListOverlay;
+    @Inject
+    private ModalOverlay modalOverlay;
 
     private final Rectangle window = new Rectangle();
     private final Rectangle closeButton = new Rectangle();
@@ -113,6 +115,8 @@ public class WindowOverlay extends Overlay implements KeyListener {
                 cardListOverlay.render(g, x, y, windowWidth, windowHeight);
                 break;
         }
+
+        overlayStateManager.getModalOverlay().render(g);
 
         return null;
     }
@@ -286,26 +290,34 @@ public class WindowOverlay extends Overlay implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-        if (!searchFocused) return;
+        if (searchFocused) {
+            char c = e.getKeyChar();
 
-        char c = e.getKeyChar();
+            if (Character.isLetterOrDigit(c) || Character.isSpaceChar(c)) {
+                searchText += c;
+                searchOverlayItems(searchText);
+            }
+        }
 
-        if (Character.isLetterOrDigit(c) || Character.isSpaceChar(c)) {
-            searchText += c;
-            searchOverlayItems(searchText);
+        if (modalOverlay.isVisible()) {
+            modalOverlay.onKeyTyped(e.getKeyChar());
         }
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (!searchFocused) return;
+        if (searchFocused) {
+            if (e.isConsumed())
+                System.out.println("Consumed!");
 
-        if (e.isConsumed())
-            System.out.println("Consumed!");
+            if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && !searchText.isEmpty()) {
+                searchText = searchText.substring(0, searchText.length() - 1);
+                searchOverlayItems(searchText);
+            }
+        }
 
-        if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && !searchText.isEmpty()) {
-            searchText = searchText.substring(0, searchText.length() - 1);
-            searchOverlayItems(searchText);
+        if (modalOverlay.isVisible()) {
+            modalOverlay.onKeyPressed(e.getKeyCode());
         }
     }
 

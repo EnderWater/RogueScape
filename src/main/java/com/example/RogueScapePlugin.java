@@ -61,11 +61,11 @@ public class RogueScapePlugin extends Plugin {
     @Inject
     private AvailablePacksOverlay availablePacksOverlay;
 
-//    @Inject
-//    private TaskButtonOverlay taskButtonOverlay;
-
     @Inject
     private TaskListOverlay taskListOverlay;
+
+    @Inject
+    private ModalOverlay modalOverlay;
 
     @Inject
     private ChunkIndicatorOverlay chunkIndicatorOverlay;
@@ -120,6 +120,11 @@ public class RogueScapePlugin extends Plugin {
         @Override
         public MouseEvent mousePressed(MouseEvent event)
         {
+            // If a modal is open, it takes priority in consuming the events
+            if (modalOverlay.isVisible() && modalOverlay.handleClick(event)) {
+                event.consume();
+            }
+
             if (overlayStateManager.isWindowOpen()) {
                 // Check if the click was on the pack
                 if (cardListOverlay.isClickOnButton(event)) {

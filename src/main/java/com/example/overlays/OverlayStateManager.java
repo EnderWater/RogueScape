@@ -1,6 +1,7 @@
 package com.example.overlays;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -9,6 +10,9 @@ import java.util.stream.Collectors;
 
 @Singleton
 public class OverlayStateManager {
+    @Inject
+    @Getter
+    private ModalOverlay modalOverlay;
 
     private int MAX_ITEMS_PER_PAGE = 0;
 
@@ -29,6 +33,10 @@ public class OverlayStateManager {
 
     @Getter
     private OverlayComponent overlayComponent = OverlayComponent.None;
+
+    @Getter
+    @Setter
+    private boolean isModalOpen = false;
 
     public enum OverlayComponent {
         None,
