@@ -1,0 +1,2 @@
+taskType,name,description,current,target,pinned,monsterType,skillName,packsAwarded
+KILL,Kill Goblins,Slay goblins in Lumbridge,5,50,0,Goblin,1
