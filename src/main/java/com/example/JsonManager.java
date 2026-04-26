@@ -42,7 +42,7 @@ public class JsonManager {
         // Ensure that the JSON file exists
         ensureJsonExists(filename);
 
-        String pathToJson = "plugins/roguescape/" + filename;
+        String pathToJson = "roguescape/data/" + filename;
         try (Reader reader = new FileReader(pathToJson)) {
 
             return GSON.fromJson(reader, type);
@@ -54,7 +54,7 @@ public class JsonManager {
 
     public <T> void save(String filename, T object)
     {
-        String filePath = "plugins/roguescape/" + filename;
+        String filePath = "roguescape/data/" + filename;
         Path path = Paths.get(filePath);
         try
         {
@@ -70,7 +70,7 @@ public class JsonManager {
     private void ensureJsonExists(String filename) {
         try {
             // 1. Directory path for this user
-            Path dir = Paths.get("plugins/roguescape/");
+            Path dir = Paths.get("roguescape/data/");
             if (!Files.exists(dir)) {
                 Files.createDirectories(dir); // create folders if missing
             }

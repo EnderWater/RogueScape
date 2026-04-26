@@ -74,3 +74,28 @@ tasks.register('shadowJar', Jar) {
 	archiveClassifier.set('shadow')
 	archiveFileName.set("${rootProject.name}-${project.version}-all.jar")
 }
+
+tasks.register('shadowBuild') {
+	dependsOn shadowJar
+
+	doLast {
+		def jarName = project.property("pluginJarName")
+		def outputDir = layout.buildDirectory.dir("plugin").get().asFile
+
+		delete outputDir
+		outputDir.mkdirs()
+
+		copy {
+			from(shadowJar.archiveFile)
+			into(outputDir)
+			rename { "${jarName}.jar" }
+		}
+
+		copy {
+			from(layout.projectDirectory.dir("roguescape"))
+			into(new File(outputDir, "roguescape"))
+		}
+
+		println "Shadow build complete -> ${outputDir}"
+	}
+}

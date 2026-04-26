@@ -95,7 +95,7 @@ public class TaskListOverlay implements TaskChangeListener {
 
     private void drawBorder(Graphics2D g, Rectangle bounds) {
         g.setColor(new Color(160, 160, 160));
-        g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        g.drawRoundRect(bounds.x, bounds.y, bounds.width, bounds.height, 12, 12);
     }
 
     private void drawTitle(Graphics2D g, Task task, int x, int y) {

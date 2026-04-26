@@ -65,7 +65,7 @@ public class CardManager {
             this.openedPackCards = cardManager.openedPackCards;
         }
 
-        List<Card> allCards = CardCsvLoader.read(Paths.get("plugins", "roguescape", "allCards.csv"));
+        List<Card> allCards = CardCsvLoader.read(Paths.get("roguescape", "data", "allCards.csv"));
 
         Set<Integer> heldIds = this.heldCards.stream()
                 .map(Card::getCardId)
