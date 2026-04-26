@@ -192,7 +192,7 @@ public class TaskGeneratorPanel extends JPanel {
     }
 
     private void loadFromCsv(JButton loadFromCsvButton) {
-        Path taskFile = Paths.get("roguescape", "data", "loadFromCsv", "tasks", "tasks.csv");
+        Path taskFile = Paths.get("assets", "data", "loadFromCsv", "tasks", "tasks.csv");
         // Create the dialog string to show the path of the csv
         String dialog = "Would you like to load tasks from " + taskFile + "?";
 

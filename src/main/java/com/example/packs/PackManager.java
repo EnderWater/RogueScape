@@ -57,7 +57,7 @@ public class PackManager {
     }
 
     private Map<String, Pack> loadDefaultPacks() {
-        Path packFile = Paths.get("plugins", "roguescape", "defaultPacks.csv");
+        Path packFile = Paths.get("assets", "data", "defaultPacks.csv");
         return PackCsvAdapter.readAllCards(packFile);
     }
 

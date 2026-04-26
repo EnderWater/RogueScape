@@ -80,34 +80,58 @@ tasks.register('shadowBuild') {
 
 	doLast {
 		def jarName = project.property("pluginJarName")
-		def outputDir = layout.buildDirectory.dir("plugin").get().asFile
+
+		// EVERYTHING goes inside /plugin/roguescape
+		def outputDir = layout.buildDirectory.dir("plugin/roguescape").get().asFile
 
 		delete outputDir
 		outputDir.mkdirs()
 
+		// Copy shadow jar into plugin folder
 		copy {
 			from(shadowJar.archiveFile)
 			into(outputDir)
 			rename { "${jarName}.jar" }
 		}
 
+		// Copy assets into plugin folder
 		copy {
-			from(layout.projectDirectory.dir("roguescape"))
-			into(new File(outputDir, "roguescape"))
+			from(layout.projectDirectory.dir("assets"))
+			into(new File(outputDir, "assets"))
 		}
 
 		println "Shadow build complete -> ${outputDir}"
 	}
 }
 
-tasks.register('packageRelease', Zip) {
+tasks.register('generateRunBat') {
 	dependsOn shadowBuild
 
+	doLast {
+		def pluginDir = layout.buildDirectory.dir("plugin/roguescape").get().asFile
+		def batFile = new File(pluginDir, "run.bat")
+
+		batFile.text =
+				"@echo off\n" +
+						"cd /d %~dp0\n" +
+						"java -ea -jar roguescape_1.0.jar\n"
+
+		println "Generated run.bat at ${batFile.absolutePath}"
+	}
+}
+
+tasks.register('packageRelease', Zip) {
+	dependsOn shadowBuild, generateRunBat
+
 	def jarName = project.property("pluginJarName")
+
 	archiveFileName = "${jarName}.zip"
 	destinationDirectory = layout.buildDirectory.dir("releases")
 
+	// Zip the folder
 	from(layout.buildDirectory.dir("plugin")) {
 		into("")
 	}
+
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

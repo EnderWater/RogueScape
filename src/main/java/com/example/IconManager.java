@@ -36,19 +36,19 @@ public class IconManager {
     private void loadIcons() {
 
         // Card type icons
-        File cardTypeIconDirectory = getBaseDirectory("roguescape/icons/card-type-icons");
+        File cardTypeIconDirectory = getBaseDirectory("assets/icons/card-type-icons");
         loadIconsFromDirectory(cardTypeIconDirectory);
 
         // Rarity icons
-        File rarityIconDirectory = getBaseDirectory("roguescape/icons/rarity-icons");
+        File rarityIconDirectory = getBaseDirectory("assets/icons/rarity-icons");
         loadIconsFromDirectory(rarityIconDirectory);
 
         // Goal icons
-        File goalIconDirectory = getBaseDirectory("roguescape/icons/goal-icons");
+        File goalIconDirectory = getBaseDirectory("assets/icons/goal-icons");
         loadIconsFromDirectory(goalIconDirectory);
 
         // Pack icons
-        File packIconDirectory = getBaseDirectory("roguescape/icons/pack-icons");
+        File packIconDirectory = getBaseDirectory("assets/icons/pack-icons");
         loadIconsFromDirectory(packIconDirectory);
     }
 
