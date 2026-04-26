@@ -99,3 +99,15 @@ tasks.register('shadowBuild') {
 		println "Shadow build complete -> ${outputDir}"
 	}
 }
+
+tasks.register('packageRelease', Zip) {
+	dependsOn shadowBuild
+
+	def jarName = project.property("pluginJarName")
+	archiveFileName = "${jarName}.zip"
+	destinationDirectory = layout.buildDirectory.dir("releases")
+
+	from(layout.buildDirectory.dir("plugin")) {
+		into("")
+	}
+}
