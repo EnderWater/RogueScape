@@ -132,9 +132,7 @@ public class TaskManager {
     public void addToTask(Task task, int amount) {
         if (!task.isTaskComplete()) {
             task.addToTask(amount);
-
-            if (task.isTaskComplete())
-                completeTask(task);
+            completeTask(task);
         }
         this.notifyListeners();
     }

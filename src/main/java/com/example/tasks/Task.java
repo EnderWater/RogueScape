@@ -53,7 +53,7 @@ public abstract class Task implements OverlayItem {
     }
 
     public boolean isTaskComplete() {
-        return this.current >= this.target && this.target != 0;
+        return this.current >= this.target && this.target != 0  && isComplete;
     }
 
     public void setCompleted() {
@@ -68,10 +68,6 @@ public abstract class Task implements OverlayItem {
 
     public void addToTask(int x) {
         this.current += x;
-
-        if (this.isTaskComplete()) {
-            setCompleted();
-        }
     }
 
     public void removeFromTask(int x) {

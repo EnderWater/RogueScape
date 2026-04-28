@@ -44,11 +44,10 @@ public class Pack implements OverlayItem {
     }
 
     public void addAvailablePack(int num) {
-        // Make num positive if it is negative
         if (num < 0)
             num = -num;
 
-        SoundPlayer.play("sounds/Booster_Pack_Obtained_Sound.wav");
+        SoundPlayer.play("Booster_Pack_Obtained_Sound.wav", 1f);
         this.available += num;
     }
 
