@@ -44,10 +44,8 @@ public class TaskListOverlay implements TaskChangeListener {
                 .map(task -> (Task) task)
                 .collect(Collectors.toList());
 
-        // Add a little bit of x and y padding
         containerY += 8;
         containerX += 8;
-        // The width and height need to have the values doubled to account for padding on every side (left and right) (top and bottom)
         containerHeight -= 16;
         containerWidth -= 16;
 
@@ -74,16 +72,16 @@ public class TaskListOverlay implements TaskChangeListener {
         int contentX = x + 10;
         int contentY = y + 22;
 
-        drawTitle(g, task, contentX, contentY);
+        contentY = drawTitle(g, task, contentX, contentY, width);
+        contentY += 4;
 
-        contentY += 24;
-        drawDescription(g, task, contentX, contentY);
+        contentY = drawDescription(g, task, contentX, contentY, width);
+        contentY += 4;
 
-        contentY += 24;
-        drawCompletion(g, task, contentX, contentY);
+        contentY = drawCompletion(g, task, contentX, contentY);
+        contentY += 4;
 
-        contentY += 24;
-        drawReward(g, task, contentX, contentY);
+        contentY = drawReward(g, task, contentX, contentY);
 
         drawButtons(g, task, bounds);
     }
@@ -98,29 +96,83 @@ public class TaskListOverlay implements TaskChangeListener {
         g.drawRoundRect(bounds.x, bounds.y, bounds.width, bounds.height, 12, 12);
     }
 
-    private void drawTitle(Graphics2D g, Task task, int x, int y) {
+    // ---------- WRAPPED TEXT HELPERS ----------
+
+    private List<String> wrapText(FontMetrics metrics, String text, int maxWidth) {
+        List<String> lines = new ArrayList<>();
+
+        String[] words = text.split(" ");
+        StringBuilder line = new StringBuilder();
+
+        for (String word : words) {
+            String test = line + word + " ";
+
+            if (metrics.stringWidth(test) > maxWidth) {
+                lines.add(line.toString().trim());
+                line = new StringBuilder(word + " ");
+            } else {
+                line.append(word).append(" ");
+            }
+        }
+
+        if (line.length() > 0) {
+            lines.add(line.toString().trim());
+        }
+
+        return lines;
+    }
+
+    private int drawTitle(Graphics2D g, Task task, int x, int y, int width) {
         Font original = g.getFont();
         g.setFont(original.deriveFont(Font.BOLD, 16f));
-
         g.setColor(Color.WHITE);
-        g.drawString(task.getName(), x, y);
+
+        FontMetrics metrics = g.getFontMetrics();
+        int maxWidth = width - 20;
+
+        List<String> lines = wrapText(metrics, task.getName(), maxWidth);
+
+        int cursorY = y;
+
+        for (String line : lines) {
+            int lineWidth = metrics.stringWidth(line);
+            int textX = x + (width - 20 - lineWidth) / 2;
+            g.drawString(line, textX, cursorY);
+            cursorY += metrics.getHeight();
+        }
 
         g.setFont(original);
+        return cursorY;
     }
 
-    private void drawDescription(Graphics2D g, Task task, int x, int y) {
+    private int drawDescription(Graphics2D g, Task task, int x, int y, int width) {
         g.setColor(Color.LIGHT_GRAY);
-        g.drawString(task.getDescription(), x, y);
+
+        FontMetrics metrics = g.getFontMetrics();
+        int maxWidth = width - 20;
+
+        List<String> lines = wrapText(metrics, task.getDescription(), maxWidth);
+
+        int cursorY = y;
+
+        for (String line : lines) {
+            g.drawString(line, x, cursorY);
+            cursorY += metrics.getHeight();
+        }
+
+        return cursorY;
     }
 
-    private void drawCompletion(Graphics2D g, Task task, int x, int y) {
+    private int drawCompletion(Graphics2D g, Task task, int x, int y) {
         g.setColor(Color.WHITE);
 
         String text = task.getCurrent() + "/" + task.getTarget() + " Completed";
         g.drawString(text, x, y);
+
+        return y + g.getFontMetrics().getHeight();
     }
 
-    private void drawReward(Graphics2D g, Task task, int x, int y) {
+    private int drawReward(Graphics2D g, Task task, int x, int y) {
         FontMetrics metrics = g.getFontMetrics();
 
         g.setColor(Color.YELLOW);
@@ -130,10 +182,11 @@ public class TaskListOverlay implements TaskChangeListener {
 
         g.setColor(Color.WHITE);
         g.drawString(" " + task.getPacksAwarded() + " Booster Packs", x + rewardLabelWidth, y);
+
+        return y + metrics.getHeight();
     }
 
-    private void drawButtons(Graphics2D g, Task task, Rectangle bounds)
-    {
+    private void drawButtons(Graphics2D g, Task task, Rectangle bounds) {
         int columns = 3;
         int rows = 2;
 
@@ -144,10 +197,8 @@ public class TaskListOverlay implements TaskChangeListener {
         int buttonWidth = (bounds.width - 20 - totalHorizontalSpacing) / columns;
 
         int startX = bounds.x + 10;
-
         int startY = bounds.y + bounds.height - (rows * BUTTON_HEIGHT) - verticalSpacing - 6;
 
-        // Row 1 (top row): +1, -1, Pin
         int y1 = startY;
         int x = startX;
 
@@ -159,7 +210,6 @@ public class TaskListOverlay implements TaskChangeListener {
 
         Rectangle pin = drawButton(g, "Pin", x, y1, buttonWidth);
 
-        // Row 2 (bottom row): Complete, Reset, Delete
         int y2 = y1 + BUTTON_HEIGHT + verticalSpacing;
         x = startX;
 
@@ -197,25 +247,13 @@ public class TaskListOverlay implements TaskChangeListener {
 
     public TaskButtonBounds getClickedButton(Point point) {
         for (TaskButtonBounds bounds : buttonBounds) {
-            if (bounds.complete.contains(point))
-                return bounds.withAction(TaskButtonAction.COMPLETE);
-
-            if (bounds.pin.contains(point))
-                return bounds.withAction(TaskButtonAction.PIN);
-
-            if (bounds.delete.contains(point))
-                return bounds.withAction(TaskButtonAction.DELETE);
-
-            if (bounds.reset.contains(point))
-                return bounds.withAction(TaskButtonAction.RESET);
-
-            if (bounds.add1.contains(point))
-                return bounds.withAction(TaskButtonAction.ADD1);
-
-            if (bounds.remove1.contains(point))
-                return bounds.withAction(TaskButtonAction.REMOVE1);
+            if (bounds.complete.contains(point)) return bounds.withAction(TaskButtonAction.COMPLETE);
+            if (bounds.pin.contains(point)) return bounds.withAction(TaskButtonAction.PIN);
+            if (bounds.delete.contains(point)) return bounds.withAction(TaskButtonAction.DELETE);
+            if (bounds.reset.contains(point)) return bounds.withAction(TaskButtonAction.RESET);
+            if (bounds.add1.contains(point)) return bounds.withAction(TaskButtonAction.ADD1);
+            if (bounds.remove1.contains(point)) return bounds.withAction(TaskButtonAction.REMOVE1);
         }
-
         return null;
     }
 
@@ -235,14 +273,8 @@ public class TaskListOverlay implements TaskChangeListener {
         public final Rectangle remove1;
         public TaskButtonAction action;
 
-        public TaskButtonBounds(
-                Task task,
-                Rectangle complete,
-                Rectangle pin,
-                Rectangle delete,
-                Rectangle reset,
-                Rectangle add1,
-                Rectangle remove1) {
+        public TaskButtonBounds(Task task, Rectangle complete, Rectangle pin, Rectangle delete,
+                                Rectangle reset, Rectangle add1, Rectangle remove1) {
             this.task = task;
             this.complete = complete;
             this.pin = pin;
@@ -259,72 +291,52 @@ public class TaskListOverlay implements TaskChangeListener {
     }
 
     public enum TaskButtonAction {
-        COMPLETE,
-        PIN,
-        DELETE,
-        RESET,
-        ADD1,
-        REMOVE1,
+        COMPLETE, PIN, DELETE, RESET, ADD1, REMOVE1,
     }
 
     public boolean isClickOnButton(MouseEvent event) {
         if (event.isConsumed()) return true;
-
-        TaskButtonBounds taskButtonBounds = this.getClickedButton(event.getPoint());
-
-        // If the allTasks overlay isn't open, don't do anything with the click
-        if (!overlayStateManager.isAllTasksOpen() || taskButtonBounds == null)
-            return false;
-
+        TaskButtonBounds taskButtonBounds = this.getClickedButton(event.getPoint()); // If the allTasks overlay isn't open, don't do anything with the click
+        if (!overlayStateManager.isAllTasksOpen() || taskButtonBounds == null) return false;
         switch (taskButtonBounds.action) {
             case PIN:
                 taskManager.pinTask(taskButtonBounds.task);
                 break;
             case DELETE:
-                modalOverlay.showConfirm("Are you sure you'd like to delete the task " + taskButtonBounds.task.getName() + "?",
-                        modalResult -> {
-                            if (modalResult == ModalOverlay.ModalResult.CONFIRM)
-                                taskManager.deleteTask(taskButtonBounds.task);
-                        });
+                modalOverlay.showConfirm("Are you sure you'd like to delete the task " + taskButtonBounds.task.getName() + "?", modalResult -> {
+                    if (modalResult == ModalOverlay.ModalResult.CONFIRM) taskManager.deleteTask(taskButtonBounds.task);
+                });
                 break;
             case RESET:
-                modalOverlay.showConfirm("Are you sure you'd like to reset the task " + taskButtonBounds.task.getName() + "?",
-                        modalResult -> {
-                            if (modalResult == ModalOverlay.ModalResult.CONFIRM)
-                                taskManager.resetTask(taskButtonBounds.task);
-                        });
+                modalOverlay.showConfirm("Are you sure you'd like to reset the task " + taskButtonBounds.task.getName() + "?", modalResult -> {
+                    if (modalResult == ModalOverlay.ModalResult.CONFIRM) taskManager.resetTask(taskButtonBounds.task);
+                });
                 break;
             case COMPLETE:
-                modalOverlay.showConfirm("Are you sure you'd like to complete the task " + taskButtonBounds.task.getName() + "?",
-                        modalResult -> {
-                            if (modalResult == ModalOverlay.ModalResult.CONFIRM)
-                                taskManager.completeTask(taskButtonBounds.task);
-                        });
+                modalOverlay.showConfirm("Are you sure you'd like to complete the task " + taskButtonBounds.task.getName() + "?", modalResult -> {
+                    if (modalResult == ModalOverlay.ModalResult.CONFIRM)
+                        taskManager.completeTask(taskButtonBounds.task);
+                });
                 break;
             case ADD1:
-                modalOverlay.showInput("How many would you like to add?",
-                        modalResponse -> {
-                            try {
-                                int add = Integer.parseInt(modalResponse);
-                                if (add > 0)
-                                    taskManager.addToTask(taskButtonBounds.task, add);
-                            }
-                            catch (Exception ignored) {}
-                        });
+                modalOverlay.showInput("How many would you like to add?", modalResponse -> {
+                    try {
+                        int add = Integer.parseInt(modalResponse);
+                        if (add > 0) taskManager.addToTask(taskButtonBounds.task, add);
+                    } catch (Exception ignored) {
+                    }
+                });
                 break;
             case REMOVE1:
-                modalOverlay.showInput("How many would you like to add?",
-                        modalResponse -> {
-                            try {
-                                int add = Integer.parseInt(modalResponse);
-                                if (add > 0)
-                                    taskManager.removeFromTask(taskButtonBounds.task, add);
-                            }
-                            catch (Exception ignored) {}
-                        });
+                modalOverlay.showInput("How many would you like to add?", modalResponse -> {
+                    try {
+                        int add = Integer.parseInt(modalResponse);
+                        if (add > 0) taskManager.removeFromTask(taskButtonBounds.task, add);
+                    } catch (Exception ignored) {
+                    }
+                });
                 break;
         }
-
         return true;
     }
 }

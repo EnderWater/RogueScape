@@ -104,15 +104,47 @@ public class ModalOverlay extends Overlay {
     }
 
     private void drawMessage(Graphics2D g, int x, int y) {
+
         g.setColor(Color.WHITE);
 
         FontMetrics metrics = g.getFontMetrics();
-        int textWidth = metrics.stringWidth(message);
 
-        int textX = x + (WIDTH - textWidth) / 2;
-        int textY = y + 40;
+        int maxTextWidth = WIDTH - 20; // padding
+        int cursorY = y + 40;
 
-        g.drawString(message, textX, textY);
+        String[] words = message.split(" ");
+        StringBuilder line = new StringBuilder();
+
+        for (String word : words) {
+
+            String test = line + word + " ";
+
+            if (metrics.stringWidth(test) > maxTextWidth) {
+
+                String lineStr = line.toString().trim();
+                int lineWidth = metrics.stringWidth(lineStr);
+
+                int textX = x + (WIDTH - lineWidth) / 2;
+
+                g.drawString(lineStr, textX, cursorY);
+
+                line = new StringBuilder(word + " ");
+                cursorY += metrics.getHeight();
+
+            } else {
+                line.append(word).append(" ");
+            }
+        }
+
+        if (line.length() > 0) {
+
+            String lineStr = line.toString().trim();
+            int lineWidth = metrics.stringWidth(lineStr);
+
+            int textX = x + (WIDTH - lineWidth) / 2;
+
+            g.drawString(lineStr, textX, cursorY);
+        }
     }
 
     private void drawInput(Graphics2D g, int x, int y) {

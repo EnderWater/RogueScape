@@ -6,6 +6,7 @@ import com.example.cards.Card;
 import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Objects;
 
 public class CardRenderer {
 
@@ -30,11 +31,12 @@ public class CardRenderer {
         drawBorder(g, card, x, y, width, height);
 
         cursorY = drawTitle(g, card, x, width, cursorY);
+        cursorY = drawPackName(g, card, x, width, cursorY);
 
         BufferedImage image = iconManager.getOverlayIcon(card);
         int imageHeight = 0;
 
-        if (image != null) {
+        if (image != null && !Objects.equals(card.getType(), "Boon") && !Objects.equals(card.getType(), "Relic")) {
             int maxWidth = width - (IMAGE_PADDING * 2);
             imageHeight = (image.getHeight() * maxWidth) / image.getWidth();
 
@@ -118,7 +120,63 @@ public class CardRenderer {
 
         g.setFont(baseFont);
 
-        return cursorY + metrics.getHeight() + 10;
+        return cursorY + metrics.getHeight() + 6;
+    }
+
+    private int drawPackName(Graphics2D g, Card card, int x, int width, int cursorY) {
+
+        String packName = card.getPackName();
+        if (packName == null || packName.isEmpty()) {
+            return cursorY;
+        }
+
+        cursorY += 4; // top padding
+
+        Font baseFont = g.getFont();
+        Font packFont = baseFont.deriveFont(Font.PLAIN, baseFont.getSize() + 1f);
+
+        g.setFont(packFont);
+        g.setColor(new Color(180, 180, 180));
+
+        FontMetrics metrics = g.getFontMetrics();
+
+        int maxTextWidth = width - 20;
+        int lineHeight = metrics.getHeight();
+
+        String[] words = packName.split(" ");
+        StringBuilder line = new StringBuilder();
+
+        for (String word : words) {
+
+            String test = line + word + " ";
+
+            if (metrics.stringWidth(test) > maxTextWidth) {
+
+                int lineWidth = metrics.stringWidth(line.toString());
+                int textX = x + (width - lineWidth) / 2;
+
+                g.drawString(line.toString(), textX, cursorY);
+
+                line = new StringBuilder(word + " ");
+                cursorY += lineHeight;
+
+            } else {
+                line.append(word).append(" ");
+            }
+        }
+
+        if (line.length() > 0) {
+
+            int lineWidth = metrics.stringWidth(line.toString());
+            int textX = x + (width - lineWidth) / 2;
+
+            g.drawString(line.toString(), textX, cursorY);
+            cursorY += lineHeight;
+        }
+
+        g.setFont(baseFont);
+
+        return cursorY + 6;
     }
 
     private int drawType(Graphics2D g, Card card, int x, int width, int cursorY) {
@@ -191,15 +249,31 @@ public class CardRenderer {
         int iconY = y + height - ICON_SIZE - PADDING;
 
         BufferedImage rarityIcon = iconManager.getRarityIcon(card);
+        BufferedImage typeIcon = iconManager.getTypeIcon(card);
+        BufferedImage packIcon = iconManager.getOverlayIcon(card.getPackName());
 
+        int leftX = x + PADDING;
+        int rightX = x + width - PADDING - ICON_SIZE;
+
+        // rarity (left)
         if (rarityIcon != null) {
-            g.drawImage(rarityIcon, x + PADDING, iconY, ICON_SIZE, ICON_SIZE, null);
+            g.drawImage(rarityIcon, leftX, iconY, ICON_SIZE, ICON_SIZE, null);
         }
 
-        BufferedImage typeIcon = iconManager.getTypeIcon(card);
-
+        // type (right)
         if (typeIcon != null) {
-            g.drawImage(typeIcon, x + width - PADDING - ICON_SIZE, iconY, ICON_SIZE, ICON_SIZE, null);
+            g.drawImage(typeIcon, rightX, iconY, ICON_SIZE, ICON_SIZE, null);
+        }
+
+        // pack (center between rarity and type)
+        if (packIcon != null) {
+
+            int centerAreaStart = leftX + ICON_SIZE;
+            int centerAreaEnd = rightX;
+
+            int centerX = centerAreaStart + ((centerAreaEnd - centerAreaStart) / 2) - (ICON_SIZE / 2);
+
+            g.drawImage(packIcon, centerX, iconY, ICON_SIZE, ICON_SIZE, null);
         }
     }
 }

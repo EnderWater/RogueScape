@@ -149,7 +149,7 @@ public class OverlayStateManager {
 
 
     private void paginate() {
-        this.paginatedItems.clear();
+        paginatedItems.clear();
 
         int startingIndex = (currentPage - 1) * MAX_ITEMS_PER_PAGE; // 0 for first page if cards per page is 20
         int endingIndex = (currentPage * MAX_ITEMS_PER_PAGE); // 20 for first page if cards per page is 20
@@ -194,6 +194,7 @@ public class OverlayStateManager {
 
         this.filteredOverlayItems.clear();
         this.filteredOverlayItems.addAll(searchedItems);
+        resetPage();
         this.paginate();
     }
 }
