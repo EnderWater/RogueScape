@@ -19,7 +19,7 @@ repositories {
 	mavenCentral()
 }
 
-def runeLiteVersion = 'latest.release'
+def runeLiteVersion = project.property('runeliteVersion')
 def pluginMainClass = 'com.example.RogueScapePluginTest'
 
 dependencies {
@@ -100,6 +100,51 @@ tasks.register('shadowBuild') {
 			into(new File(outputDir, "assets"))
 		}
 
+		// Copy launcher.ps1
+		copy {
+			from(layout.projectDirectory.file("launcher.ps1"))
+			into(outputDir)
+		}
+
+		// Copy Gradle wrapper files
+		copy {
+			from("gradlew")
+			from("gradlew.bat")
+			into(outputDir)
+		}
+
+		// Copy gradle wrapper directory
+		copy {
+			from("gradle")
+			into(new File(outputDir, "gradle"))
+		}
+
+		// Copy build.gradle
+		copy {
+			from("build.gradle")
+			into(outputDir)
+		}
+
+		// Copy settings.gradle if it exists
+		if (file("settings.gradle").exists()) {
+			copy {
+				from("settings.gradle")
+				into(outputDir)
+			}
+		}
+
+		// Copy gradle.properties
+		copy {
+			from("gradle.properties")
+			into(outputDir)
+		}
+
+		// Copy source code
+		copy {
+			from("src")
+			into(new File(outputDir, "src"))
+		}
+
 		println "Shadow build complete -> ${outputDir}"
 	}
 }
@@ -108,13 +153,14 @@ tasks.register('generateRunBat') {
 	dependsOn shadowBuild
 
 	doLast {
+		def jarName = project.property("pluginJarName")
 		def pluginDir = layout.buildDirectory.dir("plugin/roguescape").get().asFile
 		def batFile = new File(pluginDir, "run.bat")
 
 		batFile.text =
 				"@echo off\n" +
 						"cd /d %~dp0\n" +
-						"java -ea -jar roguescape_1.0.jar\n"
+						"powershell -ExecutionPolicy Bypass -File launcher.ps1\n"
 
 		println "Generated run.bat at ${batFile.absolutePath}"
 	}
